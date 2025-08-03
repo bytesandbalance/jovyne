@@ -1,0 +1,13 @@
+-- Insert sample helpers with distinct user_ids (since we can't reference actual auth users, we'll create UUID placeholders)
+INSERT INTO public.helpers (user_id, skills, availability_cities, hourly_rate, experience_years, bio, portfolio_images) VALUES
+(gen_random_uuid(), ARRAY['Photography', 'Event Setup', 'Catering'], ARRAY['Köln', 'Bonn'], 35.00, 3, 'Experienced event photographer and setup specialist based in Cologne area.', ARRAY['https://images.unsplash.com/photo-1511578314322-379afb476865?w=400']),
+(gen_random_uuid(), ARRAY['Music', 'Sound Equipment', 'MC Services'], ARRAY['Düsseldorf', 'Essen'], 45.00, 5, 'Professional DJ and MC with over 5 years of experience in corporate and private events.', ARRAY['https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400']),
+(gen_random_uuid(), ARRAY['Decoration', 'Floral Arrangements', 'Venue Setup'], ARRAY['Köln', 'Düsseldorf'], 40.00, 4, 'Creative decorator specializing in elegant floral arrangements and venue transformations.', ARRAY['https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400']),
+(gen_random_uuid(), ARRAY['Catering', 'Bar Service', 'Waitstaff'], ARRAY['Bonn', 'Köln'], 30.00, 2, 'Professional catering and bar service provider for events of all sizes.', ARRAY['https://images.unsplash.com/photo-1555244162-803834f70033?w=400']);
+
+-- Insert sample helper requests  
+INSERT INTO public.helper_requests (planner_id, title, description, event_date, location_city, required_skills, hourly_rate, total_hours, start_time, end_time, status) VALUES
+((SELECT id FROM planners LIMIT 1), 'Wedding Photography Assistant Needed', 'Looking for an experienced photography assistant for a wedding ceremony and reception in Cologne. Must have experience with professional camera equipment.', '2025-08-15', 'Köln', ARRAY['Photography', 'Event Setup'], 35.00, 8, '10:00', '18:00', 'open'),
+((SELECT id FROM planners LIMIT 1), 'Corporate Event DJ Required', 'Need a professional DJ for a corporate networking event in Düsseldorf. Experience with business events preferred.', '2025-08-22', 'Düsseldorf', ARRAY['Music', 'Sound Equipment'], 50.00, 6, '17:00', '23:00', 'open'),
+((SELECT id FROM planners LIMIT 1), 'Birthday Party Decorator', 'Seeking a creative decorator for a 50th birthday party in Bonn. Theme is elegant garden party with floral arrangements.', '2025-08-10', 'Bonn', ARRAY['Decoration', 'Floral Arrangements'], 40.00, 4, '14:00', '18:00', 'open'),
+((SELECT id FROM planners LIMIT 1), 'Catering Staff for Anniversary', 'Need experienced waitstaff and bar service for a 25th wedding anniversary celebration in Cologne.', '2025-08-18', 'Köln', ARRAY['Catering', 'Bar Service', 'Waitstaff'], 32.00, 5, '16:00', '21:00', 'open');
