@@ -40,14 +40,28 @@ const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => 
   console.log('Planners with coords:', plannersWithCoords);
 
   // Create markers parameter for OpenStreetMap
-  const markersParam = plannersWithCoords.map((planner, index) => 
-    `${planner.latitude},${planner.longitude}`
-  ).join('|');
+  const createMapUrl = () => {
+    if (plannersWithCoords.length === 0) {
+      return `https://www.openstreetmap.org/export/embed.html?bbox=5.9559,47.2702,15.0419,55.0584&amp;layer=mapnik`;
+    }
 
-  // OpenStreetMap embed URL with markers
-  const mapUrl = plannersWithCoords.length > 0 
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${center[1]-0.5},${center[0]-0.3},${center[1]+0.5},${center[0]+0.3}&amp;layer=mapnik&amp;marker=${center[0]},${center[1]}`
-    : `https://www.openstreetmap.org/export/embed.html?bbox=5.9559,47.2702,15.0419,55.0584&amp;layer=mapnik`;
+    // Calculate bounding box around all planners
+    const lats = plannersWithCoords.map(p => p.latitude!);
+    const lngs = plannersWithCoords.map(p => p.longitude!);
+    const minLat = Math.min(...lats) - 0.1;
+    const maxLat = Math.max(...lats) + 0.1;
+    const minLng = Math.min(...lngs) - 0.1;
+    const maxLng = Math.max(...lngs) + 0.1;
+
+    // Create multiple markers - OpenStreetMap supports multiple markers
+    const markersQuery = plannersWithCoords.map((planner, index) => 
+      `marker=${planner.latitude},${planner.longitude}`
+    ).join('&');
+
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${minLng},${minLat},${maxLng},${maxLat}&layer=mapnik&${markersQuery}`;
+  };
+
+  const mapUrl = createMapUrl();
 
   const handlePlannerClick = (plannerId: string) => {
     setSelectedPlanner(plannerId);
