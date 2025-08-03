@@ -13,8 +13,7 @@ import {
   Filter,
   ArrowRight,
   PartyPopper,
-  Sparkles,
-  Map
+  Sparkles
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -114,12 +113,6 @@ export default function HomePage() {
                   </Button>
                 </Link>
               )}
-              <Link to="/planners?view=map">
-                <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover-bounce">
-                  <Map className="w-5 h-5 mr-2" />
-                  View Map
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
