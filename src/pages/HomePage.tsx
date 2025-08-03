@@ -67,7 +67,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm">
               <PartyPopper className="w-5 h-5" />
-              <span className="text-sm font-medium">Welcome to PartyPlatform</span>
+              <span className="text-sm font-medium">Welcome to Danz</span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
