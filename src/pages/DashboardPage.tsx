@@ -4,18 +4,50 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Users, Star, DollarSign, Settings, Plus, UserCheck, BarChart3, CreditCard, Clock, MapPin, Phone, Mail } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import EventTaskTracker from '@/components/dashboard/EventTaskTracker';
 import ClientContactList from '@/components/dashboard/ClientContactList';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isPlannerDialogOpen, setIsPlannerDialogOpen] = useState(false);
+  const [eventForm, setEventForm] = useState({
+    title: '',
+    description: '',
+    event_date: '',
+    event_time: '',
+    venue_name: '',
+    venue_address: '',
+    guest_count: '',
+    budget: ''
+  });
+  const [profileForm, setProfileForm] = useState({
+    full_name: '',
+    phone: ''
+  });
+  const [plannerForm, setPlannerForm] = useState({
+    business_name: '',
+    description: '',
+    location_city: '',
+    location_state: '',
+    base_price: '',
+    years_experience: ''
+  });
 
   useEffect(() => {
     if (user) {
@@ -33,6 +65,10 @@ export default function DashboardPage() {
         .single();
       
       setProfile(profileData);
+      setProfileForm({
+        full_name: profileData?.full_name || '',
+        phone: profileData?.phone || ''
+      });
 
       // Check if user is a planner
       const { data: plannerData } = await supabase
@@ -42,6 +78,14 @@ export default function DashboardPage() {
         .single();
       
       setPlannerProfile(plannerData);
+      setPlannerForm({
+        business_name: plannerData?.business_name || '',
+        description: plannerData?.description || '',
+        location_city: plannerData?.location_city || '',
+        location_state: plannerData?.location_state || '',
+        base_price: plannerData?.base_price?.toString() || '',
+        years_experience: plannerData?.years_experience?.toString() || ''
+      });
 
       // Fetch events based on user role
       let eventsQuery = supabase.from('events').select('*');
@@ -58,6 +102,111 @@ export default function DashboardPage() {
       console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateEvent = async () => {
+    try {
+      const eventData = {
+        ...eventForm,
+        guest_count: eventForm.guest_count ? parseInt(eventForm.guest_count) : null,
+        budget: eventForm.budget ? parseFloat(eventForm.budget) : null,
+        planner_id: plannerProfile?.id,
+        client_id: user?.id
+      };
+
+      const { error } = await supabase
+        .from('events')
+        .insert([eventData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Event created successfully!",
+        description: "Your new event has been added to your dashboard."
+      });
+
+      setIsEventDialogOpen(false);
+      setEventForm({
+        title: '',
+        description: '',
+        event_date: '',
+        event_time: '',
+        venue_name: '',
+        venue_address: '',
+        guest_count: '',
+        budget: ''
+      });
+      fetchUserData();
+    } catch (error) {
+      console.error('Error creating event:', error);
+      toast({
+        title: "Error creating event",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profileForm.full_name,
+          phone: profileForm.phone
+        })
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Profile updated successfully!",
+        description: "Your profile information has been saved."
+      });
+
+      setIsProfileDialogOpen(false);
+      fetchUserData();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error updating profile",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdatePlannerProfile = async () => {
+    try {
+      const { error } = await supabase
+        .from('planners')
+        .update({
+          business_name: plannerForm.business_name,
+          description: plannerForm.description,
+          location_city: plannerForm.location_city,
+          location_state: plannerForm.location_state,
+          base_price: plannerForm.base_price ? parseFloat(plannerForm.base_price) : null,
+          years_experience: plannerForm.years_experience ? parseInt(plannerForm.years_experience) : null
+        })
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Planner profile updated successfully!",
+        description: "Your business information has been saved."
+      });
+
+      setIsPlannerDialogOpen(false);
+      fetchUserData();
+    } catch (error) {
+      console.error('Error updating planner profile:', error);
+      toast({
+        title: "Error updating planner profile",
+        description: "Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -174,7 +323,7 @@ export default function DashboardPage() {
                   <div className="text-center py-8">
                     <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">No events yet</p>
-                    <Button className="mt-4">
+                    <Button className="mt-4" onClick={() => setIsEventDialogOpen(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Your First Event
                     </Button>
@@ -187,7 +336,7 @@ export default function DashboardPage() {
           <TabsContent value="events" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Your Events</h2>
-              <Button>
+              <Button onClick={() => setIsEventDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Event
               </Button>
@@ -237,7 +386,7 @@ export default function DashboardPage() {
                   <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No events yet</h3>
                   <p className="text-muted-foreground mb-4">Start planning your first event</p>
-                  <Button>
+                  <Button onClick={() => setIsEventDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Event
                   </Button>
@@ -273,7 +422,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => setIsProfileDialogOpen(true)}>
                   <Settings className="w-4 h-4 mr-2" />
                   Edit Profile
                 </Button>
@@ -315,7 +464,7 @@ export default function DashboardPage() {
                       <p className="text-muted-foreground mt-1">{plannerProfile.description}</p>
                     </div>
                   )}
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setIsPlannerDialogOpen(true)}>
                     <Settings className="w-4 h-4 mr-2" />
                     Edit Planner Profile
                   </Button>
@@ -340,7 +489,7 @@ export default function DashboardPage() {
               <TabsContent value="calendar" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold">Event Calendar</h2>
-                  <Button>
+                  <Button onClick={() => setIsEventDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Schedule Event
                   </Button>
@@ -504,6 +653,236 @@ export default function DashboardPage() {
           )}
         </Tabs>
       </div>
+
+      {/* New Event Dialog */}
+      <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+            <DialogDescription>
+              Add a new event to your calendar. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={eventForm.title}
+                onChange={(e) => setEventForm({...eventForm, title: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={eventForm.description}
+                onChange={(e) => setEventForm({...eventForm, description: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="event_date" className="text-right">
+                Date
+              </Label>
+              <Input
+                id="event_date"
+                type="date"
+                value={eventForm.event_date}
+                onChange={(e) => setEventForm({...eventForm, event_date: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="event_time" className="text-right">
+                Time
+              </Label>
+              <Input
+                id="event_time"
+                type="time"
+                value={eventForm.event_time}
+                onChange={(e) => setEventForm({...eventForm, event_time: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="venue_name" className="text-right">
+                Venue
+              </Label>
+              <Input
+                id="venue_name"
+                value={eventForm.venue_name}
+                onChange={(e) => setEventForm({...eventForm, venue_name: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="guest_count" className="text-right">
+                Guests
+              </Label>
+              <Input
+                id="guest_count"
+                type="number"
+                value={eventForm.guest_count}
+                onChange={(e) => setEventForm({...eventForm, guest_count: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="budget" className="text-right">
+                Budget
+              </Label>
+              <Input
+                id="budget"
+                type="number"
+                step="0.01"
+                value={eventForm.budget}
+                onChange={(e) => setEventForm({...eventForm, budget: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={handleCreateEvent}>
+              Create Event
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your personal information.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="full_name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="full_name"
+                value={profileForm.full_name}
+                onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phone" className="text-right">
+                Phone
+              </Label>
+              <Input
+                id="phone"
+                value={profileForm.phone}
+                onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={handleUpdateProfile}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Planner Profile Dialog */}
+      <Dialog open={isPlannerDialogOpen} onOpenChange={setIsPlannerDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Planner Profile</DialogTitle>
+            <DialogDescription>
+              Update your business information.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="business_name" className="text-right">
+                Business
+              </Label>
+              <Input
+                id="business_name"
+                value={plannerForm.business_name}
+                onChange={(e) => setPlannerForm({...plannerForm, business_name: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="planner_description" className="text-right">
+                Description
+              </Label>
+              <Textarea
+                id="planner_description"
+                value={plannerForm.description}
+                onChange={(e) => setPlannerForm({...plannerForm, description: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="location_city" className="text-right">
+                City
+              </Label>
+              <Input
+                id="location_city"
+                value={plannerForm.location_city}
+                onChange={(e) => setPlannerForm({...plannerForm, location_city: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="location_state" className="text-right">
+                State
+              </Label>
+              <Input
+                id="location_state"
+                value={plannerForm.location_state}
+                onChange={(e) => setPlannerForm({...plannerForm, location_state: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="base_price" className="text-right">
+                Base Price
+              </Label>
+              <Input
+                id="base_price"
+                type="number"
+                step="0.01"
+                value={plannerForm.base_price}
+                onChange={(e) => setPlannerForm({...plannerForm, base_price: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="years_experience" className="text-right">
+                Experience
+              </Label>
+              <Input
+                id="years_experience"
+                type="number"
+                value={plannerForm.years_experience}
+                onChange={(e) => setPlannerForm({...plannerForm, years_experience: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={handleUpdatePlannerProfile}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
