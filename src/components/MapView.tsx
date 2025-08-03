@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
@@ -26,19 +26,23 @@ interface MapViewProps {
   onPlannerSelect?: (plannerId: string) => void;
 }
 
-const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => {
+// Helper component to invalidate map size properly
+function ResizeMap() {
+  const map = useMap();
   useEffect(() => {
-    // Force re-render of map tiles after component mounts
     const timer = setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 100);
-    
+      map.invalidateSize();
+    }, 300);
     return () => clearTimeout(timer);
-  }, []);
+  }, [map]);
+  return null;
+}
 
-  // Filter planners that have coordinates
+const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => {
+
+  // Filter planners that have coordinates (proper number check)
   const plannersWithCoords = planners.filter(
-    planner => planner.latitude && planner.longitude
+    planner => typeof planner.latitude === 'number' && typeof planner.longitude === 'number'
   );
 
   // Calculate center of map based on planners or default to US center
@@ -50,7 +54,7 @@ const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => 
     : [39.8283, -98.5795]; // Center of US
 
   return (
-    <div className="relative w-full h-96 rounded-lg overflow-hidden border bg-gray-100">
+    <div className="relative w-full rounded-lg overflow-hidden border bg-gray-100" style={{ height: '400px' }}>
       <MapContainer
         center={center}
         zoom={plannersWithCoords.length > 0 ? 6 : 4}
@@ -58,6 +62,7 @@ const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => 
         zoomControl={true}
         style={{ height: '100%', width: '100%', zIndex: 1 }}
       >
+        <ResizeMap />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
