@@ -1,8 +1,16 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Icon } from 'leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
+
+// Fix Leaflet's default icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 interface MapViewProps {
   planners?: Array<{
@@ -18,29 +26,14 @@ interface MapViewProps {
   onPlannerSelect?: (plannerId: string) => void;
 }
 
-// Create custom marker icon with absolute URLs
-const customIcon = new Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
 const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => {
   useEffect(() => {
-    // Ensure Leaflet CSS is loaded
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-    link.crossOrigin = '';
+    // Force re-render of map tiles after component mounts
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 100);
     
-    if (!document.querySelector(`link[href="${link.href}"]`)) {
-      document.head.appendChild(link);
-    }
+    return () => clearTimeout(timer);
   }, []);
 
   // Filter planners that have coordinates
@@ -75,7 +68,6 @@ const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => 
           <Marker
             key={planner.id}
             position={[planner.latitude!, planner.longitude!]}
-            icon={customIcon}
             eventHandlers={{
               click: () => onPlannerSelect?.(planner.id)
             }}
