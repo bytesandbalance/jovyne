@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          planner_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          planner_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          planner_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       event_tasks: {
         Row: {
           assigned_to: string | null
@@ -275,6 +314,54 @@ export type Database = {
           total_jobs?: number | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          event_id: string | null
+          id: string
+          invoice_number: string
+          issued_date: string | null
+          line_items: Json | null
+          planner_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          event_id?: string | null
+          id?: string
+          invoice_number: string
+          issued_date?: string | null
+          line_items?: Json | null
+          planner_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          event_id?: string | null
+          id?: string
+          invoice_number?: string
+          issued_date?: string | null
+          line_items?: Json | null
+          planner_id?: string
+          status?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
