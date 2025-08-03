@@ -6,7 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Search, MapPin, Star, Clock, DollarSign, Filter, Users, Calendar, Plus } from 'lucide-react';
 
 interface Helper {
@@ -43,6 +48,7 @@ interface HelperRequest {
 
 export default function HelpersPage() {
   const { user } = useAuthContext();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('browse');
   const [helpers, setHelpers] = useState<Helper[]>([]);
   const [requests, setRequests] = useState<HelperRequest[]>([]);
@@ -50,6 +56,20 @@ export default function HelpersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showNewRequestDialog, setShowNewRequestDialog] = useState(false);
+  const [plannerData, setPlannerData] = useState<any>(null);
+  
+  // New request form state
+  const [newRequest, setNewRequest] = useState({
+    title: '',
+    description: '',
+    event_date: '',
+    start_time: '',
+    end_time: '',
+    location_city: '',
+    hourly_rate: '',
+    required_skills: [] as string[],
+  });
 
   useEffect(() => {
     fetchData();
@@ -57,12 +77,12 @@ export default function HelpersPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch helpers with profiles
+      // Fetch helpers with profiles - join through user_id
       const { data: helpersData } = await supabase
         .from('helpers')
         .select(`
           *,
-          profiles!helpers_user_id_fkey (
+          profiles!inner (
             full_name,
             avatar_url
           )
@@ -89,6 +109,7 @@ export default function HelpersPage() {
           .single();
 
         if (plannerData) {
+          setPlannerData(plannerData);
           const { data: myRequestsData } = await supabase
             .from('helper_requests')
             .select('*')
@@ -104,6 +125,97 @@ export default function HelpersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const createNewRequest = async () => {
+    if (!plannerData) {
+      toast({
+        title: "Error",
+        description: "You must be a verified planner to create helper requests",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const totalHours = calculateTotalHours(newRequest.start_time, newRequest.end_time);
+      
+      const { error } = await supabase
+        .from('helper_requests')
+        .insert({
+          planner_id: plannerData.id,
+          title: newRequest.title,
+          description: newRequest.description,
+          event_date: newRequest.event_date,
+          start_time: newRequest.start_time,
+          end_time: newRequest.end_time,
+          location_city: newRequest.location_city,
+          hourly_rate: parseFloat(newRequest.hourly_rate),
+          total_hours: totalHours,
+          required_skills: newRequest.required_skills,
+          status: 'open'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Helper request created successfully"
+      });
+
+      // Reset form and close dialog
+      setNewRequest({
+        title: '',
+        description: '',
+        event_date: '',
+        start_time: '',
+        end_time: '',
+        location_city: '',
+        hourly_rate: '',
+        required_skills: [],
+      });
+      setShowNewRequestDialog(false);
+      
+      // Refresh data
+      fetchData();
+    } catch (error) {
+      console.error('Error creating request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create helper request",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const calculateTotalHours = (startTime: string, endTime: string): number => {
+    if (!startTime || !endTime) return 0;
+    
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    
+    if (end < start) {
+      // If end time is before start time, assume it's the next day
+      end.setDate(end.getDate() + 1);
+    }
+    
+    return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  };
+
+  const addSkill = (skill: string) => {
+    if (skill && !newRequest.required_skills.includes(skill)) {
+      setNewRequest(prev => ({
+        ...prev,
+        required_skills: [...prev.required_skills, skill]
+      }));
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setNewRequest(prev => ({
+      ...prev,
+      required_skills: prev.required_skills.filter(skill => skill !== skillToRemove)
+    }));
   };
 
   const filteredHelpers = helpers.filter(helper => {
@@ -324,10 +436,143 @@ export default function HelpersPage() {
           <TabsContent value="my-requests" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">My Helper Requests</h2>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                New Request
-              </Button>
+              <Dialog open={showNewRequestDialog} onOpenChange={setShowNewRequestDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Request
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create Helper Request</DialogTitle>
+                    <DialogDescription>
+                      Post a new helper request for your event. Helpers will be able to apply and you can review applications.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="title">Request Title</Label>
+                      <Input
+                        id="title"
+                        placeholder="e.g., Wedding Photography Assistant Needed"
+                        value={newRequest.title}
+                        onChange={(e) => setNewRequest(prev => ({ ...prev, title: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Describe what you need help with, requirements, and any other details..."
+                        value={newRequest.description}
+                        onChange={(e) => setNewRequest(prev => ({ ...prev, description: e.target.value }))}
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="event_date">Event Date</Label>
+                        <Input
+                          id="event_date"
+                          type="date"
+                          value={newRequest.event_date}
+                          onChange={(e) => setNewRequest(prev => ({ ...prev, event_date: e.target.value }))}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="location">Location</Label>
+                        <Select value={newRequest.location_city} onValueChange={(value) => setNewRequest(prev => ({ ...prev, location_city: value }))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select city" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Köln">Köln</SelectItem>
+                            <SelectItem value="Bonn">Bonn</SelectItem>
+                            <SelectItem value="Düsseldorf">Düsseldorf</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="start_time">Start Time</Label>
+                        <Input
+                          id="start_time"
+                          type="time"
+                          value={newRequest.start_time}
+                          onChange={(e) => setNewRequest(prev => ({ ...prev, start_time: e.target.value }))}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="end_time">End Time</Label>
+                        <Input
+                          id="end_time"
+                          type="time"
+                          value={newRequest.end_time}
+                          onChange={(e) => setNewRequest(prev => ({ ...prev, end_time: e.target.value }))}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="hourly_rate">Hourly Rate (€)</Label>
+                        <Input
+                          id="hourly_rate"
+                          type="number"
+                          placeholder="25.00"
+                          value={newRequest.hourly_rate}
+                          onChange={(e) => setNewRequest(prev => ({ ...prev, hourly_rate: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label>Required Skills</Label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {newRequest.required_skills.map((skill) => (
+                          <Badge key={skill} variant="secondary" className="cursor-pointer" onClick={() => removeSkill(skill)}>
+                            {skill} ×
+                          </Badge>
+                        ))}
+                      </div>
+                      <Select onValueChange={addSkill}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Add a skill..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Event Setup">Event Setup</SelectItem>
+                          <SelectItem value="Photography">Photography</SelectItem>
+                          <SelectItem value="Catering">Catering</SelectItem>
+                          <SelectItem value="DJ Services">DJ Services</SelectItem>
+                          <SelectItem value="Sound Equipment">Sound Equipment</SelectItem>
+                          <SelectItem value="Music Coordination">Music Coordination</SelectItem>
+                          <SelectItem value="Decoration">Decoration</SelectItem>
+                          <SelectItem value="Floral Arrangements">Floral Arrangements</SelectItem>
+                          <SelectItem value="Venue Setup">Venue Setup</SelectItem>
+                          <SelectItem value="Bartending">Bartending</SelectItem>
+                          <SelectItem value="Cocktail Service">Cocktail Service</SelectItem>
+                          <SelectItem value="Event Service">Event Service</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowNewRequestDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={createNewRequest} disabled={!newRequest.title || !newRequest.description}>
+                      Create Request
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
             
             {myRequests.length > 0 ? (
@@ -375,7 +620,7 @@ export default function HelpersPage() {
                   <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No helper requests yet</h3>
                   <p className="text-muted-foreground mb-4">Create your first helper request to get started</p>
-                  <Button>
+                  <Button onClick={() => setShowNewRequestDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Helper Request
                   </Button>
