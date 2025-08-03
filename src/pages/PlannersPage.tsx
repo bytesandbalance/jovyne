@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import MapView from '@/components/MapView';
-import { MapPin, Star, Search, Filter, Map, List } from 'lucide-react';
+import { MapPin, Star, Search, Filter } from 'lucide-react';
 
 // Mock data for planners
 const mockPlanners = [
@@ -48,17 +47,9 @@ const mockPlanners = [
 ];
 
 export default function PlannersPage() {
-  const [searchParams] = useSearchParams();
   const [searchLocation, setSearchLocation] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [selectedPlanner, setSelectedPlanner] = useState<string | null>(null);
-
-  useEffect(() => {
-    const view = searchParams.get('view');
-    if (view === 'map') {
-      setViewMode('map');
-    }
-  }, [searchParams]);
+  const [searchParams] = useSearchParams();
 
   const handlePlannerSelect = (plannerId: string) => {
     setSelectedPlanner(plannerId);
@@ -99,36 +90,11 @@ export default function PlannersPage() {
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
-            <div className="flex rounded-lg border">
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="rounded-r-none"
-              >
-                <List className="w-4 h-4 mr-1" />
-                List
-              </Button>
-              <Button
-                variant={viewMode === 'map' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('map')}
-                className="rounded-l-none"
-              >
-                <Map className="w-4 h-4 mr-1" />
-                Map
-              </Button>
-            </div>
           </div>
         </div>
 
         {/* Content */}
-        {viewMode === 'map' ? (
-          <div className="mb-8">
-            <MapView planners={filteredPlanners} onPlannerSelect={handlePlannerSelect} />
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {filteredPlanners.map((planner) => (
               <Card 
                 key={planner.id} 
@@ -180,8 +146,7 @@ export default function PlannersPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        )}
+        </div>
 
         {filteredPlanners.length === 0 && (
           <div className="text-center py-12">
