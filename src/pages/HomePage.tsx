@@ -97,10 +97,12 @@ export default function HomePage() {
                     className="border-0 bg-transparent focus-visible:ring-0 text-lg text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
-                <Button size="lg" className="rounded-xl hover-bounce">
-                  <Search className="w-5 h-5 mr-2" />
-                  Find Planners
-                </Button>
+                <Link to="/planners">
+                  <Button size="lg" className="rounded-xl hover-bounce">
+                    <Search className="w-5 h-5 mr-2" />
+                    Find Planners
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -112,10 +114,12 @@ export default function HomePage() {
                   </Button>
                 </Link>
               )}
-              <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover-bounce">
-                <Map className="w-5 h-5 mr-2" />
-                View Map
-              </Button>
+              <Link to="/planners?view=map">
+                <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover-bounce">
+                  <Map className="w-5 h-5 mr-2" />
+                  View Map
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -184,10 +188,12 @@ export default function HomePage() {
           </div>
 
           <div className="text-center">
-            <Button size="lg" variant="outline" className="hover-bounce">
-              <Search className="w-5 h-5 mr-2" />
-              Browse All Planners
-            </Button>
+            <Link to="/planners">
+              <Button size="lg" variant="outline" className="hover-bounce">
+                <Search className="w-5 h-5 mr-2" />
+                Browse All Planners
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

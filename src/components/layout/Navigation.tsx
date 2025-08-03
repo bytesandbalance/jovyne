@@ -19,6 +19,7 @@ export function Navigation() {
 
   const navItems = [
     { href: '/', label: 'Discover', icon: MapPin },
+    { href: '/planners', label: 'Find Planners', icon: Calendar },
     { href: '/dashboard', label: 'Dashboard', icon: Calendar },
     { href: '/helpers', label: 'Helpers', icon: Users },
   ];
