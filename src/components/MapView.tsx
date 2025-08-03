@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapPin, Star, Euro } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Star, Euro, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,8 @@ interface MapViewProps {
 }
 
 const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => {
+  const [selectedPlanner, setSelectedPlanner] = useState<string | null>(null);
+  
   console.log('MapView rendering with planners:', planners);
   
   // Filter planners that have coordinates (proper number check)
@@ -37,124 +39,133 @@ const MapView: React.FC<MapViewProps> = ({ planners = [], onPlannerSelect }) => 
   console.log('Center calculated:', center);
   console.log('Planners with coords:', plannersWithCoords);
 
+  // Create markers parameter for OpenStreetMap
+  const markersParam = plannersWithCoords.map((planner, index) => 
+    `${planner.latitude},${planner.longitude}`
+  ).join('|');
+
+  // OpenStreetMap embed URL with markers
+  const mapUrl = plannersWithCoords.length > 0 
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${center[1]-0.5},${center[0]-0.3},${center[1]+0.5},${center[0]+0.3}&amp;layer=mapnik&amp;marker=${center[0]},${center[1]}`
+    : `https://www.openstreetmap.org/export/embed.html?bbox=5.9559,47.2702,15.0419,55.0584&amp;layer=mapnik`;
+
+  const handlePlannerClick = (plannerId: string) => {
+    setSelectedPlanner(plannerId);
+    onPlannerSelect?.(plannerId);
+  };
+
+  const handleViewOnMap = (planner: any) => {
+    const url = `https://www.openstreetmap.org/?mlat=${planner.latitude}&mlon=${planner.longitude}&zoom=15`;
+    window.open(url, '_blank');
+  };
+
   return (
-    <div className="relative w-full rounded-lg overflow-hidden border bg-gradient-to-br from-blue-50 to-green-50" style={{ height: '400px' }}>
-      {/* Map Header */}
-      <div className="absolute top-4 left-4 right-4 z-10">
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <MapPin className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-lg">Party Planners Map</h3>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Showing {plannersWithCoords.length} planners in Germany
-            {plannersWithCoords.length > 0 && (
-              <span className="ml-2">
-                • Center: {center[0].toFixed(2)}°N, {center[1].toFixed(2)}°E
-              </span>
-            )}
-          </p>
-        </div>
-      </div>
-
-      {/* Planners List */}
-      {plannersWithCoords.length === 0 ? (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Locations Available</h3>
-            <p className="text-muted-foreground">No planner locations to display on the map</p>
-          </div>
-        </div>
-      ) : (
-        <div className="absolute bottom-4 left-4 right-4 z-10">
-          <div className="grid gap-3 max-h-48 overflow-y-auto">
-            {plannersWithCoords.map((planner, index) => (
-              <Card 
-                key={planner.id}
-                className="bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-200 cursor-pointer hover:shadow-lg"
-                onClick={() => {
-                  console.log('Planner clicked:', planner.id);
-                  onPlannerSelect?.(planner.id);
-                }}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
-                          {index + 1}
-                        </div>
-                        {planner.business_name}
-                      </CardTitle>
-                      <CardDescription className="text-xs flex items-center gap-1 mt-1">
-                        <MapPin className="w-3 h-3" />
-                        {planner.location_city}, {planner.location_state}
-                      </CardDescription>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      {planner.average_rating && (
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-xs font-medium">{planner.average_rating}</span>
-                        </div>
-                      )}
-                      {planner.base_price && (
-                        <Badge variant="secondary" className="text-xs">
-                          €{planner.base_price}+
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">
-                      📍 {planner.latitude?.toFixed(4)}, {planner.longitude?.toFixed(4)}
-                    </div>
-                    <Button size="sm" variant="outline" className="text-xs h-6">
-                      View Details
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+    <div className="relative w-full rounded-lg overflow-hidden border bg-background" style={{ height: '400px' }}>
+      {/* Street Map */}
+      <div className="relative w-full h-full">
+        <iframe
+          src={mapUrl}
+          className="w-full h-full border-0"
+          title="Street Map"
+          loading="lazy"
+        />
+        
+        {/* Map overlay with planner info */}
+        <div className="absolute top-4 left-4 right-4 z-10">
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-lg">Party Planners in Germany</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {plannersWithCoords.length} planners shown on street map
+              {plannersWithCoords.length > 0 && (
+                <span className="ml-2">
+                  • Center: {center[0].toFixed(2)}°N, {center[1].toFixed(2)}°E
+                </span>
+              )}
+            </p>
           </div>
         </div>
-      )}
 
-      {/* Decorative Map Elements */}
-      <div className="absolute inset-0 opacity-20">
-        <svg width="100%" height="100%" className="absolute inset-0">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#6B7280" strokeWidth="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-
-      {/* Location Pins on Background */}
-      {plannersWithCoords.map((planner, index) => (
-        <div
-          key={`pin-${planner.id}`}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 animate-pulse"
-          style={{
-            left: `${20 + (index * 25)}%`,
-            top: `${30 + (index * 15)}%`,
-          }}
-        >
-          <div className="relative">
-            <MapPin className="w-8 h-8 text-primary drop-shadow-lg" />
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold">
-              {index + 1}
+        {/* Planners List */}
+        {plannersWithCoords.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <div className="text-center text-white">
+              <MapPin className="w-16 h-16 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No Locations Available</h3>
+              <p>No planner locations to display on the map</p>
             </div>
           </div>
+        ) : (
+          <div className="absolute bottom-4 left-4 right-4 z-10">
+            <div className="grid gap-2 max-h-32 overflow-y-auto">
+              {plannersWithCoords.map((planner, index) => (
+                <Card 
+                  key={planner.id}
+                  className={`bg-white/95 backdrop-blur-sm hover:bg-white transition-all duration-200 cursor-pointer hover:shadow-lg ${
+                    selectedPlanner === planner.id ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => handlePlannerClick(planner.id)}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-3 h-3 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
+                            {index + 1}
+                          </div>
+                          <h4 className="font-semibold text-sm">{planner.business_name}</h4>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {planner.location_city}, {planner.location_state}
+                          </span>
+                          
+                          {planner.average_rating && (
+                            <span className="flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                              {planner.average_rating}
+                            </span>
+                          )}
+                          
+                          {planner.base_price && (
+                            <Badge variant="secondary" className="text-xs">
+                              €{planner.base_price}+
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-xs h-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewOnMap(planner);
+                        }}
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        View
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Help text */}
+      <div className="absolute bottom-1 right-1 z-10">
+        <div className="bg-black/70 text-white text-xs px-2 py-1 rounded">
+          Click "View" to see detailed street view
         </div>
-      ))}
+      </div>
     </div>
   );
 };
