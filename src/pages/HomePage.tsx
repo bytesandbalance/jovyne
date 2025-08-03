@@ -54,7 +54,7 @@ export default function HomePage() {
       rating: 5.0,
       reviews: 67,
       price: "$3,500+",
-      image: "https://images.unsplash.com/photo-1519167758481-83f29c32dc48?w=400&h=300&fit=crop",
+      image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&h=300&fit=crop",
       specialties: ["Luxury", "Corporate", "Galas"]
     }
   ];
@@ -90,11 +90,11 @@ export default function HomePage() {
               <div className="flex gap-4 p-2 bg-white/95 backdrop-blur-sm rounded-2xl shadow-party">
                 <div className="flex-1 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-muted-foreground ml-4" />
-                  <Input
+                   <Input
                     placeholder="Enter your city or zip code..."
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
-                    className="border-0 bg-transparent focus-visible:ring-0 text-lg"
+                    className="border-0 bg-transparent focus-visible:ring-0 text-lg text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
                 <Button size="lg" className="rounded-xl hover-bounce">
