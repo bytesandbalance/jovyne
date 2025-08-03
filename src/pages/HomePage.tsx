@@ -195,7 +195,7 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">How PartyPlatform Works</h2>
+            <h2 className="text-4xl font-bold mb-4">How Danz Works</h2>
             <p className="text-xl text-muted-foreground">
               Three simple steps to your perfect party
             </p>
