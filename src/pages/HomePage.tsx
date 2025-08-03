@@ -26,34 +26,34 @@ export default function HomePage() {
   const featuredPlanners = [
     {
       id: 1,
-      name: "Celebration Central",
-      description: "Creating magical moments for over 10 years",
-      location: "New York, NY",
+      name: "Kölner Festkultur",
+      description: "Creating magical moments in the heart of Cologne",
+      location: "Cologne, Germany",
       rating: 4.9,
       reviews: 127,
-      price: "$2,500+",
+      price: "€2,500+",
       image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop",
       specialties: ["Weddings", "Corporate", "Birthday"]
     },
     {
       id: 2,
-      name: "Party Perfect",
-      description: "Turning your dreams into unforgettable celebrations",
-      location: "Los Angeles, CA",
+      name: "Bonner Eventmanagement",
+      description: "Turning your dreams into unforgettable celebrations in Bonn",
+      location: "Bonn, Germany",
       rating: 4.8,
       reviews: 89,
-      price: "$1,800+",
+      price: "€1,800+",
       image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop",
       specialties: ["Birthday", "Kids Parties", "Themes"]
     },
     {
       id: 3,
-      name: "Elite Events",
-      description: "Luxury party planning with attention to every detail",
-      location: "Miami, FL",
+      name: "Düsseldorf Elite Events",
+      description: "Luxury party planning in Düsseldorf with attention to every detail",
+      location: "Düsseldorf, Germany",
       rating: 5.0,
       reviews: 67,
-      price: "$3,500+",
+      price: "€3,500+",
       image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&h=300&fit=crop",
       specialties: ["Luxury", "Corporate", "Galas"]
     }
