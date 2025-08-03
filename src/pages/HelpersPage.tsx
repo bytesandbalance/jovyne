@@ -62,7 +62,7 @@ export default function HelpersPage() {
         .from('helpers')
         .select(`
           *,
-          profiles!inner (
+          profiles!helpers_user_id_fkey (
             full_name,
             avatar_url
           )
