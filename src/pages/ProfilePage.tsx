@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Camera, MapPin, Star, Calendar, Phone, Mail, Edit3 } from 'lucide-react';
+import { User, Camera, MapPin, Star, Calendar, Phone, Mail, Edit3, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
@@ -18,6 +18,10 @@ export default function ProfilePage() {
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const portfolioInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
@@ -74,6 +78,140 @@ export default function ProfilePage() {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return;
+    
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: data.publicUrl })
+        .eq('user_id', user.id);
+      
+      if (updateError) throw updateError;
+      
+      await fetchProfile();
+      toast({
+        title: "Avatar updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload avatar. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const uploadPortfolioImage = async (file: File) => {
+    if (!user || !plannerProfile) return;
+    
+    setUploadingPortfolio(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('portfolios')
+        .upload(fileName, file);
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('portfolios')
+        .getPublicUrl(fileName);
+      
+      const currentImages = plannerProfile.portfolio_images || [];
+      const updatedImages = [...currentImages, data.publicUrl];
+      
+      const { error: updateError } = await supabase
+        .from('planners')
+        .update({ portfolio_images: updatedImages })
+        .eq('user_id', user.id);
+      
+      if (updateError) throw updateError;
+      
+      await fetchProfile();
+      toast({
+        title: "Portfolio image added",
+        description: "Your portfolio image has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error uploading portfolio image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingPortfolio(false);
+    }
+  };
+
+  const removePortfolioImage = async (imageUrl: string) => {
+    if (!user || !plannerProfile) return;
+    
+    try {
+      const currentImages = plannerProfile.portfolio_images || [];
+      const updatedImages = currentImages.filter((url: string) => url !== imageUrl);
+      
+      const { error: updateError } = await supabase
+        .from('planners')
+        .update({ portfolio_images: updatedImages })
+        .eq('user_id', user.id);
+      
+      if (updateError) throw updateError;
+      
+      await fetchProfile();
+      toast({
+        title: "Image removed",
+        description: "Portfolio image has been removed successfully.",
+      });
+    } catch (error) {
+      console.error('Error removing image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove image. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadAvatar(file);
+    }
+  };
+
+  const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadPortfolioImage(file);
+    }
+    // Reset input
+    if (portfolioInputRef.current) {
+      portfolioInputRef.current.value = '';
     }
   };
 
@@ -151,9 +289,26 @@ export default function ProfilePage() {
                 {profile?.full_name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
-            <Button size="sm" variant="outline" className="absolute -bottom-2 -right-2 rounded-full p-2">
-              <Camera className="w-4 h-4" />
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="absolute -bottom-2 -right-2 rounded-full p-2"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
+            >
+              {uploadingAvatar ? (
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4" />
+              )}
             </Button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
           </div>
           
           <h1 className="text-3xl font-bold mb-2">{profile?.full_name}</h1>
@@ -321,6 +476,62 @@ export default function ProfilePage() {
                         rows={4}
                       />
                     </div>
+                    
+                    {/* Portfolio Images Upload */}
+                    <div>
+                      <Label>Portfolio Images</Label>
+                      <div className="space-y-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => portfolioInputRef.current?.click()}
+                          disabled={uploadingPortfolio}
+                          className="w-full"
+                        >
+                          {uploadingPortfolio ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4 mr-2" />
+                              Add Portfolio Image
+                            </>
+                          )}
+                        </Button>
+                        <input
+                          ref={portfolioInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePortfolioChange}
+                          className="hidden"
+                        />
+                        
+                        {plannerProfile?.portfolio_images && plannerProfile.portfolio_images.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {plannerProfile.portfolio_images.map((image: string, index: number) => (
+                              <div key={index} className="relative group">
+                                <img
+                                  src={image}
+                                  alt={`Portfolio ${index + 1}`}
+                                  className="w-full h-32 object-cover rounded-lg"
+                                />
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="destructive"
+                                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
+                                  onClick={() => removePortfolioImage(image)}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -350,6 +561,23 @@ export default function ProfilePage() {
                       <div>
                         <span className="font-medium">Description:</span>
                         <p className="text-muted-foreground mt-1">{plannerProfile.description}</p>
+                      </div>
+                    )}
+                    
+                    {/* Portfolio Images Display */}
+                    {plannerProfile?.portfolio_images && plannerProfile.portfolio_images.length > 0 && (
+                      <div>
+                        <span className="font-medium">Portfolio:</span>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                          {plannerProfile.portfolio_images.map((image: string, index: number) => (
+                            <img
+                              key={index}
+                              src={image}
+                              alt={`Portfolio ${index + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
