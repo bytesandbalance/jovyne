@@ -218,6 +218,77 @@ export default function HelpersPage() {
     }));
   };
 
+  const handleApplyForJob = async (requestId: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to apply for jobs",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if user is a helper
+    const { data: helperData } = await supabase
+      .from('helpers')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!helperData) {
+      toast({
+        title: "Helper Profile Required",
+        description: "You need a helper profile to apply for jobs",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Check if already applied
+      const { data: existingApplication } = await supabase
+        .from('helper_applications')
+        .select('id')
+        .eq('helper_id', helperData.id)
+        .eq('helper_request_id', requestId)
+        .single();
+
+      if (existingApplication) {
+        toast({
+          title: "Already Applied",
+          description: "You have already applied for this job",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create application
+      const { error } = await supabase
+        .from('helper_applications')
+        .insert({
+          helper_id: helperData.id,
+          helper_request_id: requestId,
+          status: 'pending',
+          message: 'I would like to help with your event!',
+          hourly_rate: 25 // Default rate, could be made dynamic
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Application Submitted!",
+        description: "Your application has been sent to the planner"
+      });
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application",
+        variant: "destructive"
+      });
+    }
+  };
+
   const filteredHelpers = helpers.filter(helper => {
     const matchesSearch = helper.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          helper.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -417,7 +488,7 @@ export default function HelpersPage() {
                         </div>
                       )}
                       
-                      <Button>Apply for This Job</Button>
+                      <Button onClick={() => handleApplyForJob(request.id)}>Apply for This Job</Button>
                     </CardContent>
                   </Card>
                 ))}

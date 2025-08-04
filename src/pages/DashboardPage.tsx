@@ -15,12 +15,15 @@ import { useToast } from '@/hooks/use-toast';
 import EventTaskTracker from '@/components/dashboard/EventTaskTracker';
 import ClientContactList from '@/components/dashboard/ClientContactList';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
+import HelperApplications from '@/components/dashboard/HelperApplications';
+import HelperDashboard from '@/components/dashboard/HelperDashboard';
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
   const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
+  const [helperProfile, setHelperProfile] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
@@ -86,6 +89,15 @@ export default function DashboardPage() {
         base_price: plannerData?.base_price?.toString() || '',
         years_experience: plannerData?.years_experience?.toString() || ''
       });
+
+      // Check if user is a helper
+      const { data: helperData } = await supabase
+        .from('helpers')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+      
+      setHelperProfile(helperData);
 
       // Fetch events based on user role
       let eventsQuery = supabase.from('events').select('*');
@@ -222,6 +234,7 @@ export default function DashboardPage() {
   }
 
   const isPlannerView = plannerProfile && profile?.user_role === 'planner';
+  const isHelperView = helperProfile && profile?.user_role === 'helper';
 
   return (
     <div className="min-h-screen bg-background">
@@ -231,23 +244,27 @@ export default function DashboardPage() {
             Welcome back, {profile?.full_name || 'User'}!
           </h1>
           <p className="text-muted-foreground text-lg">
-            {isPlannerView ? 'Manage your events and grow your business' : 'Track your events and bookings'}
+            {isPlannerView ? 'Manage your events and grow your business' : 
+             isHelperView ? 'Find opportunities and manage your applications' : 
+             'Track your events and bookings'}
           </p>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className={`grid w-full ${isPlannerView ? 'max-w-4xl grid-cols-7' : 'max-w-md grid-cols-3'}`}>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsList className={`grid w-full ${isPlannerView ? 'max-w-5xl grid-cols-8' : isHelperView ? 'max-w-md grid-cols-2' : 'max-w-md grid-cols-3'}`}>
+            {!isHelperView && <TabsTrigger value="overview">Overview</TabsTrigger>}
+            {!isHelperView && <TabsTrigger value="events">Events</TabsTrigger>}
             <TabsTrigger value="profile">Profile</TabsTrigger>
             {isPlannerView && (
               <>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="clients">Clients</TabsTrigger>
+                <TabsTrigger value="applications">Applications</TabsTrigger>
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
               </>
             )}
+            {isHelperView && <TabsTrigger value="helper-dashboard">Dashboard</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -549,6 +566,11 @@ export default function DashboardPage() {
                 <InvoicingSection plannerProfile={plannerProfile} />
               </TabsContent>
 
+              {/* Applications Tab */}
+              <TabsContent value="applications" className="space-y-6">
+                <HelperApplications plannerData={plannerProfile} />
+              </TabsContent>
+
               {/* Analytics Tab */}
               <TabsContent value="analytics" className="space-y-6">
                 <div className="flex justify-between items-center">
@@ -650,6 +672,12 @@ export default function DashboardPage() {
                 </Card>
               </TabsContent>
             </>
+          )}
+
+          {isHelperView && (
+            <TabsContent value="helper-dashboard" className="space-y-6">
+              <HelperDashboard user={user} helperData={helperProfile} />
+            </TabsContent>
           )}
         </Tabs>
       </div>
