@@ -169,6 +169,7 @@ export default function HelpersPage() {
   const [loading, setLoading] = useState(true);
   const [showNewRequestDialog, setShowNewRequestDialog] = useState(false);
   const [plannerData, setPlannerData] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   
   // New request form state
   const [newRequest, setNewRequest] = useState({
@@ -188,25 +189,33 @@ export default function HelpersPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch helpers with profiles - join through user_id  
+      // Fetch helpers with profiles using a simpler query
       const { data: helpersData, error: helpersError } = await supabase
         .from('helpers')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .order('average_rating', { ascending: false });
 
       if (helpersError) {
         console.error('Error fetching helpers:', helpersError);
-      }
-      
-      setHelpers((helpersData as any) || []);
+        setHelpers([]);
+      } else if (helpersData) {
+        // Fetch profiles separately to avoid join issues
+        const helperIds = helpersData.map(h => h.user_id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', helperIds);
 
-      // Fetch all helper requests
+        // Combine helpers with their profiles
+        const helpersWithProfiles = helpersData.map(helper => ({
+          ...helper,
+          profiles: profilesData?.find(p => p.user_id === helper.user_id) || null
+        }));
+
+        setHelpers(helpersWithProfiles);
+      }
+
+      // Fetch all helper requests (only for helpers)
       const { data: requestsData } = await supabase
         .from('helper_requests')
         .select('*')
@@ -223,6 +232,8 @@ export default function HelpersPage() {
           .select('user_role')
           .eq('user_id', user.id)
           .single();
+
+        setUserRole(profileData?.user_role || null);
 
         // If user is a planner, fetch their planner data and requests
         if (profileData?.user_role === 'planner') {
@@ -241,7 +252,7 @@ export default function HelpersPage() {
               .order('created_at', { ascending: false });
 
             setMyRequests(myRequestsData || []);
-            setActiveTab('my-requests');
+            setActiveTab('browse'); // Planners start with browse helpers
           }
         }
         // If user is a helper, default to requests tab
@@ -453,6 +464,12 @@ export default function HelpersPage() {
     }
   };
 
+  const getTabCount = () => {
+    if (userRole === 'helper') return 2; // Browse + Helper Requests
+    if (userRole === 'planner') return 2; // Browse + My Requests  
+    return 1; // Just Browse for clients
+  };
+
   const filteredHelpers = helpers.filter(helper => {
     const matchesSearch = helper.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          helper.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -493,10 +510,10 @@ export default function HelpersPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+          <TabsList className="grid w-full max-w-md mx-auto" style={{ gridTemplateColumns: `repeat(${getTabCount()}, 1fr)` }}>
             <TabsTrigger value="browse">Browse Helpers</TabsTrigger>
-            <TabsTrigger value="requests">Helper Requests</TabsTrigger>
-            <TabsTrigger value="my-requests">My Requests</TabsTrigger>
+            {userRole === 'helper' && <TabsTrigger value="requests">Helper Requests</TabsTrigger>}
+            {userRole === 'planner' && <TabsTrigger value="my-requests">My Requests</TabsTrigger>}
           </TabsList>
 
           {/* Search and Filter Bar */}
