@@ -67,10 +67,12 @@ export function Navigation() {
             {user ? (
               <div className="flex items-center gap-2">
                 <MessageNotifications />
-                <Button variant="ghost" size="sm" className="hidden md:flex">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </Button>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="hidden md:flex hover-bounce">
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Button>
+                </Link>
                 <Button 
                   variant="ghost" 
                   size="sm" 
