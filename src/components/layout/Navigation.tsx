@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuthContext } from '@/components/auth/AuthProvider';
+import { MessageNotifications } from '@/components/notifications/MessageNotifications';
 import { 
   PartyPopper, 
   MapPin, 
@@ -65,6 +66,7 @@ export function Navigation() {
           <div className="flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-2">
+                <MessageNotifications />
                 <Button variant="ghost" size="sm" className="hidden md:flex">
                   <User className="w-4 h-4 mr-2" />
                   Profile

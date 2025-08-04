@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, MapPin, Star, Clock, DollarSign, Filter, Users, Calendar, Plus } from 'lucide-react';
+import { HelperProfileModal } from '@/components/helpers/HelperProfileModal';
 
 // Component to handle role-based apply button
 function ApplyButton({ requestId }: { requestId: string }) {
@@ -170,6 +171,8 @@ export default function HelpersPage() {
   const [showNewRequestDialog, setShowNewRequestDialog] = useState(false);
   const [plannerData, setPlannerData] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [selectedHelper, setSelectedHelper] = useState<Helper | null>(null);
+  const [showHelperProfile, setShowHelperProfile] = useState(false);
   
   // New request form state
   const [newRequest, setNewRequest] = useState({
@@ -608,7 +611,13 @@ export default function HelpersPage() {
                         )}
                       </div>
                       
-                      <Button className="w-full">
+                      <Button 
+                        className="w-full"
+                        onClick={() => {
+                          setSelectedHelper(helper);
+                          setShowHelperProfile(true);
+                        }}
+                      >
                         View Profile
                       </Button>
                     </CardContent>
@@ -884,6 +893,16 @@ export default function HelpersPage() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Helper Profile Modal */}
+        {selectedHelper && (
+          <HelperProfileModal
+            helper={selectedHelper}
+            open={showHelperProfile}
+            onOpenChange={setShowHelperProfile}
+            currentUserId={user?.id}
+          />
+        )}
       </div>
     </div>
   );

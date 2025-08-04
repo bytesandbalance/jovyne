@@ -365,6 +365,39 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          recipient_id: string
+          sender_id: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          recipient_id: string
+          sender_id: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          recipient_id?: string
+          sender_id?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       planners: {
         Row: {
           average_rating: number | null
