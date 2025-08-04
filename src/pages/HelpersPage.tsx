@@ -14,6 +14,117 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, MapPin, Star, Clock, DollarSign, Filter, Users, Calendar, Plus } from 'lucide-react';
 
+// Component to handle role-based apply button
+function ApplyButton({ requestId }: { requestId: string }) {
+  const { user } = useAuthContext();
+  const { toast } = useToast();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('user_role')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => setUserRole(data?.user_role || null));
+    }
+  }, [user]);
+
+  const handleApply = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to apply for jobs",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (userRole !== 'helper') {
+      toast({
+        title: "Access Denied",
+        description: "Only helpers can apply for jobs",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { data: helperData } = await supabase
+      .from('helpers')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!helperData) {
+      toast({
+        title: "Helper Profile Required",
+        description: "You need a helper profile to apply for jobs",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Check if already applied
+      const { data: existingApplication } = await supabase
+        .from('helper_applications')
+        .select('id')
+        .eq('helper_id', helperData.id)
+        .eq('helper_request_id', requestId)
+        .single();
+
+      if (existingApplication) {
+        toast({
+          title: "Already Applied",
+          description: "You have already applied for this job",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create application
+      const { error } = await supabase
+        .from('helper_applications')
+        .insert({
+          helper_id: helperData.id,
+          helper_request_id: requestId,
+          status: 'pending',
+          message: 'I would like to help with your event!',
+          hourly_rate: 25
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Application Submitted!",
+        description: "Your application has been sent to the planner"
+      });
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (userRole === 'helper') {
+    return (
+      <Button className="w-full" onClick={handleApply}>
+        Apply for Job
+      </Button>
+    );
+  }
+
+  return (
+    <Button className="w-full" disabled variant="outline">
+      {userRole === 'planner' ? 'Planners cannot apply' : 'Clients cannot apply'}
+    </Button>
+  );
+}
+
 interface Helper {
   id: string;
   user_id: string;
@@ -77,18 +188,22 @@ export default function HelpersPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch helpers with profiles - join through user_id
-      const { data: helpersData } = await supabase
+      // Fetch helpers with profiles - join through user_id  
+      const { data: helpersData, error: helpersError } = await supabase
         .from('helpers')
         .select(`
           *,
-          profiles!inner (
+          profiles (
             full_name,
             avatar_url
           )
         `)
         .order('average_rating', { ascending: false });
 
+      if (helpersError) {
+        console.error('Error fetching helpers:', helpersError);
+      }
+      
       setHelpers((helpersData as any) || []);
 
       // Fetch all helper requests
@@ -100,24 +215,42 @@ export default function HelpersPage() {
 
       setRequests(requestsData || []);
 
-      // Fetch user's requests if they're a planner
+      // Check user role and fetch appropriate data
       if (user) {
-        const { data: plannerData } = await supabase
-          .from('planners')
-          .select('id')
+        // Get user profile to check role
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('user_role')
           .eq('user_id', user.id)
           .single();
 
-        if (plannerData) {
-          setPlannerData(plannerData);
-          const { data: myRequestsData } = await supabase
-            .from('helper_requests')
-            .select('*')
-            .eq('planner_id', plannerData.id)
-            .order('created_at', { ascending: false });
+        // If user is a planner, fetch their planner data and requests
+        if (profileData?.user_role === 'planner') {
+          const { data: plannerData } = await supabase
+            .from('planners')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
 
-          setMyRequests(myRequestsData || []);
-          setActiveTab('my-requests');
+          if (plannerData) {
+            setPlannerData(plannerData);
+            const { data: myRequestsData } = await supabase
+              .from('helper_requests')
+              .select('*')
+              .eq('planner_id', plannerData.id)
+              .order('created_at', { ascending: false });
+
+            setMyRequests(myRequestsData || []);
+            setActiveTab('my-requests');
+          }
+        }
+        // If user is a helper, default to requests tab
+        else if (profileData?.user_role === 'helper') {
+          setActiveTab('requests');
+        }
+        // If user is a client, default to browse helpers
+        else if (profileData?.user_role === 'client') {
+          setActiveTab('browse');
         }
       }
     } catch (error) {
@@ -128,6 +261,22 @@ export default function HelpersPage() {
   };
 
   const createNewRequest = async () => {
+    // Check if user is a planner
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('user_id', user?.id)
+      .single();
+
+    if (profileData?.user_role !== 'planner') {
+      toast({
+        title: "Access Denied",
+        description: "Only planners can create helper requests",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!plannerData) {
       toast({
         title: "Error",
@@ -229,6 +378,21 @@ export default function HelpersPage() {
     }
 
     // Check if user is a helper
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileData?.user_role !== 'helper') {
+      toast({
+        title: "Access Denied",
+        description: "Only helpers can apply for jobs",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const { data: helperData } = await supabase
       .from('helpers')
       .select('id')
@@ -488,7 +652,7 @@ export default function HelpersPage() {
                         </div>
                       )}
                       
-                      <Button onClick={() => handleApplyForJob(request.id)}>Apply for This Job</Button>
+                      <ApplyButton requestId={request.id} />
                     </CardContent>
                   </Card>
                 ))}
