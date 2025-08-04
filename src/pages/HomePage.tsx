@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuthContext } from '@/components/auth/AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
+import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
 import { 
   MapPin, 
   Star, 
@@ -17,46 +20,82 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
+interface Planner {
+  id: string;
+  business_name: string;
+  description: string;
+  location_city: string;
+  location_state: string;
+  average_rating: number;
+  base_price: number;
+  years_experience: number;
+  specialties: string[];
+  services: string[];
+  portfolio_images: string[];
+  is_verified: boolean;
+  total_reviews: number;
+  website_url: string;
+  instagram_handle: string;
+  user_id: string;
+  full_name: string;
+  avatar_url: string;
+}
+
 export default function HomePage() {
   const { user } = useAuthContext();
   const [searchLocation, setSearchLocation] = useState('');
+  const [featuredPlanners, setFeaturedPlanners] = useState<Planner[]>([]);
+  const [selectedPlanner, setSelectedPlanner] = useState<Planner | null>(null);
+  const [showPlannerProfile, setShowPlannerProfile] = useState(false);
 
-  // Mock data for featured planners
-  const featuredPlanners = [
-    {
-      id: 1,
-      name: "Kölner Festkultur",
-      description: "Creating magical moments in the heart of Cologne",
-      location: "Cologne, Germany",
-      rating: 4.9,
-      reviews: 127,
-      price: "€2,500+",
-      image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop",
-      specialties: ["Weddings", "Corporate", "Birthday"]
-    },
-    {
-      id: 2,
-      name: "Bonner Eventmanagement",
-      description: "Turning your dreams into unforgettable celebrations in Bonn",
-      location: "Bonn, Germany",
-      rating: 4.8,
-      reviews: 89,
-      price: "€1,800+",
-      image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop",
-      specialties: ["Birthday", "Kids Parties", "Themes"]
-    },
-    {
-      id: 3,
-      name: "Düsseldorf Elite Events",
-      description: "Luxury party planning in Düsseldorf with attention to every detail",
-      location: "Düsseldorf, Germany",
-      rating: 5.0,
-      reviews: 67,
-      price: "€3,500+",
-      image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&h=300&fit=crop",
-      specialties: ["Luxury", "Corporate", "Galas"]
+  useEffect(() => {
+    fetchFeaturedPlanners();
+  }, []);
+
+  const fetchFeaturedPlanners = async () => {
+    try {
+      // Fetch top 3 planners by rating
+      const { data: plannersData, error } = await supabase
+        .from('planners')
+        .select('*')
+        .order('average_rating', { ascending: false })
+        .limit(3);
+
+      if (error) {
+        console.error('Error fetching planners:', error);
+        return;
+      }
+
+      if (plannersData && plannersData.length > 0) {
+        // Fetch profiles for planners
+        const plannerUserIds = plannersData.map(p => p.user_id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', plannerUserIds);
+
+        // Combine planners with their profiles
+        const plannersWithProfiles = plannersData.map(planner => ({
+          ...planner,
+          full_name: profilesData?.find(p => p.user_id === planner.user_id)?.full_name || '',
+          avatar_url: profilesData?.find(p => p.user_id === planner.user_id)?.avatar_url || ''
+        }));
+
+        setFeaturedPlanners(plannersWithProfiles as Planner[]);
+      }
+    } catch (error) {
+      console.error('Error fetching featured planners:', error);
     }
-  ];
+  };
+
+  const handleViewProfile = (planner: Planner) => {
+    setSelectedPlanner(planner);
+    setShowPlannerProfile(true);
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,48 +169,71 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredPlanners.map((planner) => (
-              <Card key={planner.id} className="overflow-hidden hover:shadow-party transition-party hover-bounce cursor-pointer">
-                <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={planner.image} 
-                    alt={planner.name}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  />
+              <Card key={planner.id} className="overflow-hidden hover:shadow-party transition-party hover-bounce">
+                <div className="aspect-video relative overflow-hidden bg-gradient-party">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Avatar className="w-16 h-16">
+                      <AvatarImage src={planner.avatar_url} />
+                      <AvatarFallback className="text-lg bg-white/20 text-white">
+                        {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                   <div className="absolute top-4 right-4">
                     <Badge className="bg-white/90 text-primary shadow-sm">
-                      {planner.price}
+                      €{planner.base_price || 0}+
                     </Badge>
                   </div>
+                  {planner.is_verified && (
+                    <div className="absolute top-4 left-4">
+                      <Badge variant="secondary" className="bg-white/90 text-primary shadow-sm">
+                        ✓ Verified
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-xl mb-1">{planner.name}</CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        {planner.location}
-                      </div>
+                      <CardTitle className="text-xl mb-1">{planner.business_name}</CardTitle>
+                      <p className="text-sm text-muted-foreground mb-2">{planner.full_name}</p>
+                      {(planner.location_city || planner.location_state) && (
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4" />
+                          {[planner.location_city, planner.location_state].filter(Boolean).join(', ')}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{planner.rating}</span>
-                      <span className="text-sm text-muted-foreground">({planner.reviews})</span>
+                      <span className="text-sm font-medium">{planner.average_rating || 0}</span>
+                      <span className="text-sm text-muted-foreground">({planner.total_reviews || 0})</span>
                     </div>
                   </div>
                   <CardDescription>{planner.description}</CardDescription>
                 </CardHeader>
                 
                 <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {planner.specialties.map((specialty) => (
-                      <Badge key={specialty} variant="secondary">
-                        {specialty}
-                      </Badge>
-                    ))}
-                  </div>
+                  {planner.specialties && planner.specialties.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {planner.specialties.slice(0, 3).map((specialty) => (
+                        <Badge key={specialty} variant="secondary">
+                          {specialty}
+                        </Badge>
+                      ))}
+                      {planner.specialties.length > 3 && (
+                        <Badge variant="outline">
+                          +{planner.specialties.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                   
-                  <Button className="w-full hover-bounce">
+                  <Button 
+                    className="w-full hover-bounce"
+                    onClick={() => handleViewProfile(planner)}
+                  >
                     View Profile
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -259,6 +321,16 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+      )}
+
+      {/* Planner Profile Modal */}
+      {selectedPlanner && (
+        <PlannerProfileModal
+          planner={selectedPlanner}
+          open={showPlannerProfile}
+          onOpenChange={setShowPlannerProfile}
+          currentUserId={user?.id}
+        />
       )}
     </div>
   );
