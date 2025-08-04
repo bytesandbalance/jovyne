@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
-import { useToast } from '@/hooks/use-toast';
 import { 
   MapPin, 
   Star, 
@@ -17,10 +16,7 @@ import {
   Filter,
   ArrowRight,
   PartyPopper,
-  Sparkles,
-  Upload,
-  X,
-  Camera
+  Sparkles
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -47,48 +43,14 @@ interface Planner {
 
 export default function HomePage() {
   const { user } = useAuthContext();
-  const { toast } = useToast();
   const [searchLocation, setSearchLocation] = useState('');
   const [featuredPlanners, setFeaturedPlanners] = useState<Planner[]>([]);
   const [selectedPlanner, setSelectedPlanner] = useState<Planner | null>(null);
   const [showPlannerProfile, setShowPlannerProfile] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [isUploadingPortfolio, setIsUploadingPortfolio] = useState(false);
 
   useEffect(() => {
     fetchFeaturedPlanners();
-    if (user) {
-      fetchUserProfile();
-    }
-  }, [user]);
-
-  const fetchUserProfile = async () => {
-    if (!user) return;
-    
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
-      setUserProfile(profile);
-      
-      // If user is a planner, fetch planner data too
-      if (profile?.user_role === 'planner') {
-        const { data: plannerData } = await supabase
-          .from('planners')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        
-        setUserProfile({ ...profile, plannerData });
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    }
-  };
+  }, []);
 
   const fetchFeaturedPlanners = async () => {
     try {
@@ -123,137 +85,6 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error('Error fetching featured planners:', error);
-    }
-  };
-
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
-
-    setIsUploadingAvatar(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      setUserProfile({ ...userProfile, avatar_url: publicUrl });
-      toast({
-        title: "Avatar updated successfully!",
-        description: "Your profile photo has been updated."
-      });
-    } catch (error: any) {
-      console.error('Error uploading avatar:', error);
-      toast({
-        title: "Upload failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsUploadingAvatar(false);
-    }
-  };
-
-  const handlePortfolioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length === 0 || !user || userProfile?.user_role !== 'planner') return;
-
-    setIsUploadingPortfolio(true);
-    try {
-      const uploadPromises = files.map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('portfolios')
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('portfolios')
-          .getPublicUrl(fileName);
-
-        return publicUrl;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const currentImages = userProfile.plannerData?.portfolio_images || [];
-      const newImages = [...currentImages, ...uploadedUrls];
-
-      const { error: updateError } = await supabase
-        .from('planners')
-        .update({ portfolio_images: newImages })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      setUserProfile({
-        ...userProfile,
-        plannerData: { ...userProfile.plannerData, portfolio_images: newImages }
-      });
-
-      toast({
-        title: "Portfolio updated!",
-        description: `${files.length} image(s) added to your portfolio.`
-      });
-    } catch (error: any) {
-      console.error('Error uploading portfolio:', error);
-      toast({
-        title: "Upload failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsUploadingPortfolio(false);
-    }
-  };
-
-  const removePortfolioImage = async (imageUrl: string) => {
-    if (!user || userProfile?.user_role !== 'planner') return;
-
-    try {
-      const currentImages = userProfile.plannerData?.portfolio_images || [];
-      const newImages = currentImages.filter((url: string) => url !== imageUrl);
-
-      const { error } = await supabase
-        .from('planners')
-        .update({ portfolio_images: newImages })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setUserProfile({
-        ...userProfile,
-        plannerData: { ...userProfile.plannerData, portfolio_images: newImages }
-      });
-
-      toast({
-        title: "Image removed",
-        description: "Portfolio image has been removed."
-      });
-    } catch (error: any) {
-      console.error('Error removing image:', error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
     }
   };
 
@@ -325,99 +156,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* User Profile Section */}
-      {user && userProfile && (
-        <section className="py-16 px-4 bg-muted/50">
-          <div className="container mx-auto max-w-4xl">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-2">Your Profile</h2>
-              <p className="text-muted-foreground">Manage your photos and portfolio</p>
-            </div>
-            
-            <Card className="shadow-party">
-              <CardHeader>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Avatar className="w-20 h-20">
-                      <AvatarImage src={userProfile.avatar_url} />
-                      <AvatarFallback className="text-lg">
-                        {userProfile.full_name ? getInitials(userProfile.full_name) : 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <label className="absolute -bottom-2 -right-2 p-2 bg-primary text-primary-foreground rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
-                      <Camera className="w-4 h-4" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarUpload}
-                        disabled={isUploadingAvatar}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold">{userProfile.full_name}</h3>
-                    <p className="text-muted-foreground">{userProfile.email}</p>
-                    <Badge variant="secondary" className="mt-1">
-                      {userProfile.user_role}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              {userProfile.user_role === 'planner' && (
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-lg font-medium">Portfolio Images</h4>
-                      <label className="cursor-pointer">
-                        <Button variant="outline" disabled={isUploadingPortfolio} className="gap-2">
-                          <Upload className="w-4 h-4" />
-                          {isUploadingPortfolio ? 'Uploading...' : 'Add Images'}
-                        </Button>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handlePortfolioUpload}
-                          disabled={isUploadingPortfolio}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                    
-                    {userProfile.plannerData?.portfolio_images?.length > 0 ? (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {userProfile.plannerData.portfolio_images.map((imageUrl: string, index: number) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={imageUrl}
-                              alt={`Portfolio image ${index + 1}`}
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                            <button
-                              onClick={() => removePortfolioImage(imageUrl)}
-                              className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Upload className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        <p>No portfolio images yet. Upload some to showcase your work!</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          </div>
-        </section>
-      )}
 
       {/* Featured Planners */}
       <section className="py-16 px-4">
