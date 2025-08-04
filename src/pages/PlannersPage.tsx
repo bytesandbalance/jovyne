@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
+import { cityMatches } from '@/lib/cityMapping';
 
 interface Planner {
   id: string;
@@ -41,8 +42,13 @@ export default function PlannersPage() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    // Get location from URL params if present
+    const locationParam = searchParams.get('location');
+    if (locationParam) {
+      setSearchLocation(locationParam);
+    }
     fetchPlanners();
-  }, []);
+  }, [searchParams]);
 
   const fetchPlanners = async () => {
     setLoading(true);
@@ -96,8 +102,8 @@ export default function PlannersPage() {
     if (planner.user_id === user?.id) return false;
     
     return searchLocation === '' || 
-      planner.location_city?.toLowerCase().includes(searchLocation.toLowerCase()) ||
-      planner.location_state?.toLowerCase().includes(searchLocation.toLowerCase()) ||
+      cityMatches(planner.location_city || '', searchLocation) ||
+      cityMatches(planner.location_state || '', searchLocation) ||
       planner.business_name?.toLowerCase().includes(searchLocation.toLowerCase());
   });
 
