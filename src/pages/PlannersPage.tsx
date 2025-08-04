@@ -91,12 +91,15 @@ export default function PlannersPage() {
     setShowPlannerProfile(true);
   };
 
-  const filteredPlanners = planners.filter(planner =>
-    searchLocation === '' || 
-    planner.location_city?.toLowerCase().includes(searchLocation.toLowerCase()) ||
-    planner.location_state?.toLowerCase().includes(searchLocation.toLowerCase()) ||
-    planner.business_name?.toLowerCase().includes(searchLocation.toLowerCase())
-  );
+  const filteredPlanners = planners.filter(planner => {
+    // Don't show current user in the planners list
+    if (planner.user_id === user?.id) return false;
+    
+    return searchLocation === '' || 
+      planner.location_city?.toLowerCase().includes(searchLocation.toLowerCase()) ||
+      planner.location_state?.toLowerCase().includes(searchLocation.toLowerCase()) ||
+      planner.business_name?.toLowerCase().includes(searchLocation.toLowerCase());
+  });
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
