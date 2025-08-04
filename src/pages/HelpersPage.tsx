@@ -471,6 +471,9 @@ export default function HelpersPage() {
   };
 
   const filteredHelpers = helpers.filter(helper => {
+    // Don't show current user in the helpers list
+    if (helper.user_id === user?.id) return false;
+    
     const matchesSearch = helper.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          helper.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesLocation = !locationFilter || 
