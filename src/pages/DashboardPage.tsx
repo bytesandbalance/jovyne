@@ -236,6 +236,25 @@ export default function DashboardPage() {
   const isPlannerView = plannerProfile && profile?.user_role === 'planner';
   const isHelperView = helperProfile && profile?.user_role === 'helper';
 
+  // Show dedicated helper dashboard if user is a helper
+  if (isHelperView) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto py-8 px-4">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">
+              Welcome back, {profile?.full_name || 'Helper'}!
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Manage your applications and find new opportunities
+            </p>
+          </div>
+          <HelperDashboard user={user} helperData={helperProfile} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">

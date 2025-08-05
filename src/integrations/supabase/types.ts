@@ -53,6 +53,75 @@ export type Database = {
         }
         Relationships: []
       }
+      communication_requests: {
+        Row: {
+          created_at: string
+          description: string
+          end_time: string | null
+          event_date: string
+          hourly_rate: number | null
+          id: string
+          location_city: string
+          message: string | null
+          recipient_id: string
+          recipient_type: string
+          required_skills: string[] | null
+          responded_at: string | null
+          response_message: string | null
+          sender_id: string
+          sender_type: string
+          start_time: string | null
+          status: string
+          title: string
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          end_time?: string | null
+          event_date: string
+          hourly_rate?: number | null
+          id?: string
+          location_city: string
+          message?: string | null
+          recipient_id: string
+          recipient_type: string
+          required_skills?: string[] | null
+          responded_at?: string | null
+          response_message?: string | null
+          sender_id: string
+          sender_type: string
+          start_time?: string | null
+          status?: string
+          title: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_time?: string | null
+          event_date?: string
+          hourly_rate?: number | null
+          id?: string
+          location_city?: string
+          message?: string | null
+          recipient_id?: string
+          recipient_type?: string
+          required_skills?: string[] | null
+          responded_at?: string | null
+          response_message?: string | null
+          sender_id?: string
+          sender_type?: string
+          start_time?: string | null
+          status?: string
+          title?: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_tasks: {
         Row: {
           assigned_to: string | null
