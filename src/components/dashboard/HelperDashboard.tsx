@@ -49,6 +49,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
   const { toast } = useToast();
   const [applications, setApplications] = useState<HelperApplication[]>([]);
   const [availableJobs, setAvailableJobs] = useState<HelperJob[]>([]);
+  const [upcomingJobs, setUpcomingJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,8 +97,27 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
 
       const { data: jobsData, error: jobsError } = await jobsQuery;
 
-      if (jobsError) throw jobsError;
-      setAvailableJobs((jobsData as any) || []);
+      if (jobsError) {
+        console.error('Error fetching jobs:', jobsError);
+        // This might fail due to RLS policy, just set empty array
+        setAvailableJobs([]);
+      } else {
+        setAvailableJobs((jobsData as any) || []);
+      }
+
+      // Fetch approved jobs for upcoming events
+      const { data: approvedJobsData, error: approvedJobsError } = await supabase
+        .from('helper_approved_jobs')
+        .select('*')
+        .gte('event_date', new Date().toISOString().split('T')[0])
+        .order('event_date', { ascending: true });
+
+      if (approvedJobsError) {
+        console.error('Error fetching approved jobs:', approvedJobsError);
+        setUpcomingJobs([]);
+      } else {
+        setUpcomingJobs(approvedJobsData || []);
+      }
     } catch (error) {
       console.error('Error fetching helper data:', error);
       toast({
@@ -221,8 +241,9 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
       </div>
 
       <Tabs defaultValue="applications" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="applications">My Applications</TabsTrigger>
+          <TabsTrigger value="upcoming">Upcoming Jobs</TabsTrigger>
           <TabsTrigger value="available">Available Jobs</TabsTrigger>
         </TabsList>
 
@@ -277,6 +298,74 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
                 <div className="text-center py-8">
                   <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">No applications yet</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="upcoming" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Upcoming Jobs</CardTitle>
+              <CardDescription>Your approved jobs and scheduled events</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {upcomingJobs.length > 0 ? (
+                <div className="space-y-4">
+                  {upcomingJobs.map((job) => (
+                    <div key={job.id} className="p-4 border rounded-lg bg-green-50 dark:bg-green-950/20">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold">{job.title}</h4>
+                            <Badge variant="default" className="bg-green-600">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Approved
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{job.description}</p>
+                          <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              <span>{new Date(job.event_date).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              <span>{job.start_time} - {job.end_time}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              <span>{job.location_city}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="w-4 h-4" />
+                              <span>${job.hourly_rate}/hr</span>
+                            </div>
+                          </div>
+                          <div className="mt-3 text-sm">
+                            <span className="font-medium">Planner: </span>
+                            <span>{job.planner_name} ({job.planner_business_name})</span>
+                          </div>
+                          {job.required_skills && job.required_skills.length > 0 && (
+                            <div className="mt-3">
+                              <span className="text-sm font-medium">Skills Required:</span>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {job.required_skills.map((skill: string) => (
+                                  <Badge key={skill} variant="outline">{skill}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No upcoming jobs</p>
                 </div>
               )}
             </CardContent>
