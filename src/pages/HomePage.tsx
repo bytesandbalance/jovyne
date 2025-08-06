@@ -106,7 +106,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm">
               <PartyPopper className="w-5 h-5" />
-              <span className="text-sm font-medium">Welcome to Jovialic</span>
+              <span className="text-sm font-medium">Welcome to Jovyne</span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
@@ -257,7 +257,7 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">How Jovialic Works</h2>
+            <h2 className="text-4xl font-bold mb-4">How Jovyne Works</h2>
             <p className="text-xl text-muted-foreground">
               Three simple steps to your perfect party
             </p>
