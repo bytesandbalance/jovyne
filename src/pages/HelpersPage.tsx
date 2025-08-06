@@ -219,8 +219,14 @@ export default function HelpersPage() {
         setHelpers(helpersWithProfiles);
       }
 
-      // Helper requests will be fetched based on user role below
-      setRequests([]);
+      // Fetch all helper requests (only for helpers)
+      const { data: requestsData } = await supabase
+        .from('helper_requests')
+        .select('*')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false });
+
+      setRequests(requestsData || []);
 
       // Check user role and fetch appropriate data
       if (user) {
@@ -253,20 +259,8 @@ export default function HelpersPage() {
             setActiveTab('browse'); // Planners start with browse helpers
           }
         }
-        // If user is a helper, fetch requests and default to requests tab
+        // If user is a helper, default to requests tab
         else if (profileData?.user_role === 'helper') {
-          const { data: requestsData, error: requestsError } = await supabase
-            .from('helper_requests')
-            .select('*')
-            .eq('status', 'open')
-            .order('created_at', { ascending: false });
-
-          if (requestsError) {
-            console.error('Helper requests error:', requestsError);
-            setRequests([]);
-          } else {
-            setRequests(requestsData || []);
-          }
           setActiveTab('requests');
         }
         // If user is a client, default to browse helpers
@@ -525,7 +519,7 @@ export default function HelpersPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-md mx-auto" style={{ gridTemplateColumns: `repeat(${getTabCount()}, 1fr)` }}>
             <TabsTrigger value="browse">Browse Helpers</TabsTrigger>
-            {userRole === 'helper' && <TabsTrigger value="requests">Available Jobs</TabsTrigger>}
+            {userRole === 'helper' && <TabsTrigger value="requests">Helper Requests</TabsTrigger>}
             {userRole === 'planner' && <TabsTrigger value="my-requests">My Requests</TabsTrigger>}
           </TabsList>
 

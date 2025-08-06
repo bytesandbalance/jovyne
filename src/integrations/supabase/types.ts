@@ -267,13 +267,6 @@ export type Database = {
             foreignKeyName: "helper_applications_helper_request_id_fkey"
             columns: ["helper_request_id"]
             isOneToOne: false
-            referencedRelation: "helper_approved_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_applications_helper_request_id_fkey"
-            columns: ["helper_request_id"]
-            isOneToOne: false
             referencedRelation: "helper_requests"
             referencedColumns: ["id"]
           },
@@ -626,46 +619,7 @@ export type Database = {
       }
     }
     Views: {
-      helper_approved_jobs: {
-        Row: {
-          application_message: string | null
-          applied_at: string | null
-          created_at: string | null
-          description: string | null
-          end_time: string | null
-          event_date: string | null
-          event_id: string | null
-          hourly_rate: number | null
-          id: string | null
-          location_city: string | null
-          planner_business_name: string | null
-          planner_id: string | null
-          planner_name: string | null
-          required_skills: string[] | null
-          reviewed_at: string | null
-          start_time: string | null
-          status: Database["public"]["Enums"]["helper_request_status"] | null
-          title: string | null
-          total_hours: number | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "helper_requests_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_requests_planner_id_fkey"
-            columns: ["planner_id"]
-            isOneToOne: false
-            referencedRelation: "planners"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
