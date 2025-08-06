@@ -44,7 +44,7 @@ export default function AuthPage() {
             <PartyPopper className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">
-            Jovyne
+            Jovialic
           </h1>
           <p className="text-white/80 text-lg">
             Where celebrations come to life! 🎉

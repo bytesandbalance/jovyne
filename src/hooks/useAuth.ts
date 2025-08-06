@@ -90,7 +90,7 @@ export function useAuth() {
     } else {
       toast({
         title: "See you later! 👋",
-        description: "Thanks for using Jovyne"
+        description: "Thanks for using Jovialic"
       });
     }
   };

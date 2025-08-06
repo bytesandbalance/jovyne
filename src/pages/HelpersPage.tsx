@@ -14,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, MapPin, Star, Clock, DollarSign, Filter, Users, Calendar, Plus } from 'lucide-react';
 import { HelperProfileModal } from '@/components/helpers/HelperProfileModal';
-import { RequestDialog } from '@/components/requests/RequestDialog';
 
 // Component to handle role-based apply button
 function ApplyButton({ requestId }: { requestId: string }) {
