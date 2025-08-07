@@ -10,6 +10,7 @@ import { useAuthContext } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
 import { cityMatches } from '@/lib/cityMapping';
+import { RequestDialog } from '@/components/requests/RequestDialog';
 
 interface Planner {
   id: string;

@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Star, MapPin, Clock, DollarSign, Mail, MessageSquare, Building, Globe, Instagram } from 'lucide-react';
+import { Star, MapPin, Clock, DollarSign, Mail, MessageSquare, Building, Globe, Instagram, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { RequestDialog } from '@/components/requests/RequestDialog';
 
 interface PlannerProfileModalProps {
   planner: any;
@@ -31,6 +32,7 @@ export function PlannerProfileModal({
     message: ''
   });
   const [sending, setSending] = useState(false);
+  const [showRequestDialog, setShowRequestDialog] = useState(false);
 
   const handleSendMessage = async () => {
     if (!contactForm.subject.trim() || !contactForm.message.trim()) {
@@ -218,14 +220,23 @@ export function PlannerProfileModal({
           {/* Contact Section */}
           <div className="space-y-4">
             {!showContactForm ? (
-              <Button 
-                onClick={() => setShowContactForm(true)}
-                className="w-full"
-                size="lg"
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Contact Planner
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  onClick={() => setShowContactForm(true)}
+                  variant="outline"
+                  size="lg"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Contact Planner
+                </Button>
+                <Button 
+                  onClick={() => setShowRequestDialog(true)}
+                  size="lg"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Send Request
+                </Button>
+              </div>
             ) : (
               <Card>
                 <CardContent className="p-4 space-y-4">
@@ -275,6 +286,15 @@ export function PlannerProfileModal({
           </div>
         </div>
       </DialogContent>
+      
+      <RequestDialog
+        isOpen={showRequestDialog}
+        onClose={() => setShowRequestDialog(false)}
+        recipientId={planner.user_id}
+        recipientType="planner"
+        recipientName={planner.full_name || planner.business_name}
+        senderType="client"
+      />
     </Dialog>
   );
 }

@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Star, MapPin, Clock, DollarSign, Mail, MessageSquare } from 'lucide-react';
+import { Star, MapPin, Clock, DollarSign, Mail, MessageSquare, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { RequestDialog } from '@/components/requests/RequestDialog';
 
 interface HelperProfileModalProps {
   helper: any;
@@ -31,6 +32,7 @@ export function HelperProfileModal({
     message: ''
   });
   const [sending, setSending] = useState(false);
+  const [showRequestDialog, setShowRequestDialog] = useState(false);
 
   const handleSendMessage = async () => {
     if (!contactForm.subject.trim() || !contactForm.message.trim()) {
@@ -172,14 +174,23 @@ export function HelperProfileModal({
           {/* Contact Section */}
           <div className="space-y-4">
             {!showContactForm ? (
-              <Button 
-                onClick={() => setShowContactForm(true)}
-                className="w-full"
-                size="lg"
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Contact Helper
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  onClick={() => setShowContactForm(true)}
+                  variant="outline"
+                  size="lg"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Contact Helper
+                </Button>
+                <Button 
+                  onClick={() => setShowRequestDialog(true)}
+                  size="lg"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Send Request
+                </Button>
+              </div>
             ) : (
               <Card>
                 <CardContent className="p-4 space-y-4">
@@ -229,6 +240,15 @@ export function HelperProfileModal({
           </div>
         </div>
       </DialogContent>
+      
+      <RequestDialog
+        isOpen={showRequestDialog}
+        onClose={() => setShowRequestDialog(false)}
+        recipientId={helper.user_id}
+        recipientType="helper"
+        recipientName={helper.profiles?.full_name || 'Helper'}
+        senderType="client"
+      />
     </Dialog>
   );
 }
