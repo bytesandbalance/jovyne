@@ -173,60 +173,116 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{applications.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {applications.filter(app => app.status === 'approved').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {applications.filter(app => app.status === 'pending').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{helperData?.average_rating?.toFixed(1) || '0.0'}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="applications" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="applications">My Applications</TabsTrigger>
-          <TabsTrigger value="available">Available Jobs</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full max-w-full gap-2 md:max-w-3xl mx-auto md:grid-cols-4 lg:grid-cols-8">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="clients">Clients</TabsTrigger>
+          <TabsTrigger value="applications">Applications</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="applications" className="space-y-4">
+        <TabsContent value="overview" className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{applications.length}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {applications.filter(app => app.status === 'approved').length}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {applications.filter(app => app.status === 'pending').length}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+                <Star className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{helperData?.average_rating?.toFixed(1) || '0.0'}</div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="events" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Events</CardTitle>
+              <CardDescription>Approved events and collaborations will show here.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground text-sm">Coming soon.</div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="profile" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile</CardTitle>
+              <CardDescription>Manage your helper profile and availability.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground text-sm">Coming soon.</div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="tasks" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tasks</CardTitle>
+              <CardDescription>Track assigned tasks for confirmed events.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground text-sm">Coming soon.</div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="clients" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Clients</CardTitle>
+              <CardDescription>View clients you're collaborating with via events.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground text-sm">Coming soon.</div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="applications" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>My Applications</CardTitle>
@@ -281,9 +337,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
               )}
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="available" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Available Jobs</CardTitle>
@@ -340,6 +394,30 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
                   <p className="text-muted-foreground">No available jobs at the moment</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="calendar" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Calendar</CardTitle>
+              <CardDescription>Upcoming events and key dates.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground text-sm">Coming soon.</div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="invoicing" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Invoicing</CardTitle>
+              <CardDescription>Manage invoices and track earnings.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground text-sm">Coming soon.</div>
             </CardContent>
           </Card>
         </TabsContent>

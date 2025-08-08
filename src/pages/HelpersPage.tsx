@@ -54,7 +54,7 @@ function ApplyButton({ requestId }: { requestId: string }) {
 
     const { data: helperData } = await supabase
       .from('helpers')
-      .select('id')
+      .select('id, hourly_rate')
       .eq('user_id', user.id)
       .single();
 
@@ -68,13 +68,13 @@ function ApplyButton({ requestId }: { requestId: string }) {
     }
 
     try {
-      // Check if already applied
+      // Check if already applied (use maybeSingle to avoid error on 0 rows)
       const { data: existingApplication } = await supabase
         .from('helper_applications')
         .select('id')
         .eq('helper_id', helperData.id)
         .eq('helper_request_id', requestId)
-        .single();
+        .maybeSingle();
 
       if (existingApplication) {
         toast({
@@ -93,7 +93,7 @@ function ApplyButton({ requestId }: { requestId: string }) {
           helper_request_id: requestId,
           status: 'pending',
           message: 'I would like to help with your event!',
-          hourly_rate: 25
+          hourly_rate: helperData.hourly_rate || 25
         });
 
       if (error) throw error;
@@ -410,7 +410,7 @@ export default function HelpersPage() {
 
     const { data: helperData } = await supabase
       .from('helpers')
-      .select('id')
+      .select('id, hourly_rate')
       .eq('user_id', user.id)
       .single();
 
@@ -424,13 +424,13 @@ export default function HelpersPage() {
     }
 
     try {
-      // Check if already applied
+      // Check if already applied (use maybeSingle to avoid error on 0 rows)
       const { data: existingApplication } = await supabase
         .from('helper_applications')
         .select('id')
         .eq('helper_id', helperData.id)
         .eq('helper_request_id', requestId)
-        .single();
+        .maybeSingle();
 
       if (existingApplication) {
         toast({
@@ -449,7 +449,7 @@ export default function HelpersPage() {
           helper_request_id: requestId,
           status: 'pending',
           message: 'I would like to help with your event!',
-          hourly_rate: 25 // Default rate, could be made dynamic
+          hourly_rate: helperData.hourly_rate || 25 // Default rate, could be made dynamic
         });
 
       if (error) throw error;
