@@ -264,6 +264,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "helper_applications_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "helpers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "helper_applications_helper_request_id_fkey"
             columns: ["helper_request_id"]
             isOneToOne: false
