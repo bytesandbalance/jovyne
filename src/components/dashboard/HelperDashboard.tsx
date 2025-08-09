@@ -21,6 +21,7 @@ interface HelperApplication {
     end_time: string;
     location_city: string;
     hourly_rate: number;
+    total_hours: number;
     status: string;
   } | null;
 }
@@ -72,6 +73,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
             end_time,
             location_city,
             hourly_rate,
+            total_hours,
             status
           )
         `)
@@ -238,10 +240,51 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
           <Card>
             <CardHeader>
               <CardTitle>Events</CardTitle>
-              <CardDescription>Approved events and collaborations will show here.</CardDescription>
+              <CardDescription>Approved events and collaborations</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground text-sm">Coming soon.</div>
+              {applications.filter(a => a.status === 'approved').length > 0 ? (
+                <div className="space-y-4">
+                  {applications
+                    .filter(a => a.status === 'approved')
+                    .map((a) => (
+                      <div key={a.id} className="p-4 border rounded-lg">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-semibold">{a.helper_requests?.title}</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {a.helper_requests?.description}
+                            </p>
+                            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                <span>{a.helper_requests?.event_date && new Date(a.helper_requests.event_date).toLocaleDateString()}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                <span>{a.helper_requests?.start_time} - {a.helper_requests?.end_time}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                <span>{a.helper_requests?.location_city}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="w-4 h-4" />
+                                <span>${a.hourly_rate}/hr · {(a.helper_requests?.total_hours || 0)}h</span>
+                              </div>
+                            </div>
+                          </div>
+                          <Badge variant="default" className="capitalize">Approved</Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No approved events yet</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -402,10 +445,33 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
           <Card>
             <CardHeader>
               <CardTitle>Calendar</CardTitle>
-              <CardDescription>Upcoming events and key dates.</CardDescription>
+              <CardDescription>Upcoming approved jobs</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground text-sm">Coming soon.</div>
+              {applications.filter(a => a.status === 'approved' && a.helper_requests?.event_date).length > 0 ? (
+                <div className="space-y-3">
+                  {applications
+                    .filter(a => a.status === 'approved' && a.helper_requests?.event_date)
+                    .sort((a, b) => new Date(a.helper_requests!.event_date).getTime() - new Date(b.helper_requests!.event_date).getTime())
+                    .map(a => (
+                      <div key={a.id} className="flex items-center justify-between p-3 border rounded">
+                        <div className="flex items-center gap-3">
+                          <Calendar className="w-4 h-4" />
+                          <span className="font-medium">{new Date(a.helper_requests!.event_date).toLocaleDateString()}</span>
+                          <span className="text-muted-foreground text-sm">{a.helper_requests?.title}</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {a.helper_requests?.start_time} - {a.helper_requests?.end_time} · {a.helper_requests?.location_city}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No upcoming approved jobs</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -414,10 +480,40 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
           <Card>
             <CardHeader>
               <CardTitle>Invoicing</CardTitle>
-              <CardDescription>Manage invoices and track earnings.</CardDescription>
+              <CardDescription>Approved jobs and estimated earnings</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground text-sm">Coming soon.</div>
+              {applications.filter(a => a.status === 'approved').length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border rounded bg-muted/40">
+                    <span className="font-medium">Total Estimated Earnings</span>
+                    <span className="text-lg font-bold">
+                      ${applications.filter(a => a.status === 'approved').reduce((sum, a) => sum + (a.hourly_rate || 0) * (a.helper_requests?.total_hours || 0), 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {applications.filter(a => a.status === 'approved').map(a => (
+                      <div key={a.id} className="flex items-center justify-between p-3 border rounded">
+                        <div>
+                          <div className="font-medium">{a.helper_requests?.title}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {a.helper_requests?.location_city} · {a.helper_requests?.event_date && new Date(a.helper_requests.event_date).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">${((a.hourly_rate || 0) * (a.helper_requests?.total_hours || 0)).toFixed(2)}</div>
+                          <div className="text-sm text-muted-foreground">{a.helper_requests?.total_hours || 0}h × ${a.hourly_rate}/h</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No approved jobs yet</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
