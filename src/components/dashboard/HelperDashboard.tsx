@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import HelperTasks from '@/components/helpers/HelperTasks';
 
 interface HelperApplication {
   id: string;
@@ -253,7 +254,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="clients">Clients</TabsTrigger>
+          
           <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
@@ -473,28 +474,9 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
         </TabsContent>
 
         <TabsContent value="tasks" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tasks</CardTitle>
-              <CardDescription>Track assigned tasks for confirmed events.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-muted-foreground text-sm">Coming soon.</div>
-            </CardContent>
-          </Card>
+          <HelperTasks helperId={helperData.id} />
         </TabsContent>
 
-        <TabsContent value="clients" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Clients</CardTitle>
-              <CardDescription>View clients you're collaborating with via events.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-muted-foreground text-sm">Coming soon.</div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">
           <Card>

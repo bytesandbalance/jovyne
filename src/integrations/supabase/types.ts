@@ -355,6 +355,42 @@ export type Database = {
           },
         ]
       }
+      helper_tasks: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_date: string | null
+          helper_id: string
+          id: string
+          is_completed: boolean
+          priority: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          helper_id: string
+          id?: string
+          is_completed?: boolean
+          priority?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          helper_id?: string
+          id?: string
+          is_completed?: boolean
+          priority?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       helpers: {
         Row: {
           availability_cities: string[] | null
