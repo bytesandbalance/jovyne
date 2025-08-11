@@ -286,6 +286,84 @@ export type Database = {
           },
         ]
       }
+      helper_invoices: {
+        Row: {
+          amount: number | null
+          completed_at: string | null
+          created_at: string
+          event_date: string | null
+          event_id: string | null
+          helper_application_id: string | null
+          helper_id: string
+          helper_name: string | null
+          helper_request_id: string | null
+          hourly_rate: number | null
+          id: string
+          job_title: string
+          line_items: Json
+          notes: string | null
+          paid_at: string | null
+          planner_contact_email: string | null
+          planner_contact_phone: string | null
+          planner_id: string
+          planner_name: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["helper_invoice_status"]
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          completed_at?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_id?: string | null
+          helper_application_id?: string | null
+          helper_id: string
+          helper_name?: string | null
+          helper_request_id?: string | null
+          hourly_rate?: number | null
+          id?: string
+          job_title: string
+          line_items?: Json
+          notes?: string | null
+          paid_at?: string | null
+          planner_contact_email?: string | null
+          planner_contact_phone?: string | null
+          planner_id: string
+          planner_name?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["helper_invoice_status"]
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          completed_at?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_id?: string | null
+          helper_application_id?: string | null
+          helper_id?: string
+          helper_name?: string | null
+          helper_request_id?: string | null
+          hourly_rate?: number | null
+          id?: string
+          job_title?: string
+          line_items?: Json
+          notes?: string | null
+          paid_at?: string | null
+          planner_contact_email?: string | null
+          planner_contact_phone?: string | null
+          planner_id?: string
+          planner_name?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["helper_invoice_status"]
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       helper_requests: {
         Row: {
           created_at: string
@@ -721,6 +799,12 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      helper_invoice_status:
+        | "draft"
+        | "sent_to_planner"
+        | "awaiting_payment"
+        | "paid_planner"
+        | "completed"
       helper_request_status: "open" | "in_review" | "filled" | "cancelled"
       user_role: "client" | "planner" | "helper"
     }
@@ -857,6 +941,13 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+      ],
+      helper_invoice_status: [
+        "draft",
+        "sent_to_planner",
+        "awaiting_payment",
+        "paid_planner",
+        "completed",
       ],
       helper_request_status: ["open", "in_review", "filled", "cancelled"],
       user_role: ["client", "planner", "helper"],
