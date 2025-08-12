@@ -789,7 +789,14 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_public_profiles: {
+        Args: { user_ids?: string[] }
+        Returns: {
+          user_id: string
+          full_name: string
+          avatar_url: string
+        }[]
+      }
     }
     Enums: {
       application_status: "pending" | "approved" | "rejected"

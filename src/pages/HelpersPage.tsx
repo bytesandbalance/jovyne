@@ -206,9 +206,7 @@ export default function HelpersPage() {
         // Fetch profiles separately to avoid join issues
         const helperIds = helpersData.map(h => h.user_id);
         const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('user_id, full_name, avatar_url')
-          .in('user_id', helperIds);
+          .rpc('get_public_profiles', { user_ids: helperIds });
 
         // Combine helpers with their profiles
         const helpersWithProfiles = helpersData.map(helper => ({

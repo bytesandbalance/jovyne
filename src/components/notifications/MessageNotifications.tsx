@@ -79,9 +79,7 @@ export function MessageNotifications() {
       if (messagesData && messagesData.length > 0) {
         const senderIds = [...new Set(messagesData.map(m => m.sender_id))];
         const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('user_id, full_name, avatar_url')
-          .in('user_id', senderIds);
+          .rpc('get_public_profiles', { user_ids: senderIds });
 
         // Combine messages with profiles
         const messagesWithProfiles = messagesData.map(message => ({

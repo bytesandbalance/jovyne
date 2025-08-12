@@ -70,9 +70,7 @@ export default function HomePage() {
         // Fetch profiles for planners
         const plannerUserIds = plannersData.map(p => p.user_id);
         const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('user_id, full_name, avatar_url')
-          .in('user_id', plannerUserIds);
+          .rpc('get_public_profiles', { user_ids: plannerUserIds });
 
         // Combine planners with their profiles
         const plannersWithProfiles = plannersData.map(planner => ({

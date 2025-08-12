@@ -90,9 +90,7 @@ export default function HelperApplications({ plannerData }: HelperApplicationsPr
       let profilesMap: Record<string, any> = {};
       if (userIds.length > 0) {
         const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('user_id, full_name, avatar_url, email, phone')
-          .in('user_id', Array.from(new Set(userIds)));
+          .rpc('get_public_profiles', { user_ids: Array.from(new Set(userIds)) });
         if (profilesData) {
           profilesMap = profilesData.reduce((acc: Record<string, any>, p: any) => {
             acc[p.user_id] = p;
