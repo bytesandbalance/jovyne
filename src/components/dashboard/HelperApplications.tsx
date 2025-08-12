@@ -62,17 +62,12 @@ export default function HelperApplications({ plannerData }: HelperApplicationsPr
           *,
           helpers!inner (
             id,
+            user_id,
             bio,
             skills,
             experience_years,
             average_rating,
-            total_jobs,
-            profiles!inner (
-              full_name,
-              avatar_url,
-              email,
-              phone
-            )
+            total_jobs
           ),
           helper_requests!inner (
             title,
@@ -86,7 +81,40 @@ export default function HelperApplications({ plannerData }: HelperApplicationsPr
         .order('applied_at', { ascending: false });
 
       if (error) throw error;
-      setApplications((data as any) || []);
+
+      // Fetch helper profiles separately (no FK between helpers and profiles in DB)
+      const userIds = (data || [])
+        .map((a: any) => a.helpers?.user_id)
+        .filter((id: string | undefined): id is string => !!id);
+
+      let profilesMap: Record<string, any> = {};
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url, email, phone')
+          .in('user_id', Array.from(new Set(userIds)));
+        if (profilesData) {
+          profilesMap = profilesData.reduce((acc: Record<string, any>, p: any) => {
+            acc[p.user_id] = p;
+            return acc;
+          }, {});
+        }
+      }
+
+      const enriched = (data || []).map((a: any) => (
+        a.helpers?.user_id
+          ? {
+              ...a,
+              helpers: {
+                ...a.helpers,
+                profiles: profilesMap[a.helpers.user_id] || null,
+              },
+            }
+          : a
+      ));
+
+      setApplications(enriched as any);
+
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast({
