@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import HelperTasks from '@/components/helpers/HelperTasks';
+import HelperInvoices from '@/components/helpers/HelperInvoices';
 
 interface HelperApplication {
   id: string;
@@ -669,6 +670,9 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
               )}
             </CardContent>
           </Card>
+
+          {/* Actual invoices and actions */}
+          <HelperInvoices helperId={helperData.id} />
         </TabsContent>
       </Tabs>
     </div>

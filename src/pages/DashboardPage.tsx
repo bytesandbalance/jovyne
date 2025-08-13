@@ -15,8 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import EventTaskTracker from '@/components/dashboard/EventTaskTracker';
 import ClientContactList from '@/components/dashboard/ClientContactList';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
-import HelperApplications from '@/components/dashboard/HelperApplications';
+import PlannerPendingPayments from '@/components/dashboard/PlannerPendingPayments';
 import HelperDashboard from '@/components/dashboard/HelperDashboard';
+import HelperApplications from '@/components/dashboard/HelperApplications';
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
@@ -582,7 +583,10 @@ export default function DashboardPage() {
 
               {/* Invoicing Tab */}
               <TabsContent value="invoicing" className="space-y-6">
-                <InvoicingSection plannerProfile={plannerProfile} />
+<div className="space-y-6">
+  <PlannerPendingPayments plannerProfile={plannerProfile} />
+  <InvoicingSection plannerProfile={plannerProfile} />
+</div>
               </TabsContent>
 
               {/* Applications Tab */}
