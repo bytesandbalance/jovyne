@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -792,9 +792,9 @@ export type Database = {
       get_public_profiles: {
         Args: { user_ids?: string[] }
         Returns: {
-          user_id: string
-          full_name: string
           avatar_url: string
+          full_name: string
+          user_id: string
         }[]
       }
     }
