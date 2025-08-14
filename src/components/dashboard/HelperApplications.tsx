@@ -148,7 +148,7 @@ export default function HelperApplications({ plannerData }: HelperApplicationsPr
       console.error('Error updating application:', error);
       toast({
         title: "Error",
-        description: `Failed to ${status} application`,
+        description: (error as any)?.message ? `Failed to ${status} application: ${(error as any).message}` : `Failed to ${status} application`,
         variant: "destructive"
       });
     }
