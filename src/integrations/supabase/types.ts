@@ -241,6 +241,7 @@ export type Database = {
           message: string | null
           reviewed_at: string | null
           status: Database["public"]["Enums"]["application_status"] | null
+          updated_at: string
         }
         Insert: {
           applied_at?: string
@@ -251,6 +252,7 @@ export type Database = {
           message?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
+          updated_at?: string
         }
         Update: {
           applied_at?: string
@@ -261,6 +263,7 @@ export type Database = {
           message?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
+          updated_at?: string
         }
         Relationships: [
           {
