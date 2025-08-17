@@ -147,11 +147,11 @@ export function MessageNotifications() {
       markAsRead(message.id);
     }
 
-    // Navigate based on message subject/content
+    // Navigate to specific dashboard tab based on message subject
     if (message.subject.includes('Application')) {
-      navigate('/dashboard');
-    } else if (message.subject.includes('Invoice')) {
-      navigate('/dashboard');
+      navigate('/dashboard?tab=applications');
+    } else if (message.subject.includes('Invoice') || message.subject.includes('Payment')) {
+      navigate('/dashboard?tab=invoicing');
     } else {
       // Default navigation
       navigate('/dashboard');

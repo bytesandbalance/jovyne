@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,8 @@ import HelperApplications from '@/components/dashboard/HelperApplications';
 export default function DashboardPage() {
   const { user } = useAuthContext();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'overview';
   const [profile, setProfile] = useState<any>(null);
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
   const [helperProfile, setHelperProfile] = useState<any>(null);
@@ -270,7 +273,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList className={`grid w-full ${isPlannerView ? 'max-w-5xl grid-cols-8' : isHelperView ? 'max-w-md grid-cols-2' : 'max-w-md grid-cols-3'}`}>
             {!isHelperView && <TabsTrigger value="overview">Overview</TabsTrigger>}
             {!isHelperView && <TabsTrigger value="events">Events</TabsTrigger>}
