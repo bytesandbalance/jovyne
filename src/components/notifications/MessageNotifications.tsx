@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -25,6 +26,7 @@ interface Message {
 
 export function MessageNotifications() {
   const { user } = useAuthContext();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -139,6 +141,23 @@ export function MessageNotifications() {
     }
   };
 
+  const handleNotificationClick = (message: Message) => {
+    // Mark as read
+    if (!message.is_read) {
+      markAsRead(message.id);
+    }
+
+    // Navigate based on message subject/content
+    if (message.subject.includes('Application')) {
+      navigate('/dashboard');
+    } else if (message.subject.includes('Invoice')) {
+      navigate('/dashboard');
+    } else {
+      // Default navigation
+      navigate('/dashboard');
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -193,28 +212,33 @@ export function MessageNotifications() {
                       }`}
                       onClick={() => !message.is_read && markAsRead(message.id)}
                     >
-                      <div className="flex items-start gap-3">
-                        <Mail className="w-4 h-4 mt-1 text-muted-foreground" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium truncate">
-                              {message.profiles?.full_name || 'Unknown User'}
-                            </p>
-                            {!message.is_read && (
-                              <div className="w-2 h-2 bg-primary rounded-full" />
-                            )}
-                          </div>
-                          <p className="text-sm font-medium text-muted-foreground truncate">
-                            {message.subject}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {message.message}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(message.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
+                       <div className="flex items-start gap-3">
+                         <Mail className="w-4 h-4 mt-1 text-muted-foreground" />
+                         <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-2">
+                             <p className="text-sm font-medium truncate">
+                               {message.profiles?.full_name || 'Unknown User'}
+                             </p>
+                             {!message.is_read && (
+                               <div className="w-2 h-2 bg-primary rounded-full" />
+                             )}
+                           </div>
+                           <button 
+                             className="text-left w-full hover:bg-muted/50 rounded p-1 -m-1"
+                             onClick={() => handleNotificationClick(message)}
+                           >
+                             <p className="text-sm font-medium text-primary truncate hover:underline">
+                               {message.subject}
+                             </p>
+                             <p className="text-xs text-muted-foreground truncate">
+                               {message.message}
+                             </p>
+                             <p className="text-xs text-muted-foreground mt-1">
+                               {new Date(message.created_at).toLocaleDateString()}
+                             </p>
+                           </button>
+                         </div>
+                       </div>
                     </div>
                   ))}
                 </div>
