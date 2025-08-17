@@ -141,15 +141,26 @@ export function MessageNotifications() {
     }
   };
 
-  const handleNotificationClick = (message: Message) => {
+  const handleNotificationClick = async (message: Message) => {
     // Mark as read
     if (!message.is_read) {
       markAsRead(message.id);
     }
 
-    // Navigate to specific dashboard tab based on message subject
+    // Get user profile to determine role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('user_id', user?.id)
+      .single();
+
+    // Navigate to specific dashboard tab based on message subject and user role
     if (message.subject.includes('Application')) {
-      navigate('/dashboard?tab=applications');
+      if (profile?.user_role === 'helper') {
+        navigate('/dashboard?tab=tasks'); // Helpers see application status in tasks
+      } else {
+        navigate('/dashboard?tab=applications'); // Planners see applications tab
+      }
     } else if (message.subject.includes('Invoice') || message.subject.includes('Payment')) {
       navigate('/dashboard?tab=invoicing');
     } else {
