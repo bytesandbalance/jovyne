@@ -157,7 +157,13 @@ export function MessageNotifications() {
     // Navigate to specific dashboard tab based on message subject and user role
     if (message.subject.includes('Application')) {
       navigate('/dashboard?tab=applications'); // Both helpers and planners have applications tab
-    } else if (message.subject.includes('Invoice') || message.subject.includes('Payment') || message.subject.includes('paid') || message.subject.includes('Paid')) {
+    } else if (message.subject.toLowerCase().includes('invoice') || 
+               message.subject.toLowerCase().includes('payment') || 
+               message.subject.toLowerCase().includes('paid') || 
+               message.subject.toLowerCase().includes('billing') || 
+               message.subject.toLowerCase().includes('amount') || 
+               message.subject.toLowerCase().includes('due') || 
+               message.subject.toLowerCase().includes('bill')) {
       navigate('/dashboard?tab=invoicing');
     } else {
       // Default navigation
