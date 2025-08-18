@@ -156,11 +156,7 @@ export function MessageNotifications() {
 
     // Navigate to specific dashboard tab based on message subject and user role
     if (message.subject.includes('Application')) {
-      if (profile?.user_role === 'helper') {
-        navigate('/dashboard?tab=tasks'); // Helpers see application status in tasks
-      } else {
-        navigate('/dashboard?tab=applications'); // Planners see applications tab
-      }
+      navigate('/dashboard?tab=applications'); // Both helpers and planners have applications tab
     } else if (message.subject.includes('Invoice') || message.subject.includes('Payment')) {
       navigate('/dashboard?tab=invoicing');
     } else {
