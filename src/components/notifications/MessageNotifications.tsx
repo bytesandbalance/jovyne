@@ -224,36 +224,33 @@ export function MessageNotifications() {
                       className={`p-3 hover:bg-muted cursor-pointer border-l-2 ${
                         message.is_read ? 'border-l-transparent' : 'border-l-primary bg-primary/5'
                       }`}
-                      onClick={() => !message.is_read && markAsRead(message.id)}
+                      onClick={() => handleNotificationClick(message)}
                     >
                        <div className="flex items-start gap-3">
-                         <Mail className="w-4 h-4 mt-1 text-muted-foreground" />
-                         <div className="flex-1 min-w-0">
-                           <div className="flex items-center gap-2">
-                             <p className="text-sm font-medium truncate">
-                               {message.profiles?.full_name || 'Unknown User'}
-                             </p>
-                             {!message.is_read && (
-                               <div className="w-2 h-2 bg-primary rounded-full" />
-                             )}
-                           </div>
-                           <button 
-                             className="text-left w-full hover:bg-muted/50 rounded p-1 -m-1"
-                             onClick={() => handleNotificationClick(message)}
-                           >
-                             <p className="text-sm font-medium text-primary truncate hover:underline">
-                               {message.subject}
-                             </p>
-                             <p className="text-xs text-muted-foreground truncate">
-                               {message.message}
-                             </p>
-                             <p className="text-xs text-muted-foreground mt-1">
-                               {new Date(message.created_at).toLocaleDateString()}
-                             </p>
-                           </button>
-                         </div>
-                       </div>
-                    </div>
+                          <Mail className="w-4 h-4 mt-1 text-muted-foreground" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium truncate">
+                                {message.profiles?.full_name || 'Unknown User'}
+                              </p>
+                              {!message.is_read && (
+                                <div className="w-2 h-2 bg-primary rounded-full" />
+                              )}
+                            </div>
+                            <div className="text-left w-full">
+                              <p className="text-sm font-medium text-primary truncate hover:underline">
+                                {message.subject}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {message.message}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(message.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                     </div>
                   ))}
                 </div>
               ) : (
