@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +56,8 @@ interface HelperDashboardProps {
 
 export default function HelperDashboard({ user, helperData }: HelperDashboardProps) {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'overview';
   const [applications, setApplications] = useState<HelperApplication[]>([]);
   const [availableJobs, setAvailableJobs] = useState<HelperJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -249,7 +252,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="grid w-full max-w-full gap-2 md:max-w-3xl mx-auto md:grid-cols-4 lg:grid-cols-8">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
