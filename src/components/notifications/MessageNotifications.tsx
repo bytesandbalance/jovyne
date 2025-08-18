@@ -157,7 +157,7 @@ export function MessageNotifications() {
     // Navigate to specific dashboard tab based on message subject and user role
     if (message.subject.includes('Application')) {
       navigate('/dashboard?tab=applications'); // Both helpers and planners have applications tab
-    } else if (message.subject.includes('Invoice') || message.subject.includes('Payment')) {
+    } else if (message.subject.includes('Invoice') || message.subject.includes('Payment') || message.subject.includes('paid') || message.subject.includes('Paid')) {
       navigate('/dashboard?tab=invoicing');
     } else {
       // Default navigation
