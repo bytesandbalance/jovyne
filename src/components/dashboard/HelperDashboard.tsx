@@ -326,13 +326,13 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
                     .filter(a => a.status === 'approved')
                     .map((a) => (
                       <div key={a.id} className="p-4 border rounded-lg">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
                             <h4 className="font-semibold">{a.helper_requests?.title}</h4>
                             <p className="text-sm text-muted-foreground mt-1">
                               {a.helper_requests?.description}
                             </p>
-                            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-3 text-sm text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 <Calendar className="w-4 h-4" />
                                 <span>{a.helper_requests?.event_date && new Date(a.helper_requests.event_date).toLocaleDateString()}</span>
@@ -351,7 +351,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
                               </div>
                             </div>
                           </div>
-                          <Badge variant="default" className="capitalize">Approved</Badge>
+                          <Badge variant="default" className="capitalize w-fit">Approved</Badge>
                         </div>
                       </div>
                     ))}
@@ -493,13 +493,13 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
                 <div className="space-y-4">
                   {applications.map((application) => (
                     <div key={application.id} className="p-4 border rounded-lg">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{application.helper_requests?.title}</h4>
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold">{application.helper_requests?.title}</h4>
                           <p className="text-sm text-muted-foreground mt-1">
                             {application.helper_requests?.description}
                           </p>
-                          <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-3 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
                               <span>{application.helper_requests?.event_date && new Date(application.helper_requests.event_date).toLocaleDateString()}</span>
@@ -521,10 +521,10 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
                             Applied: {new Date(application.applied_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge variant={getStatusColor(application.status)}>
-                          {getStatusIcon(application.status)}
-                          <span className="ml-1 capitalize">{application.status}</span>
-                        </Badge>
+                          <Badge variant={getStatusColor(application.status)} className="flex items-center gap-1 w-fit">
+                            {getStatusIcon(application.status)}
+                            <span className="capitalize">{application.status}</span>
+                          </Badge>
                       </div>
                     </div>
                   ))}
