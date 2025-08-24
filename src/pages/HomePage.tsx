@@ -123,7 +123,7 @@ export default function HomePage() {
 
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto mb-8">
-              <div className="flex gap-4 p-2 bg-white/95 backdrop-blur-sm rounded-2xl shadow-party">
+              <div className="flex flex-col sm:flex-row gap-4 p-2 bg-white/95 backdrop-blur-sm rounded-2xl shadow-party">
                 <div className="flex-1 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-muted-foreground ml-4" />
                    <Input
@@ -133,8 +133,8 @@ export default function HomePage() {
                     className="border-0 bg-transparent focus-visible:ring-0 text-lg text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
-                <Link to={`/planners${searchLocation ? `?location=${encodeURIComponent(searchLocation)}` : ''}`}>
-                  <Button size="lg" className="rounded-xl hover-bounce">
+                <Link to={`/planners${searchLocation ? `?location=${encodeURIComponent(searchLocation)}` : ''}`} className="w-full sm:w-auto">
+                  <Button size="lg" className="rounded-xl hover-bounce w-full sm:w-auto">
                     <Search className="w-5 h-5 mr-2" />
                     Find Planners
                   </Button>

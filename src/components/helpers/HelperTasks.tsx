@@ -245,24 +245,26 @@ export default function HelperTasks({ helperId }: HelperTasksProps) {
           ) : (
             <div className="space-y-3">
               {tasks.map(task => (
-                <div key={task.id} className="flex items-start gap-3 p-4 border rounded-lg">
-                  <Checkbox checked={task.is_completed} onCheckedChange={(c) => toggleComplete(task, !!c)} />
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`font-medium ${task.is_completed ? 'line-through text-muted-foreground' : ''}`}>{task.title}</span>
-                      <Badge variant={getPriorityVariant(task.priority)} className="capitalize">{task.priority}</Badge>
-                      {task.due_date && !task.is_completed && new Date(task.due_date) < new Date() && (
-                        <Badge variant="destructive">Overdue</Badge>
+                <div key={task.id} className="flex flex-col sm:flex-row sm:items-start gap-3 p-4 border rounded-lg">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <Checkbox checked={task.is_completed} onCheckedChange={(c) => toggleComplete(task, !!c)} className="flex-shrink-0 mt-1" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`font-medium break-words ${task.is_completed ? 'line-through text-muted-foreground' : ''}`}>{task.title}</span>
+                        <Badge variant={getPriorityVariant(task.priority)} className="capitalize">{task.priority}</Badge>
+                        {task.due_date && !task.is_completed && new Date(task.due_date) < new Date() && (
+                          <Badge variant="destructive">Overdue</Badge>
+                        )}
+                      </div>
+                      {task.description && (
+                        <p className="text-sm text-muted-foreground mt-1 break-words">{task.description.length > 100 ? `${task.description.substring(0, 100)}...` : task.description}</p>
+                      )}
+                      {task.due_date && (
+                        <p className="text-xs text-muted-foreground mt-1">Due: {new Date(task.due_date).toLocaleDateString()}</p>
                       )}
                     </div>
-                    {task.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                    )}
-                    {task.due_date && (
-                      <p className="text-xs text-muted-foreground mt-1">Due: {new Date(task.due_date).toLocaleDateString()}</p>
-                    )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-end sm:justify-start flex-shrink-0">
                     <Button variant="outline" size="icon" onClick={() => openEdit(task)} aria-label="Edit task">
                       <Pencil className="w-4 h-4" />
                     </Button>

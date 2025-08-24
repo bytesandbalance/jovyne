@@ -356,35 +356,39 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
           ) : (
             <div className="space-y-4">
               {invoices.map((invoice) => (
-                <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <div key={invoice.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-4">
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                       <FileText className="w-5 h-5 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold">{invoice.invoice_number}</h3>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold truncate">{invoice.invoice_number}</h3>
+                      <p className="text-sm text-muted-foreground truncate">
                         {getClientName(invoice.client_id)}
                       </p>
                       {getEventTitle(invoice.event_id) && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground truncate">
                           Event: {getEventTitle(invoice.event_id)}
                         </p>
                       )}
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground break-words">
                         Issued: {new Date(invoice.issued_date).toLocaleDateString()}
-                        {invoice.due_date && ` • Due: ${new Date(invoice.due_date).toLocaleDateString()}`}
+                        {invoice.due_date && (
+                          <span className="block sm:inline">
+                            <span className="hidden sm:inline"> • </span>Due: {new Date(invoice.due_date).toLocaleDateString()}
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right flex items-center gap-4">
-                    <div>
+                  <div className="flex items-center justify-between sm:justify-end gap-4 flex-shrink-0">
+                    <div className="text-left sm:text-right">
                       <p className="font-semibold text-lg">${invoice.amount.toFixed(2)}</p>
-                      <Badge variant={getStatusColor(invoice.status)}>
+                      <Badge variant={getStatusColor(invoice.status)} className="w-fit">
                         {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                       </Badge>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="flex-shrink-0">
                       <Eye className="w-3 h-3 mr-1" />
                       View
                     </Button>

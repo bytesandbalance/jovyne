@@ -442,14 +442,14 @@ export default function DashboardPage() {
                 <CardDescription>Manage your account information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="break-words">
                     <span className="font-medium">Name:</span>
-                    <p className="text-muted-foreground">{profile?.full_name}</p>
+                    <p className="text-muted-foreground break-words">{profile?.full_name}</p>
                   </div>
-                  <div>
+                  <div className="break-words">
                     <span className="font-medium">Email:</span>
-                    <p className="text-muted-foreground">{profile?.email}</p>
+                    <p className="text-muted-foreground break-words">{profile?.email}</p>
                   </div>
                   <div>
                     <span className="font-medium">Role:</span>
