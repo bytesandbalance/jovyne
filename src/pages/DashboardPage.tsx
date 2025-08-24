@@ -274,7 +274,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isPlannerView ? 'max-w-5xl grid-cols-8' : isHelperView ? 'max-w-md grid-cols-2' : 'max-w-md grid-cols-3'}`}>
+          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
             {!isHelperView && <TabsTrigger value="overview">Overview</TabsTrigger>}
             {!isHelperView && <TabsTrigger value="events">Events</TabsTrigger>}
             <TabsTrigger value="profile">Profile</TabsTrigger>
