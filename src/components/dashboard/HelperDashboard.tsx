@@ -253,7 +253,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
   return (
     <div className="space-y-6">
       <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-full gap-2 md:max-w-3xl mx-auto md:grid-cols-4 lg:grid-cols-8">
+        <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
