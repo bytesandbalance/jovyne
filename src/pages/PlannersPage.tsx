@@ -168,13 +168,6 @@ export default function PlannersPage() {
                       ${planner.base_price || 0}+
                     </Badge>
                   </div>
-                  {planner.is_verified && (
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="secondary" className="bg-white/90 text-primary shadow-sm">
-                        ✓ Verified
-                      </Badge>
-                    </div>
-                  )}
                 </div>
                 
                 <CardHeader>

@@ -106,11 +106,6 @@ export function PlannerProfileModal({
                   <span className="font-medium">{planner.average_rating || 0}</span>
                   <span className="text-muted-foreground">({planner.total_reviews || 0} reviews)</span>
                 </div>
-                {planner.is_verified && (
-                  <Badge variant="secondary" className="text-xs">
-                    ✓ Verified
-                  </Badge>
-                )}
               </div>
               
               <div className="flex items-center gap-1 mt-2 text-muted-foreground">
