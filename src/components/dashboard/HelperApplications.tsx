@@ -203,36 +203,39 @@ export default function HelperApplications({ plannerData }: HelperApplicationsPr
                   className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
                   onClick={() => setSelectedApplication(application)}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-12 h-12">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <Avatar className="w-12 h-12 flex-shrink-0">
                         <AvatarImage src={application.helpers?.profiles?.avatar_url} />
                         <AvatarFallback>
                           {application.helpers?.profiles?.full_name?.charAt(0) || 'H'}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{application.helpers?.profiles?.full_name}</h4>
-                        <p className="text-sm text-muted-foreground">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold truncate">{application.helpers?.profiles?.full_name}</h4>
+                        <p className="text-sm text-muted-foreground truncate">
                           Applied for: {application.helper_requests?.title}
                         </p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Star className="w-4 h-4 text-yellow-500" />
                             <span>{application.helpers?.average_rating?.toFixed(1) || '0.0'}</span>
                           </div>
-                          <span>{application.helpers?.experience_years} years exp</span>
+                          <span className="whitespace-nowrap">{application.helpers?.experience_years} years exp</span>
                           <div className="flex items-center gap-1">
                             <DollarSign className="w-4 h-4" />
-                            <span>${application.hourly_rate}/hr</span>
+                            <span className="whitespace-nowrap">${application.hourly_rate}/hr</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={getStatusColor(application.status)}>
+                    <div className="flex justify-start sm:justify-end">
+                      <Badge 
+                        variant={getStatusColor(application.status)}
+                        className="flex items-center gap-1 text-xs px-2 py-1 flex-shrink-0"
+                      >
                         {getStatusIcon(application.status)}
-                        <span className="ml-1 capitalize">{application.status}</span>
+                        <span className="capitalize">{application.status}</span>
                       </Badge>
                     </div>
                   </div>

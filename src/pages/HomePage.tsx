@@ -127,7 +127,7 @@ export default function HomePage() {
                 <div className="flex-1 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-muted-foreground ml-4" />
                    <Input
-                    placeholder="Enter your city or zip code..."
+                    placeholder="Enter your city..."
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
                     className="border-0 bg-transparent focus-visible:ring-0 text-lg text-foreground placeholder:text-muted-foreground"
