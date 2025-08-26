@@ -292,6 +292,7 @@ export type Database = {
       helper_invoices: {
         Row: {
           amount: number | null
+          client_id: string | null
           completed_at: string | null
           created_at: string
           event_date: string | null
@@ -317,6 +318,7 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
+          client_id?: string | null
           completed_at?: string | null
           created_at?: string
           event_date?: string | null
@@ -342,6 +344,7 @@ export type Database = {
         }
         Update: {
           amount?: number | null
+          client_id?: string | null
           completed_at?: string | null
           created_at?: string
           event_date?: string | null
@@ -365,10 +368,19 @@ export type Database = {
           total_hours?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "helper_invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       helper_requests: {
         Row: {
+          client_id: string | null
           created_at: string
           description: string
           end_time: string | null
@@ -386,6 +398,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_id?: string | null
           created_at?: string
           description: string
           end_time?: string | null
@@ -403,6 +416,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_id?: string | null
           created_at?: string
           description?: string
           end_time?: string | null
@@ -420,6 +434,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "helper_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "helper_requests_event_id_fkey"
             columns: ["event_id"]
@@ -597,6 +618,240 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      planner_applications: {
+        Row: {
+          applied_at: string
+          id: string
+          message: string | null
+          planner_id: string
+          planner_request_id: string
+          proposed_fee: number | null
+          reviewed_at: string | null
+          status: Database["public"]["Enums"]["application_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string
+          id?: string
+          message?: string | null
+          planner_id: string
+          planner_request_id: string
+          proposed_fee?: number | null
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string
+          id?: string
+          message?: string | null
+          planner_id?: string
+          planner_request_id?: string
+          proposed_fee?: number | null
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_applications_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_applications_planner_request_id_fkey"
+            columns: ["planner_request_id"]
+            isOneToOne: false
+            referencedRelation: "planner_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planner_invoices: {
+        Row: {
+          amount: number | null
+          client_contact_email: string | null
+          client_contact_phone: string | null
+          client_id: string
+          client_name: string | null
+          completed_at: string | null
+          created_at: string
+          event_date: string | null
+          event_id: string | null
+          id: string
+          job_title: string
+          line_items: Json
+          notes: string | null
+          paid_at: string | null
+          planner_application_id: string | null
+          planner_id: string
+          planner_name: string | null
+          planner_request_id: string | null
+          proposed_fee: number | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["helper_invoice_status"]
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          client_contact_email?: string | null
+          client_contact_phone?: string | null
+          client_id: string
+          client_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_id?: string | null
+          id?: string
+          job_title: string
+          line_items?: Json
+          notes?: string | null
+          paid_at?: string | null
+          planner_application_id?: string | null
+          planner_id: string
+          planner_name?: string | null
+          planner_request_id?: string | null
+          proposed_fee?: number | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["helper_invoice_status"]
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          client_contact_email?: string | null
+          client_contact_phone?: string | null
+          client_id?: string
+          client_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_id?: string | null
+          id?: string
+          job_title?: string
+          line_items?: Json
+          notes?: string | null
+          paid_at?: string | null
+          planner_application_id?: string | null
+          planner_id?: string
+          planner_name?: string | null
+          planner_request_id?: string | null
+          proposed_fee?: number | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["helper_invoice_status"]
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_invoices_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_invoices_planner_application_id_fkey"
+            columns: ["planner_application_id"]
+            isOneToOne: false
+            referencedRelation: "planner_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_invoices_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_invoices_planner_request_id_fkey"
+            columns: ["planner_request_id"]
+            isOneToOne: false
+            referencedRelation: "planner_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planner_requests: {
+        Row: {
+          budget: number | null
+          client_id: string
+          created_at: string
+          description: string
+          end_time: string | null
+          event_date: string
+          event_id: string | null
+          id: string
+          location_city: string
+          required_services: string[] | null
+          start_time: string | null
+          status: Database["public"]["Enums"]["helper_request_status"] | null
+          title: string
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          client_id: string
+          created_at?: string
+          description: string
+          end_time?: string | null
+          event_date: string
+          event_id?: string | null
+          id?: string
+          location_city: string
+          required_services?: string[] | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["helper_request_status"] | null
+          title: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          client_id?: string
+          created_at?: string
+          description?: string
+          end_time?: string | null
+          event_date?: string
+          event_id?: string | null
+          id?: string
+          location_city?: string
+          required_services?: string[] | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["helper_request_status"] | null
+          title?: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       planners: {
         Row: {
