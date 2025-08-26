@@ -23,6 +23,7 @@ export function Navigation() {
     { href: '/planners', label: 'Find Planners', icon: Calendar },
     { href: '/dashboard', label: 'Dashboard', icon: Calendar },
     { href: '/helpers', label: 'Helpers', icon: Users },
+    { href: '/planner-requests', label: 'Find Planners', icon: Calendar },
   ];
 
   return (

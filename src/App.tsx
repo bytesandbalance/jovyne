@@ -12,6 +12,7 @@ import ProfilePage from "./pages/ProfilePage";
 import HelpersPage from "./pages/HelpersPage";
 import PlannersPage from "./pages/PlannersPage";
 import NotFound from "./pages/NotFound";
+import PlannersRequestsPage from "./pages/PlannersRequestsPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/helpers" element={<HelpersPage />} />
             <Route path="/planners" element={<PlannersPage />} />
+            <Route path="/planner-requests" element={<PlannersRequestsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

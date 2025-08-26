@@ -13,10 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, MapPin, Star, Clock, DollarSign, Filter, Users, Calendar, Plus } from 'lucide-react';
-import { HelperProfileModal } from '@/components/helpers/HelperProfileModal';
-import { RequestDialog } from '@/components/requests/RequestDialog';
+import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
 
-// Component to handle role-based apply button
+// Component to handle role-based apply button for planner requests
 function ApplyButton({ requestId }: { requestId: string }) {
   const { user } = useAuthContext();
   const { toast } = useToast();
@@ -37,31 +36,31 @@ function ApplyButton({ requestId }: { requestId: string }) {
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please sign in to apply for jobs",
+        description: "Please sign in to apply for planner jobs",
         variant: "destructive"
       });
       return;
     }
 
-    if (userRole !== 'helper') {
+    if (userRole !== 'planner') {
       toast({
         title: "Access Denied",
-        description: "Only helpers can apply for jobs",
+        description: "Only planners can apply for these requests",
         variant: "destructive"
       });
       return;
     }
 
-    const { data: helperData } = await supabase
-      .from('helpers')
-      .select('id, hourly_rate')
+    const { data: plannerData } = await supabase
+      .from('planners')
+      .select('id, base_price')
       .eq('user_id', user.id)
       .single();
 
-    if (!helperData) {
+    if (!plannerData) {
       toast({
-        title: "Helper Profile Required",
-        description: "You need a helper profile to apply for jobs",
+        title: "Planner Profile Required",
+        description: "You need a planner profile to apply for requests",
         variant: "destructive"
       });
       return;
@@ -70,16 +69,16 @@ function ApplyButton({ requestId }: { requestId: string }) {
     try {
       // Check if already applied (use maybeSingle to avoid error on 0 rows)
       const { data: existingApplication } = await supabase
-        .from('helper_applications')
+        .from('planner_applications')
         .select('id')
-        .eq('helper_id', helperData.id)
-        .eq('helper_request_id', requestId)
+        .eq('planner_id', plannerData.id)
+        .eq('planner_request_id', requestId)
         .maybeSingle();
 
       if (existingApplication) {
         toast({
           title: "Already Applied",
-          description: "You have already applied for this job",
+          description: "You have already applied for this request",
           variant: "destructive"
         });
         return;
@@ -87,23 +86,23 @@ function ApplyButton({ requestId }: { requestId: string }) {
 
       // Create application
       const { error } = await supabase
-        .from('helper_applications')
+        .from('planner_applications')
         .insert({
-          helper_id: helperData.id,
-          helper_request_id: requestId,
+          planner_id: plannerData.id,
+          planner_request_id: requestId,
           status: 'pending',
-          message: 'I would like to help with your event!',
-          hourly_rate: helperData.hourly_rate || 25
+          message: 'I would like to help plan your event!',
+          proposed_fee: plannerData.base_price || 500
         });
 
       if (error) throw error;
 
       toast({
         title: "Application Submitted!",
-        description: "Your application has been sent to the planner"
+        description: "Your application has been sent to the client"
       });
     } catch (error) {
-      console.error('Error applying for job:', error);
+      console.error('Error applying for request:', error);
       toast({
         title: "Error",
         description: "Failed to submit application",
@@ -112,39 +111,44 @@ function ApplyButton({ requestId }: { requestId: string }) {
     }
   };
 
-  if (userRole === 'helper') {
+  if (userRole === 'planner') {
     return (
       <Button className="w-full" onClick={handleApply}>
-        Apply for Job
+        Apply for Request
       </Button>
     );
   }
 
   return (
     <Button className="w-full" disabled variant="outline">
-      {userRole === 'planner' ? 'Planners cannot apply' : 'Clients cannot apply'}
+      {userRole === 'helper' ? 'Helpers cannot apply' : 'Only planners can apply'}
     </Button>
   );
 }
 
-interface Helper {
+interface Planner {
   id: string;
   user_id: string;
-  bio: string;
-  skills: string[];
-  experience_years: number;
-  hourly_rate: number;
-  availability_cities: string[];
+  business_name: string;
+  description: string;
+  services: string[];
+  specialties: string[];
+  years_experience: number;
+  base_price: number;
+  location_city: string;
+  location_state: string;
   average_rating: number;
-  total_jobs: number;
+  total_reviews: number;
   portfolio_images: string[];
+  website_url: string;
+  instagram_handle: string;
   profiles: {
     full_name: string;
     avatar_url: string;
   } | null;
 }
 
-interface HelperRequest {
+interface PlannerRequest {
   id: string;
   title: string;
   description: string;
@@ -152,29 +156,28 @@ interface HelperRequest {
   start_time: string;
   end_time: string;
   location_city: string;
-  hourly_rate: number;
+  budget: number;
   total_hours: number;
-  required_skills: string[];
+  required_services: string[];
   status: string;
   created_at: string;
 }
 
-export default function HelpersPage() {
+export default function PlannersRequestsPage() {
   const { user } = useAuthContext();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('browse');
-  const [helpers, setHelpers] = useState<Helper[]>([]);
-  const [requests, setRequests] = useState<HelperRequest[]>([]);
-  const [myRequests, setMyRequests] = useState<HelperRequest[]>([]);
+  const [planners, setPlanners] = useState<Planner[]>([]);
+  const [requests, setRequests] = useState<PlannerRequest[]>([]);
+  const [myRequests, setMyRequests] = useState<PlannerRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [showNewRequestDialog, setShowNewRequestDialog] = useState(false);
-  const [plannerData, setPlannerData] = useState<any>(null);
   const [clientData, setClientData] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [selectedHelper, setSelectedHelper] = useState<Helper | null>(null);
-  const [showHelperProfile, setShowHelperProfile] = useState(false);
+  const [selectedPlanner, setSelectedPlanner] = useState<Planner | null>(null);
+  const [showPlannerProfile, setShowPlannerProfile] = useState(false);
   
   // New request form state
   const [newRequest, setNewRequest] = useState({
@@ -184,8 +187,8 @@ export default function HelpersPage() {
     start_time: '',
     end_time: '',
     location_city: '',
-    hourly_rate: '',
-    required_skills: [] as string[],
+    budget: '',
+    required_services: [] as string[],
   });
 
   useEffect(() => {
@@ -194,33 +197,34 @@ export default function HelpersPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch helpers with profiles using a simpler query
-      const { data: helpersData, error: helpersError } = await supabase
-        .from('helpers')
+      // Fetch planners with profiles
+      const { data: plannersData, error: plannersError } = await supabase
+        .from('planners')
         .select('*')
+        .eq('is_verified', true)
         .order('average_rating', { ascending: false });
 
-      if (helpersError) {
-        console.error('Error fetching helpers:', helpersError);
-        setHelpers([]);
-      } else if (helpersData) {
+      if (plannersError) {
+        console.error('Error fetching planners:', plannersError);
+        setPlanners([]);
+      } else if (plannersData) {
         // Fetch profiles separately to avoid join issues
-        const helperIds = helpersData.map(h => h.user_id);
+        const plannerIds = plannersData.map(p => p.user_id);
         const { data: profilesData } = await supabase
-          .rpc('get_public_profiles', { user_ids: helperIds });
+          .rpc('get_public_profiles', { user_ids: plannerIds });
 
-        // Combine helpers with their profiles
-        const helpersWithProfiles = helpersData.map(helper => ({
-          ...helper,
-          profiles: profilesData?.find(p => p.user_id === helper.user_id) || null
+        // Combine planners with their profiles
+        const plannersWithProfiles = plannersData.map(planner => ({
+          ...planner,
+          profiles: profilesData?.find(p => p.user_id === planner.user_id) || null
         }));
 
-        setHelpers(helpersWithProfiles);
+        setPlanners(plannersWithProfiles);
       }
 
-      // Fetch all helper requests (only for helpers)
+      // Fetch all planner requests (only for planners)
       const { data: requestsData } = await supabase
-        .from('helper_requests')
+        .from('planner_requests')
         .select('*')
         .eq('status', 'open')
         .order('created_at', { ascending: false });
@@ -238,64 +242,33 @@ export default function HelpersPage() {
 
         setUserRole(profileData?.user_role || null);
 
-        // If user is a planner, fetch their planner data and requests
-        if (profileData?.user_role === 'planner') {
-          const { data: plannerData } = await supabase
-            .from('planners')
-            .select('id')
-            .eq('user_id', user.id)
-            .single();
-
-          if (plannerData) {
-            setPlannerData(plannerData);
-            const { data: myRequestsData } = await supabase
-              .from('helper_requests')
-              .select('*')
-              .eq('planner_id', plannerData.id)
-              .order('created_at', { ascending: false });
-
-            setMyRequests(myRequestsData || []);
-            setActiveTab('browse'); // Planners start with browse helpers
-          }
-        }
-        // If user is a client, fetch their client data and requests  
+        // If user is a client, fetch their client data and requests
         if (profileData?.user_role === 'client') {
-          // Ensure client profile exists
-          let clientDataResult = await supabase
+          const { data: clientData } = await supabase
             .from('clients')
             .select('id')
             .eq('user_id', user.id)
             .single();
 
-          // Create client profile if it doesn't exist
-          if (clientDataResult.error) {
-            const { data: newClient } = await supabase
-              .from('clients')
-              .insert({
-                user_id: user.id,
-                full_name: profileData.full_name || '',
-                email: profileData.email || ''
-              })
-              .select('id')
-              .single();
-            clientDataResult = { data: newClient, error: null };
-          }
-
-          if (clientDataResult.data) {
-            setClientData(clientDataResult.data);
+          if (clientData) {
+            setClientData(clientData);
             const { data: myRequestsData } = await supabase
-              .from('helper_requests')
+              .from('planner_requests')
               .select('*')
-              .eq('client_id', clientDataResult.data.id)
+              .eq('client_id', clientData.id)
               .order('created_at', { ascending: false });
 
             setMyRequests(myRequestsData || []);
-            setActiveTab('browse'); // Clients start with browse helpers
+            setActiveTab('browse'); // Clients start with browse planners
           }
         }
-        // If user is a helper, default to requests tab
-        else if (profileData?.user_role === 'helper') {
+        // If user is a planner, default to requests tab
+        else if (profileData?.user_role === 'planner') {
           setActiveTab('requests');
+        }
+        // If user is a helper, default to browse planners
+        else if (profileData?.user_role === 'helper') {
+          setActiveTab('browse');
         }
       }
     } catch (error) {
@@ -306,78 +279,55 @@ export default function HelpersPage() {
   };
 
   const createNewRequest = async () => {
-    // Check if user is a planner or client
+    // Check if user is a client
     const { data: profileData } = await supabase
       .from('profiles')
       .select('user_role')
       .eq('user_id', user?.id)
       .single();
 
-    if (!profileData?.user_role || !['planner', 'client'].includes(profileData.user_role)) {
+    if (profileData?.user_role !== 'client') {
       toast({
         title: "Access Denied",
-        description: "Only planners and clients can create helper requests",
+        description: "Only clients can create planner requests",
         variant: "destructive"
       });
       return;
     }
 
-    // Get requester data (planner or client)
-    let requesterId = null;
-    if (profileData.user_role === 'planner') {
-      if (!plannerData) {
-        toast({
-          title: "Error",
-          description: "You must be a verified planner to create helper requests",
-          variant: "destructive"
-        });
-        return;
-      }
-      requesterId = plannerData.id;
-    } else if (profileData.user_role === 'client') {
-      if (!clientData) {
-        toast({
-          title: "Error",
-          description: "You must be a registered client to create helper requests",
-          variant: "destructive"
-        });
-        return;
-      }
-      requesterId = clientData.id;
+    if (!clientData) {
+      toast({
+        title: "Error",
+        description: "You must be a registered client to create planner requests",
+        variant: "destructive"
+      });
+      return;
     }
 
     try {
       const totalHours = calculateTotalHours(newRequest.start_time, newRequest.end_time);
       
-      const insertData: any = {
-        title: newRequest.title,
-        description: newRequest.description,
-        event_date: newRequest.event_date,
-        start_time: newRequest.start_time,
-        end_time: newRequest.end_time,
-        location_city: newRequest.location_city,
-        hourly_rate: parseFloat(newRequest.hourly_rate),
-        total_hours: totalHours,
-        required_skills: newRequest.required_skills,
-        status: 'open'
-      };
-
-      // Set the appropriate requester ID
-      if (profileData.user_role === 'planner') {
-        insertData.planner_id = requesterId;
-      } else {
-        insertData.client_id = requesterId;
-      }
-      
       const { error } = await supabase
-        .from('helper_requests')
-        .insert(insertData);
+        .from('planner_requests')
+        .insert({
+          client_id: clientData.id,
+          title: newRequest.title,
+          description: newRequest.description,
+          event_date: newRequest.event_date,
+          start_time: newRequest.start_time,
+          end_time: newRequest.end_time,
+          location_city: newRequest.location_city,
+          budget: parseFloat(newRequest.budget),
+          total_hours: totalHours,
+          required_services: newRequest.required_services,
+          status: 'open'
+        });
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "Helper request created successfully"
+        description: "Planner request created successfully"
       });
 
       // Reset form and close dialog
@@ -388,8 +338,8 @@ export default function HelpersPage() {
         start_time: '',
         end_time: '',
         location_city: '',
-        hourly_rate: '',
-        required_skills: [],
+        budget: '',
+        required_services: [],
       });
       setShowNewRequestDialog(false);
       
@@ -399,7 +349,7 @@ export default function HelpersPage() {
       console.error('Error creating request:', error);
       toast({
         title: "Error",
-        description: "Failed to create helper request",
+        description: "Failed to create planner request",
         variant: "destructive"
       });
     }
@@ -419,125 +369,37 @@ export default function HelpersPage() {
     return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
   };
 
-  const addSkill = (skill: string) => {
-    if (skill && !newRequest.required_skills.includes(skill)) {
+  const addService = (service: string) => {
+    if (service && !newRequest.required_services.includes(service)) {
       setNewRequest(prev => ({
         ...prev,
-        required_skills: [...prev.required_skills, skill]
+        required_services: [...prev.required_services, service]
       }));
     }
   };
 
-  const removeSkill = (skillToRemove: string) => {
+  const removeService = (serviceToRemove: string) => {
     setNewRequest(prev => ({
       ...prev,
-      required_skills: prev.required_skills.filter(skill => skill !== skillToRemove)
+      required_services: prev.required_services.filter(service => service !== serviceToRemove)
     }));
   };
 
-  const handleApplyForJob = async (requestId: string) => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to apply for jobs",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check if user is a helper
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('user_role')
-      .eq('user_id', user.id)
-      .single();
-
-    if (profileData?.user_role !== 'helper') {
-      toast({
-        title: "Access Denied",
-        description: "Only helpers can apply for jobs",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const { data: helperData } = await supabase
-      .from('helpers')
-      .select('id, hourly_rate')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!helperData) {
-      toast({
-        title: "Helper Profile Required",
-        description: "You need a helper profile to apply for jobs",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      // Check if already applied (use maybeSingle to avoid error on 0 rows)
-      const { data: existingApplication } = await supabase
-        .from('helper_applications')
-        .select('id')
-        .eq('helper_id', helperData.id)
-        .eq('helper_request_id', requestId)
-        .maybeSingle();
-
-      if (existingApplication) {
-        toast({
-          title: "Already Applied",
-          description: "You have already applied for this job",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Create application
-      const { error } = await supabase
-        .from('helper_applications')
-        .insert({
-          helper_id: helperData.id,
-          helper_request_id: requestId,
-          status: 'pending',
-          message: 'I would like to help with your event!',
-          hourly_rate: helperData.hourly_rate || 25 // Default rate, could be made dynamic
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Application Submitted!",
-        description: "Your application has been sent to the planner"
-      });
-    } catch (error) {
-      console.error('Error applying for job:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit application",
-        variant: "destructive"
-      });
-    }
-  };
-
   const getTabCount = () => {
-    if (userRole === 'helper') return 2; // Browse + Helper Requests
-    if (userRole === 'planner') return 2; // Browse + My Requests
+    if (userRole === 'planner') return 2; // Browse + Planner Requests
     if (userRole === 'client') return 2; // Browse + My Requests  
-    return 1; // Just Browse for guests
+    return 1; // Just Browse for helpers/guests
   };
 
-  const filteredHelpers = helpers.filter(helper => {
-    // Don't show current user in the helpers list
-    if (helper.user_id === user?.id) return false;
+  const filteredPlanners = planners.filter(planner => {
+    // Don't show current user in the planners list
+    if (planner.user_id === user?.id) return false;
     
-    const matchesSearch = helper.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         helper.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = planner.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         planner.business_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         planner.services.some(service => service.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesLocation = !locationFilter || 
-                           helper.availability_cities.some(city => 
-                             city.toLowerCase().includes(locationFilter.toLowerCase())
-                           );
+                           planner.location_city?.toLowerCase().includes(locationFilter.toLowerCase());
     return matchesSearch && matchesLocation;
   });
 
@@ -554,7 +416,7 @@ export default function HelpersPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading helpers...</p>
+          <p className="text-muted-foreground">Loading planners...</p>
         </div>
       </div>
     );
@@ -564,17 +426,17 @@ export default function HelpersPage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">Party Helpers</h1>
+          <h1 className="text-4xl font-bold mb-4">Event Planners</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Find skilled helpers for your events or discover opportunities to assist with amazing parties
+            Find professional event planners for your special occasions or discover planning opportunities
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-md mx-auto" style={{ gridTemplateColumns: `repeat(${getTabCount()}, 1fr)` }}>
-            <TabsTrigger value="browse">Browse Helpers</TabsTrigger>
-            {userRole === 'helper' && <TabsTrigger value="requests">Helper Requests</TabsTrigger>}
-            {(userRole === 'planner' || userRole === 'client') && <TabsTrigger value="my-requests">My Requests</TabsTrigger>}
+            <TabsTrigger value="browse">Browse Planners</TabsTrigger>
+            {userRole === 'planner' && <TabsTrigger value="requests">Planner Requests</TabsTrigger>}
+            {userRole === 'client' && <TabsTrigger value="my-requests">My Requests</TabsTrigger>}
           </TabsList>
 
           {/* Search and Filter Bar */}
@@ -583,7 +445,7 @@ export default function HelpersPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search helpers or skills..."
+                  placeholder="Search planners or services..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -608,69 +470,67 @@ export default function HelpersPage() {
           </div>
 
           <TabsContent value="browse" className="space-y-6">
-            {filteredHelpers.length > 0 ? (
+            {filteredPlanners.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredHelpers.map((helper) => (
-                  <Card key={helper.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                {filteredPlanners.map((planner) => (
+                  <Card key={planner.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <div className="flex items-center gap-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={helper.profiles?.avatar_url} />
+                          <AvatarImage src={planner.profiles?.avatar_url} />
                           <AvatarFallback>
-                            {helper.profiles?.full_name?.charAt(0) || 'H'}
+                            {planner.profiles?.full_name?.charAt(0) || planner.business_name?.charAt(0) || 'P'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{helper.profiles?.full_name}</CardTitle>
+                          <CardTitle className="text-lg">{planner.business_name}</CardTitle>
+                          <p className="text-sm text-muted-foreground">{planner.profiles?.full_name}</p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Star className="w-4 h-4 text-yellow-500" />
-                            <span>{helper.average_rating.toFixed(1)}</span>
-                            <span>({helper.total_jobs} jobs)</span>
+                            <span>{planner.average_rating.toFixed(1)}</span>
+                            <span>({planner.total_reviews} reviews)</span>
                           </div>
                         </div>
                       </div>
                     </CardHeader>
                     
                     <CardContent className="space-y-4">
-                      {helper.bio && (
-                        <p className="text-sm text-muted-foreground">{helper.bio}</p>
+                      {planner.description && (
+                        <p className="text-sm text-muted-foreground">{planner.description}</p>
                       )}
                       
                       <div className="flex flex-wrap gap-2">
-                        {helper.skills.slice(0, 3).map((skill) => (
-                          <Badge key={skill} variant="secondary">
-                            {skill}
+                        {planner.services.slice(0, 3).map((service) => (
+                          <Badge key={service} variant="secondary">
+                            {service}
                           </Badge>
                         ))}
-                        {helper.skills.length > 3 && (
-                          <Badge variant="outline">+{helper.skills.length - 3} more</Badge>
+                        {planner.services.length > 3 && (
+                          <Badge variant="outline">+{planner.services.length - 3} more</Badge>
                         )}
                       </div>
                       
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
-                          <span>{helper.experience_years} years exp</span>
+                          <span>{planner.years_experience} years exp</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <DollarSign className="w-4 h-4" />
-                          <span>${helper.hourly_rate}/hr</span>
+                          <span>From €{planner.base_price}</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="w-4 h-4" />
-                        <span>{helper.availability_cities.slice(0, 2).join(', ')}</span>
-                        {helper.availability_cities.length > 2 && (
-                          <span>+{helper.availability_cities.length - 2} more</span>
-                        )}
+                        <span>{planner.location_city}, {planner.location_state}</span>
                       </div>
                       
                       <Button 
                         className="w-full"
                         onClick={() => {
-                          setSelectedHelper(helper);
-                          setShowHelperProfile(true);
+                          setSelectedPlanner(planner);
+                          setShowPlannerProfile(true);
                         }}
                       >
                         View Profile
@@ -683,7 +543,7 @@ export default function HelpersPage() {
               <Card>
                 <CardContent className="text-center py-12">
                   <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No helpers found</h3>
+                  <h3 className="text-lg font-semibold mb-2">No planners found</h3>
                   <p className="text-muted-foreground">Try adjusting your search or location filters</p>
                 </CardContent>
               </Card>
@@ -721,16 +581,16 @@ export default function HelpersPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <DollarSign className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">${request.hourly_rate}/hr</span>
+                          <span className="text-sm">Budget: €{request.budget}</span>
                         </div>
                       </div>
                       
-                      {request.required_skills.length > 0 && (
+                      {request.required_services.length > 0 && (
                         <div className="mb-4">
-                          <span className="text-sm font-medium">Required Skills:</span>
+                          <span className="text-sm font-medium">Required Services:</span>
                           <div className="flex flex-wrap gap-2 mt-2">
-                            {request.required_skills.map((skill) => (
-                              <Badge key={skill} variant="outline">{skill}</Badge>
+                            {request.required_services.map((service) => (
+                              <Badge key={service} variant="outline">{service}</Badge>
                             ))}
                           </div>
                         </div>
@@ -745,7 +605,7 @@ export default function HelpersPage() {
               <Card>
                 <CardContent className="text-center py-12">
                   <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No helper requests found</h3>
+                  <h3 className="text-lg font-semibold mb-2">No planner requests found</h3>
                   <p className="text-muted-foreground">Check back later for new opportunities</p>
                 </CardContent>
               </Card>
@@ -754,7 +614,7 @@ export default function HelpersPage() {
 
           <TabsContent value="my-requests" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">My Helper Requests</h2>
+              <h2 className="text-2xl font-bold">My Planner Requests</h2>
               <Dialog open={showNewRequestDialog} onOpenChange={setShowNewRequestDialog}>
                 <DialogTrigger asChild>
                   <Button>
@@ -764,9 +624,9 @@ export default function HelpersPage() {
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Create Helper Request</DialogTitle>
+                    <DialogTitle>Create Planner Request</DialogTitle>
                     <DialogDescription>
-                      Post a new helper request for your event. Helpers will be able to apply and you can review applications.
+                      Post a new planner request for your event. Professional planners will be able to apply and you can review applications.
                     </DialogDescription>
                   </DialogHeader>
                   
@@ -775,7 +635,7 @@ export default function HelpersPage() {
                       <Label htmlFor="title">Request Title</Label>
                       <Input
                         id="title"
-                        placeholder="e.g., Wedding Photography Assistant Needed"
+                        placeholder="e.g., Wedding Planner Needed for Romantic Garden Wedding"
                         value={newRequest.title}
                         onChange={(e) => setNewRequest(prev => ({ ...prev, title: e.target.value }))}
                       />
@@ -785,7 +645,7 @@ export default function HelpersPage() {
                       <Label htmlFor="description">Description</Label>
                       <Textarea
                         id="description"
-                        placeholder="Describe what you need help with, requirements, and any other details..."
+                        placeholder="Describe your event vision, requirements, and any other details..."
                         value={newRequest.description}
                         onChange={(e) => setNewRequest(prev => ({ ...prev, description: e.target.value }))}
                         rows={3}
@@ -840,43 +700,43 @@ export default function HelpersPage() {
                       </div>
                       
                       <div className="grid gap-2">
-                        <Label htmlFor="hourly_rate">Hourly Rate (€)</Label>
+                        <Label htmlFor="budget">Budget (€)</Label>
                         <Input
-                          id="hourly_rate"
+                          id="budget"
                           type="number"
-                          placeholder="25.00"
-                          value={newRequest.hourly_rate}
-                          onChange={(e) => setNewRequest(prev => ({ ...prev, hourly_rate: e.target.value }))}
+                          placeholder="1500.00"
+                          value={newRequest.budget}
+                          onChange={(e) => setNewRequest(prev => ({ ...prev, budget: e.target.value }))}
                         />
                       </div>
                     </div>
                     
                     <div className="grid gap-2">
-                      <Label>Required Skills</Label>
+                      <Label>Required Services</Label>
                       <div className="flex flex-wrap gap-2 mb-2">
-                        {newRequest.required_skills.map((skill) => (
-                          <Badge key={skill} variant="secondary" className="cursor-pointer" onClick={() => removeSkill(skill)}>
-                            {skill} ×
+                        {newRequest.required_services.map((service) => (
+                          <Badge key={service} variant="secondary" className="cursor-pointer" onClick={() => removeService(service)}>
+                            {service} ×
                           </Badge>
                         ))}
                       </div>
-                      <Select onValueChange={addSkill}>
+                      <Select onValueChange={addService}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Add a skill..." />
+                          <SelectValue placeholder="Add a service..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Event Setup">Event Setup</SelectItem>
-                          <SelectItem value="Photography">Photography</SelectItem>
-                          <SelectItem value="Catering">Catering</SelectItem>
-                          <SelectItem value="DJ Services">DJ Services</SelectItem>
-                          <SelectItem value="Sound Equipment">Sound Equipment</SelectItem>
-                          <SelectItem value="Music Coordination">Music Coordination</SelectItem>
-                          <SelectItem value="Decoration">Decoration</SelectItem>
-                          <SelectItem value="Floral Arrangements">Floral Arrangements</SelectItem>
-                          <SelectItem value="Venue Setup">Venue Setup</SelectItem>
-                          <SelectItem value="Bartending">Bartending</SelectItem>
-                          <SelectItem value="Cocktail Service">Cocktail Service</SelectItem>
-                          <SelectItem value="Event Service">Event Service</SelectItem>
+                          <SelectItem value="Full Event Planning">Full Event Planning</SelectItem>
+                          <SelectItem value="Day-of Coordination">Day-of Coordination</SelectItem>
+                          <SelectItem value="Venue Selection">Venue Selection</SelectItem>
+                          <SelectItem value="Vendor Management">Vendor Management</SelectItem>
+                          <SelectItem value="Budget Management">Budget Management</SelectItem>
+                          <SelectItem value="Timeline Creation">Timeline Creation</SelectItem>
+                          <SelectItem value="Theme & Design">Theme & Design</SelectItem>
+                          <SelectItem value="Invitation Design">Invitation Design</SelectItem>
+                          <SelectItem value="Guest Management">Guest Management</SelectItem>
+                          <SelectItem value="Catering Coordination">Catering Coordination</SelectItem>
+                          <SelectItem value="Entertainment Booking">Entertainment Booking</SelectItem>
+                          <SelectItem value="Photography Coordination">Photography Coordination</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -925,8 +785,8 @@ export default function HelpersPage() {
                           <p className="text-sm text-muted-foreground">{request.location_city}</p>
                         </div>
                         <div>
-                          <span className="text-sm font-medium">Rate:</span>
-                          <p className="text-sm text-muted-foreground">${request.hourly_rate}/hr</p>
+                          <span className="text-sm font-medium">Budget:</span>
+                          <p className="text-sm text-muted-foreground">€{request.budget}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -937,11 +797,11 @@ export default function HelpersPage() {
               <Card>
                 <CardContent className="text-center py-12">
                   <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No helper requests yet</h3>
-                  <p className="text-muted-foreground mb-4">Create your first helper request to get started</p>
+                  <h3 className="text-lg font-semibold mb-2">No planner requests yet</h3>
+                  <p className="text-muted-foreground mb-4">Create your first planner request to get started</p>
                   <Button onClick={() => setShowNewRequestDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Helper Request
+                    Create Planner Request
                   </Button>
                 </CardContent>
               </Card>
@@ -949,12 +809,12 @@ export default function HelpersPage() {
           </TabsContent>
         </Tabs>
 
-        {/* Helper Profile Modal */}
-        {selectedHelper && (
-          <HelperProfileModal
-            helper={selectedHelper}
-            open={showHelperProfile}
-            onOpenChange={setShowHelperProfile}
+        {/* Planner Profile Modal */}
+        {selectedPlanner && (
+          <PlannerProfileModal
+            planner={selectedPlanner}
+            open={showPlannerProfile}
+            onOpenChange={setShowPlannerProfile}
             currentUserId={user?.id}
           />
         )}
