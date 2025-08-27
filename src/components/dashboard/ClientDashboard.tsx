@@ -525,6 +525,10 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
           </Card>
         </TabsContent>
 
+        <TabsContent value="applications" className="space-y-4">
+          <PlannerApplications clientData={clientData} />
+        </TabsContent>
+
         <TabsContent value="invoices" className="space-y-4">
           <Card>
             <CardHeader>

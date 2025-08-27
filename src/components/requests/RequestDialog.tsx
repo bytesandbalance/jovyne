@@ -135,11 +135,12 @@ export function RequestDialog({
 
         if (!clientData) throw new Error('Client profile not found');
 
-        // Create helper request with client_id
+        // Create helper request with client_id (planner_id as null/undefined)
         const { error } = await supabase
           .from('helper_requests')
           .insert({
             client_id: clientData.id,
+            planner_id: null,
             title: formData.title,
             description: formData.description,
             event_date: formData.eventDate,
