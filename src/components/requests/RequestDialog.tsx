@@ -69,13 +69,99 @@ export function RequestDialog({
 
       const totalHours = calculateTotalHours();
 
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          sender_id: userData.user.id,
-          recipient_id: recipientId,
-          subject: `Request: ${formData.title}`,
-          message: `${formData.description}
+      if (recipientType === 'planner' && senderType === 'client') {
+        // Get client data
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', userData.user.id)
+          .single();
+
+        if (!clientData) throw new Error('Client profile not found');
+
+        // Create planner request
+        const { error } = await supabase
+          .from('planner_requests')
+          .insert({
+            client_id: clientData.id,
+            title: formData.title,
+            description: formData.description,
+            event_date: formData.eventDate,
+            start_time: formData.startTime || null,
+            end_time: formData.endTime || null,
+            location_city: formData.locationCity,
+            budget: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
+            total_hours: totalHours,
+            required_services: skills,
+            status: 'open'
+          });
+
+        if (error) throw error;
+      } else if (recipientType === 'helper' && senderType === 'planner') {
+        // Get planner data
+        const { data: plannerData } = await supabase
+          .from('planners')
+          .select('id')
+          .eq('user_id', userData.user.id)
+          .single();
+
+        if (!plannerData) throw new Error('Planner profile not found');
+
+        // Create helper request
+        const { error } = await supabase
+          .from('helper_requests')
+          .insert({
+            planner_id: plannerData.id,
+            title: formData.title,
+            description: formData.description,
+            event_date: formData.eventDate,
+            start_time: formData.startTime || null,
+            end_time: formData.endTime || null,
+            location_city: formData.locationCity,
+            hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
+            total_hours: totalHours,
+            required_skills: skills,
+            status: 'open'
+          });
+
+        if (error) throw error;
+      } else if (recipientType === 'helper' && senderType === 'client') {
+        // Get client data
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', userData.user.id)
+          .single();
+
+        if (!clientData) throw new Error('Client profile not found');
+
+        // Create helper request with client_id
+        const { error } = await supabase
+          .from('helper_requests')
+          .insert({
+            client_id: clientData.id,
+            title: formData.title,
+            description: formData.description,
+            event_date: formData.eventDate,
+            start_time: formData.startTime || null,
+            end_time: formData.endTime || null,
+            location_city: formData.locationCity,
+            hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
+            total_hours: totalHours,
+            required_skills: skills,
+            status: 'open'
+          });
+
+        if (error) throw error;
+      } else {
+        // Fallback to direct message for unsupported combinations
+        const { error } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: userData.user.id,
+            recipient_id: recipientId,
+            subject: `Request: ${formData.title}`,
+            message: `${formData.description}
 
 Event Details:
 - Date: ${formData.eventDate}
@@ -86,9 +172,10 @@ Event Details:
 - Required Skills: ${skills.join(', ')}
 
 ${formData.message ? `Additional Message: ${formData.message}` : ''}`
-        });
+          });
 
-      if (error) throw error;
+        if (error) throw error;
+      }
 
       toast({
         title: "Request sent! 🎉",
