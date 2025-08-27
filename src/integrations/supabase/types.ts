@@ -23,7 +23,7 @@ export type Database = {
           id: string
           notes: string | null
           phone: string | null
-          planner_id: string
+          planner_id: string | null
           updated_at: string
           user_id: string | null
         }
@@ -35,7 +35,7 @@ export type Database = {
           id?: string
           notes?: string | null
           phone?: string | null
-          planner_id: string
+          planner_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -47,7 +47,7 @@ export type Database = {
           id?: string
           notes?: string | null
           phone?: string | null
-          planner_id?: string
+          planner_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
