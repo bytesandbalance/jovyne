@@ -287,7 +287,6 @@ export function PlannerProfileModal({
         onClose={() => setShowRequestDialog(false)}
         recipientId={planner.user_id}
         recipientType="planner"
-        recipientName={planner.full_name || planner.business_name}
         senderType="client"
       />
     </Dialog>

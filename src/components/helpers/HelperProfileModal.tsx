@@ -246,7 +246,6 @@ export function HelperProfileModal({
         onClose={() => setShowRequestDialog(false)}
         recipientId={helper.user_id}
         recipientType="helper"
-        recipientName={helper.profiles?.full_name || 'Helper'}
         senderType="client"
       />
     </Dialog>

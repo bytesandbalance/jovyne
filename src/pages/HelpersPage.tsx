@@ -260,37 +260,23 @@ export default function HelpersPage() {
         }
         // If user is a client, fetch their client data and requests  
         if (profileData?.user_role === 'client') {
-          // Ensure client profile exists
-          let clientDataResult = await supabase
+          // Get client data - it should exist from signup trigger
+          const { data: clientData } = await supabase
             .from('clients')
             .select('id')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
-          // Create client profile if it doesn't exist
-          if (clientDataResult.error) {
-            const { data: newClient } = await supabase
-              .from('clients')
-              .insert({
-                user_id: user.id,
-                full_name: profileData.full_name || '',
-                email: profileData.email || ''
-              })
-              .select('id')
-              .single();
-            clientDataResult = { data: newClient, error: null };
-          }
-
-          if (clientDataResult.data) {
-            setClientData(clientDataResult.data);
+          if (clientData) {
+            setClientData(clientData);
             const { data: myRequestsData } = await supabase
               .from('helper_requests')
               .select('*')
-              .eq('client_id', clientDataResult.data.id)
+              .eq('client_id', clientData.id)
               .order('created_at', { ascending: false });
 
             setMyRequests(myRequestsData || []);
-            setActiveTab('browse'); // Clients start with browse helpers
+            setActiveTab('my-requests'); // Clients start with their requests
           }
         }
         // If user is a helper, default to requests tab

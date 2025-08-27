@@ -1,20 +1,18 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { X, Plus } from 'lucide-react';
 
 interface RequestDialogProps {
   isOpen: boolean;
   onClose: () => void;
   recipientId: string;
   recipientType: 'helper' | 'planner';
-  recipientName: string;
   senderType: 'client' | 'planner';
 }
 
@@ -23,7 +21,6 @@ export function RequestDialog({
   onClose,
   recipientId,
   recipientType,
-  recipientName,
   senderType
 }: RequestDialogProps) {
   const [formData, setFormData] = useState({
@@ -52,14 +49,14 @@ export function RequestDialog({
   };
 
   const calculateTotalHours = () => {
-    if (!formData.startTime || !formData.endTime) return null;
+    if (!formData.startTime || !formData.endTime) return 0;
     
-    const start = new Date(`2000-01-01 ${formData.startTime}`);
-    const end = new Date(`2000-01-01 ${formData.endTime}`);
+    const start = new Date(`2000-01-01T${formData.startTime}`);
+    const end = new Date(`2000-01-01T${formData.endTime}`);
     
-    if (end <= start) return null;
+    if (end <= start) return 0;
     
-    return ((end.getTime() - start.getTime()) / (1000 * 60 * 60)).toFixed(1);
+    return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60) * 100) / 100;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,32 +70,32 @@ export function RequestDialog({
       const totalHours = calculateTotalHours();
 
       const { error } = await supabase
-        .from('communication_requests')
+        .from('messages')
         .insert({
           sender_id: userData.user.id,
           recipient_id: recipientId,
-          sender_type: senderType,
-          recipient_type: recipientType,
-          title: formData.title,
-          description: formData.description,
-          event_date: formData.eventDate,
-          start_time: formData.startTime || null,
-          end_time: formData.endTime || null,
-          location_city: formData.locationCity,
-          required_skills: skills,
-          total_hours: totalHours ? parseFloat(totalHours) : null,
-          hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
-          message: formData.message || null
+          subject: `Request: ${formData.title}`,
+          message: `${formData.description}
+
+Event Details:
+- Date: ${formData.eventDate}
+- Time: ${formData.startTime || 'TBD'} - ${formData.endTime || 'TBD'}
+- Location: ${formData.locationCity}
+- Hours: ${totalHours} hours
+- Hourly Rate: $${formData.hourlyRate}
+- Required Skills: ${skills.join(', ')}
+
+${formData.message ? `Additional Message: ${formData.message}` : ''}`
         });
 
       if (error) throw error;
 
       toast({
-        title: "Request sent successfully!",
-        description: `Your request has been sent to ${recipientName}.`
+        title: "Request sent! 🎉",
+        description: `Your request has been sent to the ${recipientType}.`
       });
 
-      onClose();
+      // Reset form
       setFormData({
         title: '',
         description: '',
@@ -110,11 +107,11 @@ export function RequestDialog({
         message: ''
       });
       setSkills([]);
-    } catch (error) {
-      console.error('Error sending request:', error);
+      onClose();
+    } catch (error: any) {
       toast({
         title: "Error sending request",
-        description: "Please try again later.",
+        description: error.message,
         variant: "destructive"
       });
     } finally {
@@ -124,82 +121,91 @@ export function RequestDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Send Request to {recipientName}</DialogTitle>
+          <DialogTitle>Send Request to {recipientType === 'helper' ? 'Helper' : 'Planner'}</DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="title">Event Title</Label>
+              <Label htmlFor="title">Event Title *</Label>
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
+                placeholder="Birthday Party"
               />
             </div>
+
             <div>
-              <Label htmlFor="locationCity">City</Label>
+              <Label htmlFor="eventDate">Event Date *</Label>
               <Input
-                id="locationCity"
-                value={formData.locationCity}
-                onChange={(e) => setFormData(prev => ({ ...prev, locationCity: e.target.value }))}
+                id="eventDate"
+                type="date"
+                value={formData.eventDate}
+                onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
                 required
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               required
+              placeholder="Describe your event and what you need help with..."
               rows={3}
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="eventDate">Event Date</Label>
-              <Input
-                id="eventDate"
-                type="date"
-                value={formData.eventDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, eventDate: e.target.value }))}
-                required
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="startTime">Start Time</Label>
               <Input
                 id="startTime"
                 type="time"
                 value={formData.startTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
               />
             </div>
+
             <div>
               <Label htmlFor="endTime">End Time</Label>
               <Input
                 id="endTime"
                 type="time"
                 value={formData.endTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+              <Input
+                id="hourlyRate"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.hourlyRate}
+                onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
+                placeholder="25.00"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="hourlyRate">Hourly Rate (€)</Label>
+            <Label htmlFor="locationCity">Location (City) *</Label>
             <Input
-              id="hourlyRate"
-              type="number"
-              step="0.01"
-              value={formData.hourlyRate}
-              onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: e.target.value }))}
+              id="locationCity"
+              value={formData.locationCity}
+              onChange={(e) => setFormData({ ...formData, locationCity: e.target.value })}
+              required
+              placeholder="New York, NY"
             />
           </div>
 
@@ -212,29 +218,34 @@ export function RequestDialog({
                 placeholder="Add a skill"
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
               />
-              <Button type="button" onClick={addSkill}>Add</Button>
+              <Button type="button" onClick={addSkill} size="sm">
+                <Plus className="w-4 h-4" />
+              </Button>
             </div>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="flex items-center gap-1">
+                <span
+                  key={skill}
+                  className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm flex items-center gap-1"
+                >
                   {skill}
                   <X
-                    className="h-3 w-3 cursor-pointer"
+                    className="w-3 h-3 cursor-pointer hover:text-destructive"
                     onClick={() => removeSkill(skill)}
                   />
-                </Badge>
+                </span>
               ))}
             </div>
           </div>
 
           <div>
-            <Label htmlFor="message">Additional Message (Optional)</Label>
+            <Label htmlFor="message">Additional Message</Label>
             <Textarea
               id="message"
               value={formData.message}
-              onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-              placeholder="Any additional information or questions..."
-              rows={2}
+              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              placeholder="Any additional details or questions..."
+              rows={3}
             />
           </div>
 
