@@ -320,7 +320,7 @@ export type Database = {
           hourly_rate: number | null
           id: string
           location_city: string
-          planner_id: string
+          planner_id: string | null
           required_skills: string[] | null
           start_time: string | null
           status: Database["public"]["Enums"]["helper_request_status"] | null
@@ -338,7 +338,7 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           location_city: string
-          planner_id: string
+          planner_id?: string | null
           required_skills?: string[] | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["helper_request_status"] | null
@@ -356,7 +356,7 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           location_city?: string
-          planner_id?: string
+          planner_id?: string | null
           required_skills?: string[] | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["helper_request_status"] | null
