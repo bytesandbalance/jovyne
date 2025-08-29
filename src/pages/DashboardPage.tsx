@@ -31,6 +31,7 @@ export default function DashboardPage() {
   const [clientRequests, setClientRequests] = useState<any[]>([]);
   const [clientInvoices, setClientInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingRequest, setProcessingRequest] = useState<string | null>(null);
   
   // Safe default tab calculation that doesn't cause initialization errors
   const urlTab = searchParams.get('tab');
@@ -312,10 +313,23 @@ export default function DashboardPage() {
     try {
       console.log('Starting request action:', { requestId, action });
       
-      // Update the request status first
+      // Set processing state for this specific request
+      setProcessingRequest(requestId);
+      
+      // Get current planner ID
+      if (!plannerProfile?.id) {
+        throw new Error('Planner profile not found');
+      }
+
+      // Update the request status and set planner_id to claim the request
+      const updateData = {
+        status: action,
+        planner_id: plannerProfile.id
+      };
+      
       const { error: updateError } = await supabase
         .from('planner_requests')
-        .update({ status: action })
+        .update(updateData)
         .eq('id', requestId);
 
       if (updateError) {
@@ -324,6 +338,15 @@ export default function DashboardPage() {
       }
 
       console.log('Status updated successfully to:', action);
+
+      // Optimistically update the local state immediately
+      setPlannerRequests(prev => 
+        prev.map(request => 
+          request.id === requestId 
+            ? { ...request, status: action, planner_id: plannerProfile.id }
+            : request
+        )
+      );
 
       // Get the client info separately to ensure we can access it
       const request = plannerRequests.find(r => r.id === requestId);
@@ -366,12 +389,14 @@ export default function DashboardPage() {
       toast({
         title: action === 'approved' ? "Request approved!" : "Request declined",
         description: action === 'approved' 
-          ? "The client has been notified of your acceptance." 
+          ? "The client has been notified of your acceptance and related records have been created." 
           : "The client has been notified of your decision."
       });
 
-      // Refresh the data to show updated status
-      fetchUserData();
+      // Refresh the data to show updated status (after a short delay for optimistic update to show)
+      setTimeout(() => {
+        fetchUserData();
+      }, 1000);
     } catch (error) {
       console.error('Error updating request:', error);
       toast({
@@ -379,6 +404,11 @@ export default function DashboardPage() {
         description: "Please try again.",
         variant: "destructive"
       });
+      
+      // Revert optimistic update on error
+      fetchUserData();
+    } finally {
+      setProcessingRequest(null);
     }
   };
 
@@ -785,18 +815,38 @@ export default function DashboardPage() {
                                   onClick={() => handleRequestAction(request.id, 'approved')}
                                   className="flex-1 sm:flex-none"
                                   size="sm"
+                                  disabled={processingRequest === request.id}
                                 >
-                                  <CheckCircle className="w-4 h-4 mr-2" />
-                                  Approve Request
+                                  {processingRequest === request.id ? (
+                                    <>
+                                      <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                      Processing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle className="w-4 h-4 mr-2" />
+                                      Approve Request
+                                    </>
+                                  )}
                                 </Button>
                                 <Button 
                                   onClick={() => handleRequestAction(request.id, 'rejected')}
                                   variant="outline"
                                   className="flex-1 sm:flex-none"
                                   size="sm"
+                                  disabled={processingRequest === request.id}
                                 >
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Decline Request
+                                  {processingRequest === request.id ? (
+                                    <>
+                                      <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                      Processing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <XCircle className="w-4 h-4 mr-2" />
+                                      Decline Request
+                                    </>
+                                  )}
                                 </Button>
                               </div>
                             )}
