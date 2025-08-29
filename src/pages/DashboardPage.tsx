@@ -474,14 +474,13 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'grid w-full max-w-4xl mx-auto grid-cols-5' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
+          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-6xl mx-auto p-1 h-auto' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             {isPlannerView && (
               <>
                 <TabsTrigger value="requests">Requests</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="clients">Clients</TabsTrigger>
-                <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
               </>
             )}
@@ -888,65 +887,6 @@ export default function DashboardPage() {
               {/* Client Contacts Tab */}
               <TabsContent value="clients" className="space-y-6">
                 <ClientContactList plannerProfile={plannerProfile} />
-              </TabsContent>
-
-              {/* Calendar Tab */}
-              <TabsContent value="calendar" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Event Calendar</h2>
-                  <Button onClick={() => setIsEventDialogOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Schedule Event
-                  </Button>
-                </div>
-
-                <div className="grid gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5" />
-                        Upcoming Events
-                      </CardTitle>
-                      <CardDescription>Your event schedule overview</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {events.slice(0, 5).map((event) => (
-                          <div key={event.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                <Calendar className="w-6 h-6 text-primary" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold">{event.title}</h3>
-                                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                                  <Clock className="w-3 h-3" />
-                                  {new Date(event.event_date).toLocaleDateString()}
-                                  {event.event_time && ` at ${event.event_time}`}
-                                </p>
-                                {event.venue_name && (
-                                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                                    <MapPin className="w-3 h-3" />
-                                    {event.venue_name}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            <Badge variant={event.status === 'completed' ? 'default' : 'secondary'}>
-                              {event.status}
-                            </Badge>
-                          </div>
-                        ))}
-                        {events.length === 0 && (
-                          <div className="text-center py-8">
-                            <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                            <p className="text-muted-foreground">No events scheduled</p>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
               </TabsContent>
 
               {/* Invoicing Tab */}
