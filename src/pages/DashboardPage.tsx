@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Users, Star, DollarSign, Settings, Plus, UserCheck, BarChart3, CreditCard, Clock, MapPin, Phone, Mail, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import EventTaskTracker from '@/components/dashboard/EventTaskTracker';
 import ClientContactList from '@/components/dashboard/ClientContactList';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
 import PlannerPendingPayments from '@/components/dashboard/PlannerPendingPayments';

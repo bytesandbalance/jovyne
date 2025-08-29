@@ -53,53 +53,6 @@ export type Database = {
         }
         Relationships: []
       }
-      event_tasks: {
-        Row: {
-          assigned_to: string | null
-          created_at: string
-          description: string | null
-          due_date: string | null
-          event_id: string
-          id: string
-          is_completed: boolean | null
-          priority: string | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          event_id: string
-          id?: string
-          is_completed?: boolean | null
-          priority?: string | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          event_id?: string
-          id?: string
-          is_completed?: boolean | null
-          priority?: string | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_tasks_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       events: {
         Row: {
           budget: number | null
