@@ -85,9 +85,20 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
     }
 
     try {
+      // Note: This creates a client record but requires user_id which should come from auth
+      // For now, we'll show an informational message
+      toast({
+        title: "Feature Not Available",
+        description: "Client creation requires user authentication setup. This will be added when auth is implemented.",
+        variant: "destructive"
+      });
+      return;
+
+      /* When auth is ready, uncomment this:
       const { data, error } = await supabase
         .from('clients')
         .insert([{
+          user_id: '', // This needs to come from the auth system
           planner_id: plannerProfile.id,
           full_name: newClient.full_name,
           email: newClient.email,
@@ -97,10 +108,10 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
         }])
         .select()
         .single();
-
+        
       if (error) throw error;
-
       setClients(prev => [...prev, data]);
+      */
       setNewClient({
         full_name: '',
         email: '',

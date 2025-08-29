@@ -67,40 +67,13 @@ function ApplyButton({ requestId }: { requestId: string }) {
     }
 
     try {
-      // Check if already applied (use maybeSingle to avoid error on 0 rows)
-      const { data: existingApplication } = await supabase
-        .from('planner_applications')
-        .select('id')
-        .eq('planner_id', plannerData.id)
-        .eq('planner_request_id', requestId)
-        .maybeSingle();
-
-      if (existingApplication) {
-        toast({
-          title: "Already Applied",
-          description: "You have already applied for this request",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Create application
-      const { error } = await supabase
-        .from('planner_applications')
-        .insert({
-          planner_id: plannerData.id,
-          planner_request_id: requestId,
-          status: 'pending',
-          message: 'I would like to help plan your event!',
-          proposed_fee: plannerData.base_price || 500
-        });
-
-      if (error) throw error;
-
+      // Application functionality is currently disabled
       toast({
-        title: "Application Submitted!",
-        description: "Your application has been sent to the client"
+        title: "Feature Coming Soon",
+        description: "Planner applications will be available in the new workflow",
+        variant: "default"
       });
+      return;
     } catch (error) {
       console.error('Error applying for request:', error);
       toast({

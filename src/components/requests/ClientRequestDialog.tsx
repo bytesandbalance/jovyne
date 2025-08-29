@@ -111,7 +111,7 @@ export default function ClientRequestDialog({
             budget: formData.budget ? parseFloat(formData.budget) : null,
             total_hours: totalHours,
             required_services: formData.required_services,
-            status: 'pending'
+            status: 'open'
           });
 
         if (error) throw error;
@@ -149,7 +149,7 @@ export default function ClientRequestDialog({
             hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null,
             total_hours: totalHours,
             required_skills: formData.required_skills,
-            status: 'pending'
+            status: 'open'
           });
 
         if (error) throw error;

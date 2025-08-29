@@ -68,40 +68,13 @@ function ApplyButton({ requestId }: { requestId: string }) {
     }
 
     try {
-      // Check if already applied (use maybeSingle to avoid error on 0 rows)
-      const { data: existingApplication } = await supabase
-        .from('helper_applications')
-        .select('id')
-        .eq('helper_id', helperData.id)
-        .eq('helper_request_id', requestId)
-        .maybeSingle();
-
-      if (existingApplication) {
-        toast({
-          title: "Already Applied",
-          description: "You have already applied for this job",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Create application
-      const { error } = await supabase
-        .from('helper_applications')
-        .insert({
-          helper_id: helperData.id,
-          helper_request_id: requestId,
-          status: 'pending',
-          message: 'I would like to help with your event!',
-          hourly_rate: helperData.hourly_rate || 25
-        });
-
-      if (error) throw error;
-
+      // Application functionality is currently disabled
       toast({
-        title: "Application Submitted!",
-        description: "Your application has been sent to the planner"
+        title: "Feature Coming Soon",
+        description: "Job applications will be available in the new workflow",
+        variant: "default"
       });
+      return;
     } catch (error) {
       console.error('Error applying for job:', error);
       toast({
@@ -463,40 +436,13 @@ export default function HelpersPage() {
     }
 
     try {
-      // Check if already applied (use maybeSingle to avoid error on 0 rows)
-      const { data: existingApplication } = await supabase
-        .from('helper_applications')
-        .select('id')
-        .eq('helper_id', helperData.id)
-        .eq('helper_request_id', requestId)
-        .maybeSingle();
-
-      if (existingApplication) {
-        toast({
-          title: "Already Applied",
-          description: "You have already applied for this job",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Create application
-      const { error } = await supabase
-        .from('helper_applications')
-        .insert({
-          helper_id: helperData.id,
-          helper_request_id: requestId,
-          status: 'pending',
-          message: 'I would like to help with your event!',
-          hourly_rate: helperData.hourly_rate || 25 // Default rate, could be made dynamic
-        });
-
-      if (error) throw error;
-
+      // Application functionality is currently disabled  
       toast({
-        title: "Application Submitted!",
-        description: "Your application has been sent to the planner"
+        title: "Feature Coming Soon",
+        description: "Job applications will be available in the new workflow",
+        variant: "default"
       });
+      return;
     } catch (error) {
       console.error('Error applying for job:', error);
       toast({

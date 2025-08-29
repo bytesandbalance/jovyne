@@ -18,7 +18,6 @@ import ClientContactList from '@/components/dashboard/ClientContactList';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
 import PlannerPendingPayments from '@/components/dashboard/PlannerPendingPayments';
 import HelperDashboardFixed from '@/components/dashboard/HelperDashboardFixed';
-import HelperRequests from './HelperRequests';
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
@@ -594,7 +593,9 @@ export default function DashboardPage() {
 
               {/* Applications Tab */}
               <TabsContent value="applications" className="space-y-6">
-                <HelperApplications plannerData={plannerProfile} />
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Helper applications will be available when the new workflow is implemented</p>
+                </div>
               </TabsContent>
 
               {/* Analytics Tab */}
@@ -702,7 +703,7 @@ export default function DashboardPage() {
 
           {isHelperView && (
             <TabsContent value="helper-dashboard" className="space-y-6">
-              <HelperDashboard user={user} helperData={helperProfile} />
+              <HelperDashboardFixed user={user} helperData={helperProfile} />
             </TabsContent>
           )}
         </Tabs>

@@ -103,42 +103,16 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
 
   const fetchHelperData = async () => {
     try {
-      // Fetch helper's applications
-      const { data: applicationsData, error: applicationsError } = await supabase
-        .from('helper_applications')
-        .select(`
-          *,
-          helper_requests (
-            title,
-            description,
-            event_date,
-            start_time,
-            end_time,
-            location_city,
-            hourly_rate,
-            total_hours,
-            status
-          )
-        `)
-        .eq('helper_id', helperData.id)
-        .order('applied_at', { ascending: false });
+      // For now, we'll show empty applications since the table was removed
+      // When the new application workflow is ready, this will be updated
+      setApplications([]);
 
-      if (applicationsError) throw applicationsError;
-      setApplications((applicationsData as any) || []);
-
-      // Fetch available jobs (excluding ones already applied to)
-      const appliedRequestIds = applicationsData?.map(app => app.helper_request_id) || [];
-      
+      // Fetch available jobs from helper_requests
       let jobsQuery = supabase
         .from('helper_requests')
         .select('*')
         .eq('status', 'open')
         .order('created_at', { ascending: false });
-
-      if (appliedRequestIds.length > 0) {
-        jobsQuery = jobsQuery.not('id', 'in', `(${appliedRequestIds.join(',')})`);
-      }
-
       const { data: jobsData, error: jobsError } = await jobsQuery;
 
       if (jobsError) throw jobsError;
@@ -156,33 +130,11 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
   };
 
   const handleApplyForJob = async (requestId: string) => {
-    try {
-      const { error } = await supabase
-        .from('helper_applications')
-        .insert({
-          helper_id: helperData.id,
-          helper_request_id: requestId,
-          status: 'pending',
-          message: 'I would like to help with your event!',
-          hourly_rate: helperData.hourly_rate || 25
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Application Submitted!",
-        description: "Your application has been sent to the planner"
-      });
-
-      fetchHelperData();
-    } catch (error) {
-      console.error('Error applying for job:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit application",
-        variant: "destructive"
-      });
-    }
+    toast({
+      title: "Feature Coming Soon",
+      description: "Job applications will be available when the new workflow is implemented",
+      variant: "default"
+    });
   };
 
   const handleSaveProfile = async () => {

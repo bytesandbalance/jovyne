@@ -62,15 +62,30 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
 
   const fetchInvoicesAndData = async () => {
     try {
-      // Fetch invoices
+      // Fetch planner invoices
       const { data: invoicesData, error: invoicesError } = await supabase
-        .from('invoices')
+        .from('planner_invoices')
         .select('*')
         .eq('planner_id', plannerProfile.id)
         .order('created_at', { ascending: false });
 
       if (invoicesError) throw invoicesError;
-      setInvoices(invoicesData || []);
+      
+      // Transform planner_invoices to match Invoice interface
+      const transformedInvoices = (invoicesData || []).map(invoice => ({
+        id: invoice.id,
+        invoice_number: `PI-${invoice.id.slice(0, 8)}`, // Generate invoice number from ID
+        amount: invoice.amount || 0,
+        status: invoice.status,
+        due_date: invoice.event_date,
+        issued_date: invoice.created_at,
+        description: invoice.job_title,
+        line_items: invoice.line_items,
+        event_id: invoice.event_id,
+        client_id: invoice.client_id
+      }));
+      
+      setInvoices(transformedInvoices);
 
       // Fetch events
       const { data: eventsData, error: eventsError } = await supabase
@@ -120,24 +135,32 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
     }
 
     try {
+      // Note: Direct invoice creation is disabled as it should go through the application approval flow
+      toast({
+        title: "Feature Not Available",
+        description: "Invoices are now created automatically when applications are approved",
+        variant: "default"
+      });
+      return;
+
+      /* When manual invoice creation is needed, uncomment this:
       const { data, error } = await supabase
-        .from('invoices')
+        .from('planner_invoices')
         .insert([{
           planner_id: plannerProfile.id,
-          invoice_number: generateInvoiceNumber(),
           client_id: newInvoice.client_id,
           event_id: newInvoice.event_id || null,
           amount: parseFloat(newInvoice.amount),
-          description: newInvoice.description,
-          due_date: newInvoice.due_date || null,
+          job_title: newInvoice.description,
+          event_date: newInvoice.due_date || null,
           status: 'draft'
         }])
         .select()
         .single();
-
+        
       if (error) throw error;
-
       setInvoices(prev => [data, ...prev]);
+      */
       setNewInvoice({
         client_id: '',
         event_id: '',
