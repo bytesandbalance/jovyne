@@ -45,6 +45,7 @@ export default function PlannersPage() {
   const [showPlannerProfile, setShowPlannerProfile] = useState(false);
   const [searchParams] = useSearchParams();
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [clientData, setClientData] = useState<any>(null);
   const [plannerRequests, setPlannerRequests] = useState<any[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
   const [showRequestDialog, setShowRequestDialog] = useState(false);
@@ -74,13 +75,16 @@ export default function PlannersPage() {
 
       // If user is a client, fetch their planner requests
       if (profile?.user_role === 'client') {
-        const { data: clientData } = await supabase
+        const { data: clientRecord } = await supabase
           .from('clients')
-          .select('id')
+          .select('*')
           .eq('user_id', user.id)
           .single();
         
-        if (clientData) {
+        console.log('Client data fetched:', clientRecord);
+        setClientData(clientRecord);
+        
+        if (clientRecord) {
           const { data: requests } = await supabase
             .from('planner_requests')
             .select(`
@@ -90,7 +94,7 @@ export default function PlannersPage() {
                 profiles:user_id (full_name, avatar_url)
               )
             `)
-            .eq('client_id', clientData.id)
+            .eq('client_id', clientRecord.id)
             .order('created_at', { ascending: false });
           
           setPlannerRequests(requests || []);
@@ -395,9 +399,20 @@ export default function PlannersPage() {
                         
                         <Button 
                           className="w-full hover-bounce"
-                          onClick={() => handleViewProfile(planner)}
+                          onClick={() => {
+                            if (!clientData) {
+                              toast({
+                                title: "Client profile not found",
+                                description: "Please make sure you're logged in as a client.",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            setSelectedPlanner(planner);
+                            setShowRequestDialog(true);
+                          }}
                         >
-                          View Profile
+                          Send Request
                         </Button>
                       </CardContent>
                     </Card>
@@ -506,10 +521,10 @@ export default function PlannersPage() {
         <ClientRequestDialog
           isOpen={showRequestDialog}
           onClose={() => setShowRequestDialog(false)}
-          recipientId=""
+          recipientId={selectedPlanner?.id || ""}
           recipientType="planner"
-          recipientName=""
-          clientData={userProfile}
+          recipientName={selectedPlanner?.business_name || ""}
+          clientData={clientData}
         />
       </div>
     </div>
