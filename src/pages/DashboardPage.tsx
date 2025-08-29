@@ -17,8 +17,8 @@ import EventTaskTracker from '@/components/dashboard/EventTaskTracker';
 import ClientContactList from '@/components/dashboard/ClientContactList';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
 import PlannerPendingPayments from '@/components/dashboard/PlannerPendingPayments';
-import HelperDashboard from '@/components/dashboard/HelperDashboard';
-import HelperApplications from '@/components/dashboard/HelperApplications';
+import HelperDashboardFixed from '@/components/dashboard/HelperDashboardFixed';
+import HelperRequests from './HelperRequests';
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
@@ -253,7 +253,7 @@ export default function DashboardPage() {
               Manage your applications and find new opportunities
             </p>
           </div>
-          <HelperDashboard user={user} helperData={helperProfile} />
+          <HelperDashboardFixed user={user} helperData={helperProfile} />
         </div>
       </div>
     );

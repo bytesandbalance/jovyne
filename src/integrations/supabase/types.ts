@@ -162,64 +162,6 @@ export type Database = {
           },
         ]
       }
-      helper_applications: {
-        Row: {
-          applied_at: string
-          helper_id: string
-          helper_request_id: string
-          hourly_rate: number | null
-          id: string
-          message: string | null
-          reviewed_at: string | null
-          status: Database["public"]["Enums"]["application_status"] | null
-          updated_at: string
-        }
-        Insert: {
-          applied_at?: string
-          helper_id: string
-          helper_request_id: string
-          hourly_rate?: number | null
-          id?: string
-          message?: string | null
-          reviewed_at?: string | null
-          status?: Database["public"]["Enums"]["application_status"] | null
-          updated_at?: string
-        }
-        Update: {
-          applied_at?: string
-          helper_id?: string
-          helper_request_id?: string
-          hourly_rate?: number | null
-          id?: string
-          message?: string | null
-          reviewed_at?: string | null
-          status?: Database["public"]["Enums"]["application_status"] | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "helper_applications_helper_id_fkey"
-            columns: ["helper_id"]
-            isOneToOne: false
-            referencedRelation: "helpers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_applications_helper_request_id_fkey"
-            columns: ["helper_request_id"]
-            isOneToOne: false
-            referencedRelation: "helper_approved_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_applications_helper_request_id_fkey"
-            columns: ["helper_request_id"]
-            isOneToOne: false
-            referencedRelation: "helper_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       helper_invoices: {
         Row: {
           amount: number | null
@@ -469,54 +411,6 @@ export type Database = {
         }
         Relationships: []
       }
-      invoices: {
-        Row: {
-          amount: number
-          client_id: string
-          created_at: string
-          description: string | null
-          due_date: string | null
-          event_id: string | null
-          id: string
-          invoice_number: string
-          issued_date: string | null
-          line_items: Json | null
-          planner_id: string
-          status: string | null
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          client_id: string
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          event_id?: string | null
-          id?: string
-          invoice_number: string
-          issued_date?: string | null
-          line_items?: Json | null
-          planner_id: string
-          status?: string | null
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          client_id?: string
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          event_id?: string | null
-          id?: string
-          invoice_number?: string
-          issued_date?: string | null
-          line_items?: Json | null
-          planner_id?: string
-          status?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       messages: {
         Row: {
           created_at: string
@@ -549,57 +443,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      planner_applications: {
-        Row: {
-          applied_at: string
-          id: string
-          message: string | null
-          planner_id: string
-          planner_request_id: string
-          proposed_fee: number | null
-          reviewed_at: string | null
-          status: Database["public"]["Enums"]["application_status"] | null
-          updated_at: string
-        }
-        Insert: {
-          applied_at?: string
-          id?: string
-          message?: string | null
-          planner_id: string
-          planner_request_id: string
-          proposed_fee?: number | null
-          reviewed_at?: string | null
-          status?: Database["public"]["Enums"]["application_status"] | null
-          updated_at?: string
-        }
-        Update: {
-          applied_at?: string
-          id?: string
-          message?: string | null
-          planner_id?: string
-          planner_request_id?: string
-          proposed_fee?: number | null
-          reviewed_at?: string | null
-          status?: Database["public"]["Enums"]["application_status"] | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "planner_applications_planner_id_fkey"
-            columns: ["planner_id"]
-            isOneToOne: false
-            referencedRelation: "planners"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "planner_applications_planner_request_id_fkey"
-            columns: ["planner_request_id"]
-            isOneToOne: false
-            referencedRelation: "planner_requests"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       planner_invoices: {
         Row: {
@@ -693,13 +536,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "planner_invoices_planner_application_id_fkey"
-            columns: ["planner_application_id"]
-            isOneToOne: false
-            referencedRelation: "planner_applications"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "planner_invoices_planner_id_fkey"
             columns: ["planner_id"]
             isOneToOne: false
@@ -726,6 +562,7 @@ export type Database = {
           event_id: string | null
           id: string
           location_city: string
+          planner_id: string | null
           required_services: string[] | null
           start_time: string | null
           status: Database["public"]["Enums"]["helper_request_status"] | null
@@ -743,6 +580,7 @@ export type Database = {
           event_id?: string | null
           id?: string
           location_city: string
+          planner_id?: string | null
           required_services?: string[] | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["helper_request_status"] | null
@@ -760,6 +598,7 @@ export type Database = {
           event_id?: string | null
           id?: string
           location_city?: string
+          planner_id?: string | null
           required_services?: string[] | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["helper_request_status"] | null
@@ -780,6 +619,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_requests_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
             referencedColumns: ["id"]
           },
         ]
@@ -936,46 +782,7 @@ export type Database = {
       }
     }
     Views: {
-      helper_approved_jobs: {
-        Row: {
-          application_message: string | null
-          applied_at: string | null
-          created_at: string | null
-          description: string | null
-          end_time: string | null
-          event_date: string | null
-          event_id: string | null
-          hourly_rate: number | null
-          id: string | null
-          location_city: string | null
-          planner_business_name: string | null
-          planner_id: string | null
-          planner_name: string | null
-          required_skills: string[] | null
-          reviewed_at: string | null
-          start_time: string | null
-          status: Database["public"]["Enums"]["helper_request_status"] | null
-          title: string | null
-          total_hours: number | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "helper_requests_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_requests_planner_id_fkey"
-            columns: ["planner_id"]
-            isOneToOne: false
-            referencedRelation: "planners"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       get_public_profiles: {

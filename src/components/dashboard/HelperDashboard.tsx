@@ -259,7 +259,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
           
-          <TabsTrigger value="applications">Applications</TabsTrigger>
+          <TabsTrigger value="requests">Available Requests</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
         </TabsList>
