@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, Users, Star, DollarSign, Settings, Plus, UserCheck, BarChart3, CreditCard, Clock, MapPin, Phone, Mail } from 'lucide-react';
+import { Calendar, Users, Star, DollarSign, Settings, Plus, UserCheck, BarChart3, CreditCard, Clock, MapPin, Phone, Mail, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import EventTaskTracker from '@/components/dashboard/EventTaskTracker';
 import ClientContactList from '@/components/dashboard/ClientContactList';
@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
   const [helperProfile, setHelperProfile] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
+  const [plannerRequests, setPlannerRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
@@ -113,6 +114,24 @@ export default function DashboardPage() {
 
       const { data: eventsData } = await eventsQuery;
       setEvents(eventsData || []);
+
+      // Fetch planner requests if user is a planner
+      if (plannerData) {
+        const { data: requestsData } = await supabase
+          .from('planner_requests')
+          .select(`
+            *,
+            clients!planner_requests_client_id_fkey (
+              user_id,
+              full_name,
+              email,
+              phone
+            )
+          `)
+          .order('created_at', { ascending: false });
+        
+        setPlannerRequests(requestsData || []);
+      }
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
@@ -225,6 +244,52 @@ export default function DashboardPage() {
     }
   };
 
+  const handleRequestAction = async (requestId: string, action: 'approved' | 'rejected') => {
+    try {
+      const { error } = await supabase
+        .from('planner_requests')
+        .update({ status: action })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      // Send notification message to client
+      const request = plannerRequests.find(r => r.id === requestId);
+      if (request?.clients?.user_id) {
+        const { error: messageError } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: user?.id,
+            recipient_id: request.clients.user_id,
+            subject: action === 'approved' ? 'Request Approved' : 'Request Declined',
+            message: action === 'approved' 
+              ? `Your planner request "${request.title}" has been approved! We'll be in touch soon to discuss next steps.`
+              : `Your planner request "${request.title}" was declined. Thank you for considering us.`
+          });
+
+        if (messageError) {
+          console.error('Error sending notification:', messageError);
+        }
+      }
+
+      toast({
+        title: action === 'approved' ? "Request approved!" : "Request declined",
+        description: action === 'approved' 
+          ? "The client has been notified of your acceptance." 
+          : "The client has been notified."
+      });
+
+      fetchUserData();
+    } catch (error) {
+      console.error('Error updating request:', error);
+      toast({
+        title: "Error updating request",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -273,12 +338,13 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
+          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
             {!isHelperView && <TabsTrigger value="overview">Overview</TabsTrigger>}
             {!isHelperView && <TabsTrigger value="events">Events</TabsTrigger>}
             <TabsTrigger value="profile">Profile</TabsTrigger>
             {isPlannerView && (
               <>
+                <TabsTrigger value="requests">Requests</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="clients">Clients</TabsTrigger>
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
@@ -513,6 +579,143 @@ export default function DashboardPage() {
 
           {isPlannerView && (
             <>
+              {/* Requests Tab */}
+              <TabsContent value="requests" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">Planner Requests</h2>
+                  <Badge variant="secondary" className="text-sm">
+                    {plannerRequests.filter(r => r.status === 'pending').length} pending
+                  </Badge>
+                </div>
+                
+                {plannerRequests.length > 0 ? (
+                  <div className="grid gap-6">
+                    {plannerRequests.map((request) => (
+                      <Card key={request.id}>
+                        <CardHeader>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="space-y-1">
+                              <CardTitle className="text-lg">{request.title}</CardTitle>
+                              <CardDescription className="flex flex-wrap items-center gap-4 text-sm">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-4 h-4" />
+                                  {new Date(request.event_date).toLocaleDateString()}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-4 h-4" />
+                                  {request.location_city}
+                                </span>
+                                {request.budget && (
+                                  <span className="flex items-center gap-1">
+                                    <DollarSign className="w-4 h-4" />
+                                    ${request.budget.toLocaleString()}
+                                  </span>
+                                )}
+                              </CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                request.status === 'approved' ? 'default' : 
+                                request.status === 'rejected' ? 'destructive' : 'secondary'
+                              }>
+                                {request.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                                {request.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                {request.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
+                                {request.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">{request.description}</p>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="font-medium">Client:</span>
+                                <div className="text-muted-foreground mt-1">
+                                  <p>{request.clients?.full_name}</p>
+                                  {request.clients?.email && (
+                                    <p className="flex items-center gap-1">
+                                      <Mail className="w-3 h-3" />
+                                      {request.clients.email}
+                                    </p>
+                                  )}
+                                  {request.clients?.phone && (
+                                    <p className="flex items-center gap-1">
+                                      <Phone className="w-3 h-3" />
+                                      {request.clients.phone}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <span className="font-medium">Request Details:</span>
+                                <div className="text-muted-foreground mt-1 space-y-1">
+                                  <p>Submitted: {new Date(request.created_at).toLocaleDateString()}</p>
+                                  {request.start_time && (
+                                    <p>Start Time: {request.start_time}</p>
+                                  )}
+                                  {request.end_time && (
+                                    <p>End Time: {request.end_time}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {request.required_services && request.required_services.length > 0 && (
+                              <div>
+                                <span className="font-medium text-sm">Required Services:</span>
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {request.required_services.map((service, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {service}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {request.status === 'pending' && (
+                              <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+                                <Button 
+                                  onClick={() => handleRequestAction(request.id, 'approved')}
+                                  className="flex-1 sm:flex-none"
+                                  size="sm"
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  Approve Request
+                                </Button>
+                                <Button 
+                                  onClick={() => handleRequestAction(request.id, 'rejected')}
+                                  variant="outline"
+                                  className="flex-1 sm:flex-none"
+                                  size="sm"
+                                >
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Decline Request
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No requests yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Planner requests will appear here when clients submit them
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
               {/* Task Tracker Tab */}
               <TabsContent value="tasks" className="space-y-6">
                 <EventTaskTracker plannerProfile={plannerProfile} />
