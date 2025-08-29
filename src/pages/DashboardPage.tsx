@@ -23,7 +23,19 @@ export default function DashboardPage() {
   const { user } = useAuthContext();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const defaultTab = searchParams.get('tab') || 'overview';
+  
+  // Set default tab based on user role
+  const getDefaultTab = () => {
+    const urlTab = searchParams.get('tab');
+    if (urlTab) return urlTab;
+    
+    // Default to 'overview' for planners, 'helper-dashboard' for helpers, 'profile' for clients
+    if (profile?.user_role === 'planner') return 'overview';
+    if (profile?.user_role === 'helper') return 'helper-dashboard';
+    return 'profile';
+  };
+  
+  const defaultTab = getDefaultTab();
   const [profile, setProfile] = useState<any>(null);
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
   const [helperProfile, setHelperProfile] = useState<any>(null);
@@ -427,9 +439,9 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-lg grid-cols-5'}`}>
-            {!isHelperView && <TabsTrigger value="overview">Overview</TabsTrigger>}
-            {!isHelperView && <TabsTrigger value="events">Events</TabsTrigger>}
+          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
+            {isPlannerView && <TabsTrigger value="overview">Overview</TabsTrigger>}
+            {isPlannerView && <TabsTrigger value="events">Events</TabsTrigger>}
             <TabsTrigger value="profile">Profile</TabsTrigger>
             {isPlannerView && (
               <>
@@ -449,7 +461,8 @@ export default function DashboardPage() {
             {isHelperView && <TabsTrigger value="helper-dashboard">Dashboard</TabsTrigger>}
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
+          {isPlannerView && (
+            <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -530,9 +543,11 @@ export default function DashboardPage() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+            </TabsContent>
+          )}
 
-          <TabsContent value="events" className="space-y-6">
+          {isPlannerView && (
+            <TabsContent value="events" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Your Events</h2>
               <Button onClick={() => setIsEventDialogOpen(true)}>
@@ -592,7 +607,8 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
+            </TabsContent>
+          )}
 
           <TabsContent value="profile" className="space-y-6">
             <Card>
