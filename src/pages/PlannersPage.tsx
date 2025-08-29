@@ -116,7 +116,7 @@ export default function PlannersPage() {
               )
             `)
             .eq('planner_id', plannerData.id)
-            .eq('status', 'pending')
+            .eq('status', 'open' as any)
             .order('created_at', { ascending: false });
           
           setIncomingRequests(requests || []);
@@ -188,15 +188,15 @@ export default function PlannersPage() {
 
   const handleRequestAction = async (requestId: string, action: 'approved' | 'rejected') => {
     try {
-      // Map to new status values
+      // Map to existing status values until we fix the schema
       const statusMap = {
-        'approved': 'approved',
-        'rejected': 'rejected'  
+        'approved': 'filled',
+        'rejected': 'cancelled'  
       };
       
       const { error } = await supabase
         .from('planner_requests')
-        .update({ status: statusMap[action] as any })  // Using any to handle type mismatch during transition
+        .update({ status: statusMap[action] as any })
         .eq('id', requestId);
 
       if (error) throw error;
@@ -441,13 +441,15 @@ export default function PlannersPage() {
                             </div>
                           </div>
                           <Badge variant={
-                            request.status === 'approved' ? 'default' : 
-                            request.status === 'rejected' ? 'destructive' : 'secondary'
+                            request.status === 'filled' ? 'default' : 
+                            request.status === 'cancelled' ? 'destructive' : 'secondary'
                           }>
-                            {request.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
-                            {request.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
-                            {request.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
-                            {request.status}
+                            {request.status === 'open' && <Clock className="w-3 h-3 mr-1" />}
+                            {request.status === 'filled' && <CheckCircle className="w-3 h-3 mr-1" />}
+                            {request.status === 'cancelled' && <XCircle className="w-3 h-3 mr-1" />}
+                            {request.status === 'open' ? 'pending' : 
+                             request.status === 'filled' ? 'approved' : 
+                             request.status === 'cancelled' ? 'rejected' : request.status}
                           </Badge>
                         </div>
                       </CardHeader>
@@ -504,10 +506,10 @@ export default function PlannersPage() {
         <ClientRequestDialog
           isOpen={showRequestDialog}
           onClose={() => setShowRequestDialog(false)}
-          recipientId={selectedPlanner?.id || ''}
+          recipientId=""
           recipientType="planner"
-          recipientName={selectedPlanner?.business_name || ''}
-          clientData={null}
+          recipientName=""
+          clientData={userProfile}
         />
       </div>
     </div>
