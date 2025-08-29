@@ -382,6 +382,20 @@ export default function DashboardPage() {
         } else {
           console.error('Could not fetch client data:', clientError);
         }
+
+        // If request was approved, link the client to this planner
+        if (action === 'approved' && request?.client_id) {
+          const { error: clientUpdateError } = await supabase
+            .from('clients')
+            .update({ planner_id: plannerProfile.id })
+            .eq('id', request.client_id);
+
+          if (clientUpdateError) {
+            console.error('Error linking client to planner:', clientUpdateError);
+          } else {
+            console.log('Client successfully linked to planner');
+          }
+        }
       } else {
         console.error('Missing request client_id or planner user_id');
       }
@@ -460,7 +474,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-3xl mx-auto p-1 h-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
+          <TabsList className={`${isPlannerView ? 'grid w-full max-w-4xl mx-auto grid-cols-5' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             {isPlannerView && (
               <>
