@@ -474,24 +474,24 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-6xl mx-auto p-1 h-auto' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+          <div className={`${isPlannerView ? 'flex flex-wrap justify-center gap-2 w-full' : isHelperView ? 'flex justify-center gap-2 w-full max-w-md mx-auto' : 'flex justify-center gap-2 w-full max-w-md mx-auto'}`}>
+            <TabsTrigger value="profile" className="px-4 py-2">Profile</TabsTrigger>
             {isPlannerView && (
               <>
-                <TabsTrigger value="requests">Requests</TabsTrigger>
-                <TabsTrigger value="tasks">Tasks</TabsTrigger>
-                <TabsTrigger value="clients">Clients</TabsTrigger>
-                <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
+                <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
+                <TabsTrigger value="tasks" className="px-4 py-2">Tasks</TabsTrigger>
+                <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
+                <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
             )}
             {!isPlannerView && !isHelperView && (
               <>
-                <TabsTrigger value="requests">Requests</TabsTrigger>
-                <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
+                <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
+                <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
             )}
-            {isHelperView && <TabsTrigger value="helper-dashboard">Dashboard</TabsTrigger>}
-          </TabsList>
+            {isHelperView && <TabsTrigger value="helper-dashboard" className="px-4 py-2">Dashboard</TabsTrigger>}
+          </div>
 
           {isPlannerView && (
             <TabsContent value="overview" className="space-y-6">
