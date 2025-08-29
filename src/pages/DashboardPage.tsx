@@ -29,6 +29,8 @@ export default function DashboardPage() {
   const [helperProfile, setHelperProfile] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [plannerRequests, setPlannerRequests] = useState<any[]>([]);
+  const [clientRequests, setClientRequests] = useState<any[]>([]);
+  const [clientInvoices, setClientInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
@@ -131,6 +133,45 @@ export default function DashboardPage() {
           .order('created_at', { ascending: false });
         
         setPlannerRequests(requestsData || []);
+      } else {
+        // Fetch client's own requests and invoices
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', user?.id)
+          .single();
+
+        if (clientData) {
+          // Fetch client's planner requests
+          const { data: clientRequestsData } = await supabase
+            .from('planner_requests')
+            .select(`
+              *,
+              planners (
+                id,
+                business_name,
+                user_id,
+                profiles!planners_user_id_fkey (
+                  full_name,
+                  email,
+                  phone
+                )
+              )
+            `)
+            .eq('client_id', clientData.id)
+            .order('created_at', { ascending: false });
+
+          setClientRequests(clientRequestsData || []);
+
+          // Fetch client's planner invoices
+          const { data: clientInvoicesData } = await supabase
+            .from('planner_invoices')
+            .select('*')
+            .eq('client_id', clientData.id)
+            .order('created_at', { ascending: false });
+
+          setClientInvoices(clientInvoicesData || []);
+        }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -246,6 +287,7 @@ export default function DashboardPage() {
 
   const handleRequestAction = async (requestId: string, action: 'approved' | 'rejected') => {
     try {
+      // Update the request status
       const { error } = await supabase
         .from('planner_requests')
         .update({ status: action })
@@ -253,32 +295,41 @@ export default function DashboardPage() {
 
       if (error) throw error;
 
-      // Send notification message to client
+      // Get the request details and client info for notification
       const request = plannerRequests.find(r => r.id === requestId);
-      if (request?.clients?.user_id) {
+      console.log('Request details for notification:', request);
+      
+      if (request?.clients?.user_id && user?.id) {
+        console.log('Sending notification to client:', request.clients.user_id);
+        
         const { error: messageError } = await supabase
           .from('messages')
           .insert({
-            sender_id: user?.id,
+            sender_id: user.id,
             recipient_id: request.clients.user_id,
             subject: action === 'approved' ? 'Request Approved' : 'Request Declined',
             message: action === 'approved' 
-              ? `Your planner request "${request.title}" has been approved! We'll be in touch soon to discuss next steps.`
-              : `Your planner request "${request.title}" was declined. Thank you for considering us.`
+              ? `Great news! Your planner request "${request.title}" has been approved by ${plannerProfile?.business_name || 'a planner'}. We'll be in touch soon to discuss next steps and planning details.`
+              : `Thank you for your interest. Your planner request "${request.title}" was declined by ${plannerProfile?.business_name || 'the planner'}. You may want to try submitting another request with different requirements.`
           });
 
         if (messageError) {
           console.error('Error sending notification:', messageError);
+        } else {
+          console.log('Notification sent successfully');
         }
+      } else {
+        console.error('Missing client user_id or planner user_id for notification');
       }
 
       toast({
         title: action === 'approved' ? "Request approved!" : "Request declined",
         description: action === 'approved' 
           ? "The client has been notified of your acceptance." 
-          : "The client has been notified."
+          : "The client has been notified of your decision."
       });
 
+      // Refresh the data to show updated status
       fetchUserData();
     } catch (error) {
       console.error('Error updating request:', error);
@@ -338,7 +389,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
+          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-lg grid-cols-5'}`}>
             {!isHelperView && <TabsTrigger value="overview">Overview</TabsTrigger>}
             {!isHelperView && <TabsTrigger value="events">Events</TabsTrigger>}
             <TabsTrigger value="profile">Profile</TabsTrigger>
@@ -348,6 +399,12 @@ export default function DashboardPage() {
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="clients">Clients</TabsTrigger>
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
+                <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
+              </>
+            )}
+            {!isPlannerView && !isHelperView && (
+              <>
+                <TabsTrigger value="requests">Requests</TabsTrigger>
                 <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
               </>
             )}
@@ -791,6 +848,263 @@ export default function DashboardPage() {
   <PlannerPendingPayments plannerProfile={plannerProfile} />
   <InvoicingSection plannerProfile={plannerProfile} />
 </div>
+              </TabsContent>
+            </>
+          )}
+
+          {/* Client Requests Tab */}
+          {!isPlannerView && !isHelperView && (
+            <>
+              <TabsContent value="requests" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">My Requests</h2>
+                  <Badge variant="secondary" className="text-sm">
+                    {clientRequests.filter(r => r.status === 'pending').length} pending
+                  </Badge>
+                </div>
+                
+                {clientRequests.length > 0 ? (
+                  <div className="grid gap-6">
+                    {clientRequests.map((request) => (
+                      <Card key={request.id}>
+                        <CardHeader>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="space-y-1">
+                              <CardTitle className="text-lg">{request.title}</CardTitle>
+                              <CardDescription className="flex flex-wrap items-center gap-4 text-sm">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-4 h-4" />
+                                  {new Date(request.event_date).toLocaleDateString()}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-4 h-4" />
+                                  {request.location_city}
+                                </span>
+                                {request.budget && (
+                                  <span className="flex items-center gap-1">
+                                    <DollarSign className="w-4 h-4" />
+                                    ${request.budget.toLocaleString()}
+                                  </span>
+                                )}
+                              </CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                request.status === 'approved' ? 'default' : 
+                                request.status === 'rejected' ? 'destructive' : 'secondary'
+                              }>
+                                {request.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                                {request.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                {request.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
+                                {request.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">{request.description}</p>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                              {request.planners && (
+                                <div>
+                                  <span className="font-medium">Assigned Planner:</span>
+                                  <div className="text-muted-foreground mt-1">
+                                    <p>{request.planners.business_name}</p>
+                                    {request.planners.profiles?.full_name && (
+                                      <p className="flex items-center gap-1">
+                                        <Users className="w-3 h-3" />
+                                        {request.planners.profiles.full_name}
+                                      </p>
+                                    )}
+                                    {request.planners.profiles?.email && (
+                                      <p className="flex items-center gap-1">
+                                        <Mail className="w-3 h-3" />
+                                        {request.planners.profiles.email}
+                                      </p>
+                                    )}
+                                    {request.planners.profiles?.phone && (
+                                      <p className="flex items-center gap-1">
+                                        <Phone className="w-3 h-3" />
+                                        {request.planners.profiles.phone}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div>
+                                <span className="font-medium">Request Details:</span>
+                                <div className="text-muted-foreground mt-1 space-y-1">
+                                  <p>Submitted: {new Date(request.created_at).toLocaleDateString()}</p>
+                                  {request.start_time && (
+                                    <p>Start Time: {request.start_time}</p>
+                                  )}
+                                  {request.end_time && (
+                                    <p>End Time: {request.end_time}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {request.required_services && request.required_services.length > 0 && (
+                              <div>
+                                <span className="font-medium text-sm">Required Services:</span>
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {request.required_services.map((service, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {service}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No requests yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Your planner requests will appear here once submitted
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              {/* Client Invoicing Tab */}
+              <TabsContent value="invoicing" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">Invoices</h2>
+                  <Badge variant="secondary" className="text-sm">
+                    {clientInvoices.filter(i => i.status === 'awaiting_payment').length} pending payment
+                  </Badge>
+                </div>
+                
+                {clientInvoices.length > 0 ? (
+                  <div className="grid gap-6">
+                    {clientInvoices.map((invoice) => (
+                      <Card key={invoice.id}>
+                        <CardHeader>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="space-y-1">
+                              <CardTitle className="text-lg">Invoice #{invoice.id.slice(0, 8)}</CardTitle>
+                              <CardDescription className="flex flex-wrap items-center gap-4 text-sm">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-4 h-4" />
+                                  {invoice.job_title}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <DollarSign className="w-4 h-4" />
+                                  ${invoice.amount?.toLocaleString() || '0'}
+                                </span>
+                                {invoice.event_date && (
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    {new Date(invoice.event_date).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                invoice.status === 'completed' ? 'default' : 
+                                invoice.status === 'awaiting_payment' ? 'destructive' : 
+                                invoice.status === 'paid_planner' ? 'secondary' : 'outline'
+                              }>
+                                {invoice.status === 'awaiting_payment' && <Clock className="w-3 h-3 mr-1" />}
+                                {invoice.status === 'completed' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                {invoice.status.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="font-medium">Planner:</span>
+                                <div className="text-muted-foreground mt-1">
+                                  <p>{invoice.planner_name}</p>
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <span className="font-medium">Invoice Details:</span>
+                                <div className="text-muted-foreground mt-1 space-y-1">
+                                  <p>Created: {new Date(invoice.created_at).toLocaleDateString()}</p>
+                                  {invoice.sent_at && (
+                                    <p>Sent: {new Date(invoice.sent_at).toLocaleDateString()}</p>
+                                  )}
+                                  {invoice.paid_at && (
+                                    <p>Paid: {new Date(invoice.paid_at).toLocaleDateString()}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {invoice.notes && (
+                              <div>
+                                <span className="font-medium text-sm">Notes:</span>
+                                <p className="text-muted-foreground mt-1">{invoice.notes}</p>
+                              </div>
+                            )}
+                            
+                            {invoice.status === 'awaiting_payment' && (
+                              <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+                                <Button 
+                                  onClick={async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('planner_invoices')
+                                        .update({ status: 'paid_planner' })
+                                        .eq('id', invoice.id);
+
+                                      if (error) throw error;
+
+                                      toast({
+                                        title: "Payment marked as complete",
+                                        description: "The planner has been notified."
+                                      });
+
+                                      fetchUserData();
+                                    } catch (error) {
+                                      toast({
+                                        title: "Error updating payment",
+                                        description: "Please try again.",
+                                        variant: "destructive"
+                                      });
+                                    }
+                                  }}
+                                  className="flex-1 sm:flex-none"
+                                  size="sm"
+                                >
+                                  <CreditCard className="w-4 h-4 mr-2" />
+                                  Mark as Paid
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <CreditCard className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No invoices yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Invoices from planners will appear here
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
             </>
           )}
