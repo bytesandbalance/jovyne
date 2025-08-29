@@ -123,7 +123,7 @@ export default function DashboardPage() {
           .from('planner_requests')
           .select(`
             *,
-            clients!planner_requests_client_id_fkey (
+            clients (
               user_id,
               full_name,
               email,
@@ -132,6 +132,7 @@ export default function DashboardPage() {
           `)
           .order('created_at', { ascending: false });
         
+        console.log('Planner requests with clients:', requestsData);
         setPlannerRequests(requestsData || []);
       } else {
         // Fetch client's own requests and invoices
@@ -151,7 +152,7 @@ export default function DashboardPage() {
                 id,
                 business_name,
                 user_id,
-                profiles!planners_user_id_fkey (
+                profiles (
                   full_name,
                   email,
                   phone
@@ -287,39 +288,57 @@ export default function DashboardPage() {
 
   const handleRequestAction = async (requestId: string, action: 'approved' | 'rejected') => {
     try {
-      // Update the request status
-      const { error } = await supabase
+      console.log('Starting request action:', { requestId, action });
+      
+      // Update the request status first
+      const { error: updateError } = await supabase
         .from('planner_requests')
         .update({ status: action })
         .eq('id', requestId);
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('Error updating status:', updateError);
+        throw updateError;
+      }
 
-      // Get the request details and client info for notification
+      console.log('Status updated successfully to:', action);
+
+      // Get the client info separately to ensure we can access it
       const request = plannerRequests.find(r => r.id === requestId);
-      console.log('Request details for notification:', request);
+      console.log('Found request:', request);
       
-      if (request?.clients?.user_id && user?.id) {
-        console.log('Sending notification to client:', request.clients.user_id);
-        
-        const { error: messageError } = await supabase
-          .from('messages')
-          .insert({
-            sender_id: user.id,
-            recipient_id: request.clients.user_id,
-            subject: action === 'approved' ? 'Request Approved' : 'Request Declined',
-            message: action === 'approved' 
-              ? `Great news! Your planner request "${request.title}" has been approved by ${plannerProfile?.business_name || 'a planner'}. We'll be in touch soon to discuss next steps and planning details.`
-              : `Thank you for your interest. Your planner request "${request.title}" was declined by ${plannerProfile?.business_name || 'the planner'}. You may want to try submitting another request with different requirements.`
-          });
+      if (request?.client_id && user?.id) {
+        // Get client user_id directly
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('user_id, full_name')
+          .eq('id', request.client_id)
+          .single();
 
-        if (messageError) {
-          console.error('Error sending notification:', messageError);
+        if (!clientError && clientData?.user_id) {
+          console.log('Sending notification to client user_id:', clientData.user_id);
+          
+          const { error: messageError } = await supabase
+            .from('messages')
+            .insert({
+              sender_id: user.id,
+              recipient_id: clientData.user_id,
+              subject: action === 'approved' ? 'Request Approved' : 'Request Declined',
+              message: action === 'approved' 
+                ? `Great news! Your planner request "${request.title}" has been approved by ${plannerProfile?.business_name || 'a planner'}. We'll be in touch soon to discuss next steps and planning details.`
+                : `Thank you for your interest. Your planner request "${request.title}" was declined by ${plannerProfile?.business_name || 'the planner'}. You may want to try submitting another request with different requirements.`
+            });
+
+          if (messageError) {
+            console.error('Error sending notification:', messageError);
+          } else {
+            console.log('Notification sent successfully');
+          }
         } else {
-          console.log('Notification sent successfully');
+          console.error('Could not fetch client data:', clientError);
         }
       } else {
-        console.error('Missing client user_id or planner user_id for notification');
+        console.error('Missing request client_id or planner user_id');
       }
 
       toast({
