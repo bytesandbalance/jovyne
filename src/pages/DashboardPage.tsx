@@ -140,7 +140,8 @@ export default function DashboardPage() {
           .from('clients')
           .select('id')
           .eq('user_id', user?.id)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (clientData) {
           // Fetch client's planner requests
