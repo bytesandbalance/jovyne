@@ -154,15 +154,6 @@ export default function ClientDashboardRestructured({ user, clientData }: Client
 
       setInvoices(allInvoices);
 
-      // Fetch events where client is involved
-      const { data: eventsData } = await supabase
-        .from('events')
-        .select('*')
-        .eq('client_id', clientData.user_id)
-        .order('event_date', { ascending: true });
-
-      setEvents(eventsData || []);
-
     } catch (error) {
       console.error('Error fetching client data:', error);
       toast({

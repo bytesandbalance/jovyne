@@ -53,68 +53,6 @@ export type Database = {
         }
         Relationships: []
       }
-      events: {
-        Row: {
-          budget: number | null
-          client_id: string
-          created_at: string
-          description: string | null
-          event_date: string
-          event_time: string | null
-          guest_count: number | null
-          id: string
-          notes: string | null
-          planner_id: string
-          status: Database["public"]["Enums"]["event_status"] | null
-          title: string
-          updated_at: string
-          venue_address: string | null
-          venue_name: string | null
-        }
-        Insert: {
-          budget?: number | null
-          client_id: string
-          created_at?: string
-          description?: string | null
-          event_date: string
-          event_time?: string | null
-          guest_count?: number | null
-          id?: string
-          notes?: string | null
-          planner_id: string
-          status?: Database["public"]["Enums"]["event_status"] | null
-          title: string
-          updated_at?: string
-          venue_address?: string | null
-          venue_name?: string | null
-        }
-        Update: {
-          budget?: number | null
-          client_id?: string
-          created_at?: string
-          description?: string | null
-          event_date?: string
-          event_time?: string | null
-          guest_count?: number | null
-          id?: string
-          notes?: string | null
-          planner_id?: string
-          status?: Database["public"]["Enums"]["event_status"] | null
-          title?: string
-          updated_at?: string
-          venue_address?: string | null
-          venue_name?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "events_planner_id_fkey"
-            columns: ["planner_id"]
-            isOneToOne: false
-            referencedRelation: "planners"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       helper_invoices: {
         Row: {
           amount: number | null
@@ -265,13 +203,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_requests_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -482,13 +413,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "planner_invoices_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "planner_invoices_planner_id_fkey"
             columns: ["planner_id"]
             isOneToOne: false
@@ -565,13 +489,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "planner_requests_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -717,13 +634,6 @@ export type Database = {
           rating?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "reviews_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "reviews_planner_id_fkey"
             columns: ["planner_id"]

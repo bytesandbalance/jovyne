@@ -48,7 +48,6 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newInvoice, setNewInvoice] = useState({
     client_id: '',
-    event_id: '',
     amount: '',
     description: '',
     due_date: ''
@@ -86,15 +85,6 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
       }));
       
       setInvoices(transformedInvoices);
-
-      // Fetch events
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('events')
-        .select('id, title, event_date')
-        .eq('planner_id', plannerProfile.id);
-
-      if (eventsError) throw eventsError;
-      setEvents(eventsData || []);
 
       // Fetch clients
       const { data: clientsData, error: clientsError } = await supabase
@@ -149,7 +139,6 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
         .insert([{
           planner_id: plannerProfile.id,
           client_id: newInvoice.client_id,
-          event_id: newInvoice.event_id || null,
           amount: parseFloat(newInvoice.amount),
           job_title: newInvoice.description,
           event_date: newInvoice.due_date || null,
@@ -163,7 +152,6 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
       */
       setNewInvoice({
         client_id: '',
-        event_id: '',
         amount: '',
         description: '',
         due_date: ''
@@ -197,12 +185,6 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
     return client?.full_name || 'Unknown Client';
-  };
-
-  const getEventTitle = (eventId?: string) => {
-    if (!eventId) return null;
-    const event = events.find(e => e.id === eventId);
-    return event?.title || 'Unknown Event';
   };
 
   if (loading) {
@@ -257,41 +239,24 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
                 </Select>
               </div>
               <div>
-                <Label htmlFor="invoice-event">Event (Optional)</Label>
-                <Select value={newInvoice.event_id} onValueChange={(value) => setNewInvoice(prev => ({ ...prev, event_id: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an event (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {events.map(event => (
-                      <SelectItem key={event.id} value={event.id}>
-                        {event.title} - {new Date(event.event_date).toLocaleDateString()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="invoice-amount">Amount *</Label>
+                <Input
+                  id="invoice-amount"
+                  type="number"
+                  step="0.01"
+                  value={newInvoice.amount}
+                  onChange={(e) => setNewInvoice(prev => ({ ...prev, amount: e.target.value }))}
+                  placeholder="0.00"
+                />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="invoice-amount">Amount *</Label>
-                  <Input
-                    id="invoice-amount"
-                    type="number"
-                    step="0.01"
-                    value={newInvoice.amount}
-                    onChange={(e) => setNewInvoice(prev => ({ ...prev, amount: e.target.value }))}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="invoice-due-date">Due Date</Label>
-                  <Input
-                    id="invoice-due-date"
-                    type="date"
-                    value={newInvoice.due_date}
-                    onChange={(e) => setNewInvoice(prev => ({ ...prev, due_date: e.target.value }))}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="invoice-due-date">Due Date</Label>
+                <Input
+                  id="invoice-due-date"
+                  type="date"
+                  value={newInvoice.due_date}
+                  onChange={(e) => setNewInvoice(prev => ({ ...prev, due_date: e.target.value }))}
+                />
               </div>
               <div>
                 <Label htmlFor="invoice-description">Description</Label>
@@ -389,11 +354,6 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
                       <p className="text-sm text-muted-foreground truncate">
                         {getClientName(invoice.client_id)}
                       </p>
-                      {getEventTitle(invoice.event_id) && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          Event: {getEventTitle(invoice.event_id)}
-                        </p>
-                      )}
                       <p className="text-sm text-muted-foreground break-words">
                         Issued: {new Date(invoice.issued_date).toLocaleDateString()}
                         {invoice.due_date && (
