@@ -176,6 +176,54 @@ export default function DashboardPage() {
             .order('created_at', { ascending: false });
 
           setClientInvoices(clientInvoicesData || []);
+        } else {
+          console.log('No client data found, creating client record...');
+          
+          // Create client record if it doesn't exist
+          const { data: newClientData, error: createError } = await supabase
+            .from('clients')
+            .insert({
+              user_id: user.id,
+              full_name: profile?.full_name || '',
+              email: profile?.email || user.email || ''
+            })
+            .select()
+            .single();
+
+          console.log('Created client record:', { newClientData, createError });
+          
+          if (newClientData && !createError) {
+            // Fetch requests for the newly created client
+            const { data: clientRequestsData, error: requestsError } = await supabase
+              .from('planner_requests')
+              .select(`
+                *,
+                planners (
+                  id,
+                  business_name,
+                  user_id,
+                  profiles (
+                    full_name,
+                    email,
+                    phone
+                  )
+                )
+              `)
+              .eq('client_id', newClientData.id)
+              .order('created_at', { ascending: false });
+
+            console.log('New client requests result:', { clientRequestsData, requestsError });
+            setClientRequests(clientRequestsData || []);
+
+            // Fetch client's planner invoices for newly created client
+            const { data: clientInvoicesData } = await supabase
+              .from('planner_invoices')
+              .select('*')
+              .eq('client_id', newClientData.id)
+              .order('created_at', { ascending: false });
+
+            setClientInvoices(clientInvoicesData || []);
+          }
         }
       }
     } catch (error) {
