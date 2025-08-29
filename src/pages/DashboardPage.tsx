@@ -135,18 +135,18 @@ export default function DashboardPage() {
         console.log('Planner requests with clients:', requestsData);
         setPlannerRequests(requestsData || []);
       } else {
-        // Fetch client's own requests and invoices
-        const { data: clientData, error: clientError } = await supabase
+        // Fetch client's own requests and invoices - get ALL client records for this user
+        const { data: allClientData, error: clientError } = await supabase
           .from('clients')
           .select('id')
-          .eq('user_id', user?.id)
-          .limit(1)
-          .maybeSingle();
+          .eq('user_id', user?.id);
 
-        console.log('Client lookup result:', { clientData, clientError, userId: user?.id });
+        console.log('All client records result:', { allClientData, clientError, userId: user?.id });
 
-        if (clientData) {
-          // Fetch client's planner requests
+        if (allClientData && allClientData.length > 0) {
+          const clientIds = allClientData.map(c => c.id);
+          
+          // Fetch client's planner requests from ALL their client records
           const { data: clientRequestsData, error: requestsError } = await supabase
             .from('planner_requests')
             .select(`
@@ -154,30 +154,25 @@ export default function DashboardPage() {
               planners (
                 id,
                 business_name,
-                user_id,
-                profiles (
-                  full_name,
-                  email,
-                  phone
-                )
+                user_id
               )
             `)
-            .eq('client_id', clientData.id)
+            .in('client_id', clientIds)
             .order('created_at', { ascending: false });
 
-          console.log('Client requests result:', { clientRequestsData, requestsError, clientId: clientData.id });
+          console.log('Client requests result:', { clientRequestsData, requestsError, clientIds });
           setClientRequests(clientRequestsData || []);
 
-          // Fetch client's planner invoices
+          // Fetch client's planner invoices from ALL their client records
           const { data: clientInvoicesData } = await supabase
             .from('planner_invoices')
             .select('*')
-            .eq('client_id', clientData.id)
+            .in('client_id', clientIds)
             .order('created_at', { ascending: false });
 
           setClientInvoices(clientInvoicesData || []);
         } else {
-          console.log('No client data found, creating client record...');
+          console.log('No client records found, creating client record...');
           
           // Create client record if it doesn't exist
           const { data: newClientData, error: createError } = await supabase
@@ -193,36 +188,8 @@ export default function DashboardPage() {
           console.log('Created client record:', { newClientData, createError });
           
           if (newClientData && !createError) {
-            // Fetch requests for the newly created client
-            const { data: clientRequestsData, error: requestsError } = await supabase
-              .from('planner_requests')
-              .select(`
-                *,
-                planners (
-                  id,
-                  business_name,
-                  user_id,
-                  profiles (
-                    full_name,
-                    email,
-                    phone
-                  )
-                )
-              `)
-              .eq('client_id', newClientData.id)
-              .order('created_at', { ascending: false });
-
-            console.log('New client requests result:', { clientRequestsData, requestsError });
-            setClientRequests(clientRequestsData || []);
-
-            // Fetch client's planner invoices for newly created client
-            const { data: clientInvoicesData } = await supabase
-              .from('planner_invoices')
-              .select('*')
-              .eq('client_id', newClientData.id)
-              .order('created_at', { ascending: false });
-
-            setClientInvoices(clientInvoicesData || []);
+            setClientRequests([]);
+            setClientInvoices([]);
           }
         }
       }
