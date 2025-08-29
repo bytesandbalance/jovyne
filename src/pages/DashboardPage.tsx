@@ -460,9 +460,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
-            {isPlannerView && <TabsTrigger value="overview">Overview</TabsTrigger>}
-            {isPlannerView && <TabsTrigger value="events">Events</TabsTrigger>}
+          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-3xl mx-auto p-1 h-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             {isPlannerView && (
               <>
