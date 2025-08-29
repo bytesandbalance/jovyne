@@ -23,19 +23,6 @@ export default function DashboardPage() {
   const { user } = useAuthContext();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  
-  // Set default tab based on user role
-  const getDefaultTab = () => {
-    const urlTab = searchParams.get('tab');
-    if (urlTab) return urlTab;
-    
-    // Default to 'overview' for planners, 'helper-dashboard' for helpers, 'profile' for clients
-    if (profile?.user_role === 'planner') return 'overview';
-    if (profile?.user_role === 'helper') return 'helper-dashboard';
-    return 'profile';
-  };
-  
-  const defaultTab = getDefaultTab();
   const [profile, setProfile] = useState<any>(null);
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
   const [helperProfile, setHelperProfile] = useState<any>(null);
@@ -44,6 +31,10 @@ export default function DashboardPage() {
   const [clientRequests, setClientRequests] = useState<any[]>([]);
   const [clientInvoices, setClientInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Safe default tab calculation that doesn't cause initialization errors
+  const urlTab = searchParams.get('tab');
+  const defaultTab = urlTab || 'profile'; // Default to profile for all users initially
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [isPlannerDialogOpen, setIsPlannerDialogOpen] = useState(false);
