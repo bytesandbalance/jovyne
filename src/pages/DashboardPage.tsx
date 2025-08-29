@@ -136,16 +136,18 @@ export default function DashboardPage() {
         setPlannerRequests(requestsData || []);
       } else {
         // Fetch client's own requests and invoices
-        const { data: clientData } = await supabase
+        const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('id')
           .eq('user_id', user?.id)
           .limit(1)
           .maybeSingle();
 
+        console.log('Client lookup result:', { clientData, clientError, userId: user?.id });
+
         if (clientData) {
           // Fetch client's planner requests
-          const { data: clientRequestsData } = await supabase
+          const { data: clientRequestsData, error: requestsError } = await supabase
             .from('planner_requests')
             .select(`
               *,
@@ -163,6 +165,7 @@ export default function DashboardPage() {
             .eq('client_id', clientData.id)
             .order('created_at', { ascending: false });
 
+          console.log('Client requests result:', { clientRequestsData, requestsError, clientId: clientData.id });
           setClientRequests(clientRequestsData || []);
 
           // Fetch client's planner invoices
