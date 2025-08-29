@@ -479,7 +479,6 @@ export default function DashboardPage() {
             {isPlannerView && (
               <>
                 <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
-                <TabsTrigger value="tasks" className="px-4 py-2">Tasks</TabsTrigger>
                 <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
                 <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
@@ -877,11 +876,6 @@ export default function DashboardPage() {
                     </CardContent>
                   </Card>
                 )}
-              </TabsContent>
-
-              {/* Task Tracker Tab */}
-              <TabsContent value="tasks" className="space-y-6">
-                <EventTaskTracker plannerProfile={plannerProfile} />
               </TabsContent>
 
               {/* Client Contacts Tab */}
