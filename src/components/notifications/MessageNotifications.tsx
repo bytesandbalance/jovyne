@@ -166,6 +166,15 @@ export function MessageNotifications() {
       navigate('/dashboard?tab=invoicing');
     } else if (message.subject.toLowerCase().includes('application')) {
       navigate('/dashboard?tab=applications'); // Both helpers and planners have applications tab
+    } else if (message.subject.toLowerCase().includes('request') || 
+               message.subject.toLowerCase().includes('approve') || 
+               message.subject.toLowerCase().includes('approved') || 
+               message.subject.toLowerCase().includes('decline') || 
+               message.subject.toLowerCase().includes('declined') || 
+               message.subject.toLowerCase().includes('reject') || 
+               message.subject.toLowerCase().includes('rejected')) {
+      // Navigate to requests tab for request-related notifications
+      navigate('/dashboard?tab=requests');
     } else {
       // Default navigation
       navigate('/dashboard');
