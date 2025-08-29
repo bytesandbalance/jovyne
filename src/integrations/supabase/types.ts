@@ -565,7 +565,7 @@ export type Database = {
           planner_id: string | null
           required_services: string[] | null
           start_time: string | null
-          status: Database["public"]["Enums"]["helper_request_status"] | null
+          status: Database["public"]["Enums"]["planner_request_status"] | null
           title: string
           total_hours: number | null
           updated_at: string
@@ -583,7 +583,7 @@ export type Database = {
           planner_id?: string | null
           required_services?: string[] | null
           start_time?: string | null
-          status?: Database["public"]["Enums"]["helper_request_status"] | null
+          status?: Database["public"]["Enums"]["planner_request_status"] | null
           title: string
           total_hours?: number | null
           updated_at?: string
@@ -601,7 +601,7 @@ export type Database = {
           planner_id?: string | null
           required_services?: string[] | null
           start_time?: string | null
-          status?: Database["public"]["Enums"]["helper_request_status"] | null
+          status?: Database["public"]["Enums"]["planner_request_status"] | null
           title?: string
           total_hours?: number | null
           updated_at?: string
@@ -809,6 +809,7 @@ export type Database = {
         | "paid_planner"
         | "completed"
       helper_request_status: "open" | "in_review" | "filled" | "cancelled"
+      planner_request_status: "pending" | "approved" | "rejected"
       user_role: "client" | "planner" | "helper"
     }
     CompositeTypes: {
@@ -953,6 +954,7 @@ export const Constants = {
         "completed",
       ],
       helper_request_status: ["open", "in_review", "filled", "cancelled"],
+      planner_request_status: ["pending", "approved", "rejected"],
       user_role: ["client", "planner", "helper"],
     },
   },

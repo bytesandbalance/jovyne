@@ -93,7 +93,7 @@ export function RequestDialog({
             budget: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
             total_hours: totalHours,
             required_services: skills,
-            status: 'open'
+        status: 'pending'
           });
 
         if (error) throw error;

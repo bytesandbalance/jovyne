@@ -188,9 +188,15 @@ export default function PlannersPage() {
 
   const handleRequestAction = async (requestId: string, action: 'approved' | 'rejected') => {
     try {
+      // Map to new status values
+      const statusMap = {
+        'approved': 'approved',
+        'rejected': 'rejected'  
+      };
+      
       const { error } = await supabase
         .from('planner_requests')
-        .update({ status: action })
+        .update({ status: statusMap[action] as any })  // Using any to handle type mismatch during transition
         .eq('id', requestId);
 
       if (error) throw error;
@@ -495,17 +501,14 @@ export default function PlannersPage() {
         )}
 
         {/* Client Request Dialog */}
-        {showRequestDialog && (
-          <ClientRequestDialog
-            open={showRequestDialog}
-            onOpenChange={setShowRequestDialog}
-            targetPlanner={selectedPlanner}
-            onSuccess={() => {
-              setShowRequestDialog(false);
-              fetchUserData();
-            }}
-          />
-        )}
+        <ClientRequestDialog
+          isOpen={showRequestDialog}
+          onClose={() => setShowRequestDialog(false)}
+          recipientId={selectedPlanner?.id || ''}
+          recipientType="planner"
+          recipientName={selectedPlanner?.business_name || ''}
+          clientData={null}
+        />
       </div>
     </div>
   );

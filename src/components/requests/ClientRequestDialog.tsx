@@ -111,7 +111,7 @@ export default function ClientRequestDialog({
             budget: formData.budget ? parseFloat(formData.budget) : null,
             total_hours: totalHours,
             required_services: formData.required_services,
-            status: 'open'
+        status: 'pending'
           });
 
         if (error) throw error;

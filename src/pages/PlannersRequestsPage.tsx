@@ -199,7 +199,7 @@ export default function PlannersRequestsPage() {
       const { data: requestsData } = await supabase
         .from('planner_requests')
         .select('*')
-        .eq('status', 'open')
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       setRequests(requestsData || []);
@@ -293,7 +293,7 @@ export default function PlannersRequestsPage() {
           budget: parseFloat(newRequest.budget),
           total_hours: totalHours,
           required_services: newRequest.required_services,
-          status: 'open'
+          status: 'pending'
         });
 
       if (error) throw error;

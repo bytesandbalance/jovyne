@@ -273,7 +273,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
+          <TabsList className={`${isPlannerView ? 'flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6' : isHelperView ? 'grid w-full max-w-md grid-cols-2' : 'grid w-full max-w-md grid-cols-3'}`}>
             {!isHelperView && <TabsTrigger value="overview">Overview</TabsTrigger>}
             {!isHelperView && <TabsTrigger value="events">Events</TabsTrigger>}
             <TabsTrigger value="profile">Profile</TabsTrigger>
@@ -281,7 +281,6 @@ export default function DashboardPage() {
               <>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="clients">Clients</TabsTrigger>
-                <TabsTrigger value="applications">Applications</TabsTrigger>
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
               </>
@@ -589,114 +588,6 @@ export default function DashboardPage() {
   <PlannerPendingPayments plannerProfile={plannerProfile} />
   <InvoicingSection plannerProfile={plannerProfile} />
 </div>
-              </TabsContent>
-
-              {/* Applications Tab */}
-              <TabsContent value="applications" className="space-y-6">
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">Helper applications will be available when the new workflow is implemented</p>
-                </div>
-              </TabsContent>
-
-              {/* Analytics Tab */}
-              <TabsContent value="analytics" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Business Analytics</h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">$12,450</div>
-                      <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Events Completed</CardTitle>
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{events.filter(e => e.status === 'completed').length}</div>
-                      <p className="text-xs text-muted-foreground">+12% from last month</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Client Satisfaction</CardTitle>
-                      <Star className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{plannerProfile?.average_rating || '0.0'}</div>
-                      <p className="text-xs text-muted-foreground">Based on {plannerProfile?.total_reviews || 0} reviews</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{events.filter(e => e.status === 'planning').length}</div>
-                      <p className="text-xs text-muted-foreground">Currently in progress</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5" />
-                      Performance Overview
-                    </CardTitle>
-                    <CardDescription>Your business metrics and trends</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-semibold">Event Types Distribution</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Weddings</span>
-                            <span className="text-sm font-medium">45%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Corporate Events</span>
-                            <span className="text-sm font-medium">30%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Birthday Parties</span>
-                            <span className="text-sm font-medium">25%</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <h4 className="font-semibold">Monthly Performance</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Events This Month</span>
-                            <span className="text-sm font-medium">{events.length}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Average Event Value</span>
-                            <span className="text-sm font-medium">$2,490</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Client Retention</span>
-                            <span className="text-sm font-medium">85%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </TabsContent>
             </>
           )}
