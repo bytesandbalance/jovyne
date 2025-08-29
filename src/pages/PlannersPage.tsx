@@ -64,27 +64,63 @@ export default function PlannersPage() {
     if (!user) return;
     
     try {
+      console.log('Fetching user data for user ID:', user.id);
+      
       // Get user profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
       
+      console.log('User profile:', profile);
+      console.log('Profile error:', profileError);
       setUserProfile(profile);
 
       // If user is a client, fetch their planner requests
       if (profile?.user_role === 'client') {
-        const { data: clientRecord } = await supabase
+        console.log('User is a client, fetching client record...');
+        
+        let finalClientData = null;
+        
+        const { data: clientRecord, error: clientError } = await supabase
           .from('clients')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
         
-        console.log('Client data fetched:', clientRecord);
-        setClientData(clientRecord);
+        console.log('Client record:', clientRecord);
+        console.log('Client error:', clientError);
         
-        if (clientRecord) {
+        if (!clientRecord) {
+          console.log('No client record found, creating one...');
+          
+          // Create client record if it doesn't exist
+          const { data: newClientRecord, error: createError } = await supabase
+            .from('clients')
+            .insert({
+              user_id: user.id,
+              full_name: profile?.full_name || '',
+              email: profile?.email || ''
+            })
+            .select()
+            .single();
+          
+          console.log('New client record:', newClientRecord);
+          console.log('Create error:', createError);
+          
+          if (createError) {
+            console.error('Error creating client record:', createError);
+          } else {
+            finalClientData = newClientRecord;
+            setClientData(newClientRecord);
+          }
+        } else {
+          finalClientData = clientRecord;
+          setClientData(clientRecord);
+        }
+        
+        if (finalClientData?.id) {
           const { data: requests } = await supabase
             .from('planner_requests')
             .select(`
@@ -94,7 +130,7 @@ export default function PlannersPage() {
                 profiles:user_id (full_name, avatar_url)
               )
             `)
-            .eq('client_id', clientRecord.id)
+            .eq('client_id', finalClientData.id)
             .order('created_at', { ascending: false });
           
           setPlannerRequests(requests || []);
@@ -400,10 +436,12 @@ export default function PlannersPage() {
                         <Button 
                           className="w-full hover-bounce"
                           onClick={() => {
+                            console.log('Send Request clicked. Client data:', clientData);
                             if (!clientData) {
+                              console.error('No client data available');
                               toast({
                                 title: "Client profile not found",
-                                description: "Please make sure you're logged in as a client.",
+                                description: "Please refresh the page and try again.",
                                 variant: "destructive"
                               });
                               return;
