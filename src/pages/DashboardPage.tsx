@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import ClientContactList from '@/components/dashboard/ClientContactList';
 import PlannerPendingPayments from '@/components/dashboard/PlannerPendingPayments';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
+import ClientInvoiceSection from '@/components/dashboard/ClientInvoiceSection';
 import PlannerApplications from '@/components/dashboard/PlannerApplications';
 import HelperDashboardFixed from '@/components/dashboard/HelperDashboardFixed';
 import ClientDashboardRestructured from '@/components/dashboard/ClientDashboardRestructured';
@@ -616,7 +617,7 @@ const DashboardPage = () => {
                 <ClientDashboardRestructured user={user} clientData={userProfile} />
               </TabsContent>
               <TabsContent value="invoicing" className="space-y-6">
-                <ClientDashboardRestructured user={user} clientData={userProfile} />
+                <ClientInvoiceSection clientProfile={userProfile} />
               </TabsContent>
             </>
           )}

@@ -328,6 +328,57 @@ export type Database = {
         }
         Relationships: []
       }
+      planner_applications: {
+        Row: {
+          cover_letter: string | null
+          created_at: string
+          estimated_hours: number | null
+          id: string
+          planner_id: string
+          planner_request_id: string
+          proposed_fee: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cover_letter?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          id?: string
+          planner_id: string
+          planner_request_id: string
+          proposed_fee?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cover_letter?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          id?: string
+          planner_id?: string
+          planner_request_id?: string
+          proposed_fee?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_applications_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_applications_planner_request_id_fkey"
+            columns: ["planner_request_id"]
+            isOneToOne: false
+            referencedRelation: "planner_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planner_invoices: {
         Row: {
           amount: number | null

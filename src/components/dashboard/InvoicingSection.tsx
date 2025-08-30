@@ -1,33 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, DollarSign, FileText, Calendar, Clock, Eye } from 'lucide-react';
+import { DollarSign, FileText, Clock, AlertCircle, Send, Edit, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-interface Invoice {
+// Data structures to match the updated invoice table
+interface PlannerInvoice {
   id: string;
-  invoice_number: string;
-  amount: number;
-  status: string;
-  due_date?: string;
-  issued_date: string;
-  description?: string;
-  line_items: any;
-  event_id?: string;
   client_id: string;
-}
-
-interface Event {
-  id: string;
-  title: string;
+  planner_id: string;
+  job_title: string;
+  client_name: string;
+  client_contact_email: string;
+  planner_name: string;
   event_date: string;
+  amount: number;
+  status: 'draft' | 'sent_to_planner' | 'awaiting_payment' | 'paid_planner' | 'completed';
+  sent_at?: string;
+  paid_at?: string;
+  completed_at?: string;
+  notes?: string;
+  created_at: string;
+  line_items: any; // Changed to any to handle JSON from database
 }
 
 interface Client {
@@ -40,152 +41,214 @@ interface InvoicingSectionProps {
   plannerProfile: any;
 }
 
-export default function InvoicingSection({ plannerProfile }: InvoicingSectionProps) {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
+const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) => {
+  const [invoices, setInvoices] = useState<PlannerInvoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newInvoice, setNewInvoice] = useState({
-    client_id: '',
+  const [selectedInvoice, setSelectedInvoice] = useState<PlannerInvoice | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
     amount: '',
-    description: '',
-    due_date: ''
+    notes: '',
+    line_items: []
   });
 
   useEffect(() => {
-    if (plannerProfile) {
+    if (plannerProfile?.id) {
       fetchInvoicesAndData();
     }
   }, [plannerProfile]);
 
   const fetchInvoicesAndData = async () => {
     try {
-      // Fetch planner invoices
+      setLoading(true);
+
+      // Fetch invoices for this planner
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('planner_invoices')
         .select('*')
         .eq('planner_id', plannerProfile.id)
         .order('created_at', { ascending: false });
 
-      if (invoicesError) throw invoicesError;
-      
-      // Transform planner_invoices to match Invoice interface
-      const transformedInvoices = (invoicesData || []).map(invoice => ({
-        id: invoice.id,
-        invoice_number: `PI-${invoice.id.slice(0, 8)}`, // Generate invoice number from ID
-        amount: invoice.amount || 0,
-        status: invoice.status,
-        due_date: invoice.event_date,
-        issued_date: invoice.created_at,
-        description: invoice.job_title,
-        line_items: invoice.line_items,
-        event_id: invoice.event_id,
-        client_id: invoice.client_id
-      }));
-      
-      setInvoices(transformedInvoices);
+      if (invoicesError) {
+        console.error('Error fetching invoices:', invoicesError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch invoices"
+        });
+        return;
+      }
 
-      // Fetch clients
-      const { data: clientsData, error: clientsError } = await supabase
-        .from('clients')
-        .select('id, full_name, email')
-        .eq('planner_id', plannerProfile.id);
+      // Fetch client data
+      const clientIds = [...new Set((invoicesData || []).map(inv => inv.client_id))];
+      if (clientIds.length > 0) {
+        const { data: clientsData, error: clientsError } = await supabase
+          .from('clients')
+          .select('id, full_name, email')
+          .in('id', clientIds);
 
-      if (clientsError) throw clientsError;
-      setClients(clientsData || []);
+        if (clientsError) {
+          console.error('Error fetching clients:', clientsError);
+        } else {
+          setClients(clientsData || []);
+        }
+      }
+
+      setInvoices(invoicesData || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error in fetchInvoicesAndData:', error);
       toast({
+        variant: "destructive",
         title: "Error",
-        description: "Failed to load invoicing data",
-        variant: "destructive"
+        description: "An unexpected error occurred"
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const generateInvoiceNumber = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `INV-${year}${month}-${random}`;
-  };
-
-  const createInvoice = async () => {
-    if (!newInvoice.client_id || !newInvoice.amount) {
-      toast({
-        title: "Validation Error",
-        description: "Please select a client and enter an amount",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  // Handle invoice actions
+  const handleSendInvoice = async (invoiceId: string) => {
     try {
-      // Note: Direct invoice creation is disabled as it should go through the application approval flow
-      toast({
-        title: "Feature Not Available",
-        description: "Invoices are now created automatically when applications are approved",
-        variant: "default"
-      });
-      return;
-
-      /* When manual invoice creation is needed, uncomment this:
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('planner_invoices')
-        .insert([{
-          planner_id: plannerProfile.id,
-          client_id: newInvoice.client_id,
-          amount: parseFloat(newInvoice.amount),
-          job_title: newInvoice.description,
-          event_date: newInvoice.due_date || null,
-          status: 'draft'
-        }])
-        .select()
-        .single();
-        
-      if (error) throw error;
-      setInvoices(prev => [data, ...prev]);
-      */
-      setNewInvoice({
-        client_id: '',
-        amount: '',
-        description: '',
-        due_date: ''
-      });
-      setIsDialogOpen(false);
+        .update({ status: 'awaiting_payment' })
+        .eq('id', invoiceId);
 
+      if (error) throw error;
+
+      await fetchInvoicesAndData();
       toast({
-        title: "Invoice Created",
-        description: "New invoice has been created successfully",
+        title: "Success",
+        description: "Invoice sent to client successfully"
       });
     } catch (error) {
-      console.error('Error creating invoice:', error);
+      console.error('Error sending invoice:', error);
       toast({
+        variant: "destructive",
         title: "Error",
-        description: "Failed to create invoice",
-        variant: "destructive"
+        description: "Failed to send invoice"
       });
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'default';
-      case 'sent': return 'secondary';
-      case 'overdue': return 'destructive';
-      case 'cancelled': return 'outline';
-      default: return 'secondary';
+  const handleConfirmPayment = async (invoiceId: string) => {
+    try {
+      const { error } = await supabase
+        .from('planner_invoices')
+        .update({ status: 'completed' })
+        .eq('id', invoiceId);
+
+      if (error) throw error;
+
+      await fetchInvoicesAndData();
+      toast({
+        title: "Success",
+        description: "Payment confirmed successfully"
+      });
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to confirm payment"
+      });
     }
   };
 
+  const handleEditInvoice = (invoice: PlannerInvoice) => {
+    setSelectedInvoice(invoice);
+    setEditFormData({
+      amount: invoice.amount.toString(),
+      notes: invoice.notes || '',
+      line_items: invoice.line_items || []
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateInvoice = async () => {
+    if (!selectedInvoice) return;
+
+    try {
+      const { error } = await supabase
+        .from('planner_invoices')
+        .update({
+          amount: parseFloat(editFormData.amount),
+          notes: editFormData.notes,
+          line_items: editFormData.line_items
+        })
+        .eq('id', selectedInvoice.id);
+
+      if (error) throw error;
+
+      await fetchInvoicesAndData();
+      setIsEditDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Invoice updated successfully"
+      });
+    } catch (error) {
+      console.error('Error updating invoice:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update invoice"
+      });
+    }
+  };
+
+  // Get status color and display text for badges
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return 'secondary';
+      case 'awaiting_payment':
+        return 'default';
+      case 'paid_planner':
+        return 'outline';
+      case 'completed':
+        return 'default';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return 'Draft';
+      case 'awaiting_payment':
+        return 'Sent to Client';
+      case 'paid_planner':
+        return 'Paid by Client';
+      case 'completed':
+        return 'Completed';
+      default:
+        return status;
+    }
+  };
+
+  // Get client name from clients array
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
-    return client?.full_name || 'Unknown Client';
+    return client ? client.full_name : 'Unknown Client';
   };
+
+  // Calculate financial summaries
+  const totalRevenue = invoices
+    .filter(inv => inv.status === 'completed')
+    .reduce((sum, inv) => sum + inv.amount, 0);
+
+  const pendingAmount = invoices
+    .filter(inv => inv.status === 'awaiting_payment')
+    .reduce((sum, inv) => sum + inv.amount, 0);
+
+  const paidAmount = invoices
+    .filter(inv => inv.status === 'paid_planner')
+    .reduce((sum, inv) => sum + inv.amount, 0);
+
+  const totalInvoices = invoices.length;
 
   if (loading) {
     return (
@@ -200,188 +263,181 @@ export default function InvoicingSection({ plannerProfile }: InvoicingSectionPro
     );
   }
 
-  const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0);
-  const pendingAmount = invoices.filter(i => i.status === 'sent').reduce((sum, i) => sum + i.amount, 0);
-  const overdueAmount = invoices.filter(i => i.status === 'overdue').reduce((sum, i) => sum + i.amount, 0);
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Invoicing & Pricing</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Invoice
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Invoice</DialogTitle>
-              <DialogDescription>
-                Generate an invoice for your client
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="invoice-client">Client *</Label>
-                <Select value={newInvoice.client_id} onValueChange={(value) => setNewInvoice(prev => ({ ...prev, client_id: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.full_name} ({client.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="invoice-amount">Amount *</Label>
-                <Input
-                  id="invoice-amount"
-                  type="number"
-                  step="0.01"
-                  value={newInvoice.amount}
-                  onChange={(e) => setNewInvoice(prev => ({ ...prev, amount: e.target.value }))}
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <Label htmlFor="invoice-due-date">Due Date</Label>
-                <Input
-                  id="invoice-due-date"
-                  type="date"
-                  value={newInvoice.due_date}
-                  onChange={(e) => setNewInvoice(prev => ({ ...prev, due_date: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="invoice-description">Description</Label>
-                <Textarea
-                  id="invoice-description"
-                  value={newInvoice.description}
-                  onChange={(e) => setNewInvoice(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Invoice description or services provided"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={createInvoice}>
-                  Create Invoice
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <h2 className="text-2xl font-bold">Invoice Management</h2>
       </div>
 
-      {/* Financial Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Financial Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
+        
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Pending Payment</p>
                 <p className="text-2xl font-bold">${pendingAmount.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-red-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Overdue</p>
-                <p className="text-2xl font-bold">${overdueAmount.toFixed(2)}</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Paid by Client</p>
+                <p className="text-2xl font-bold">${paidAmount.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-purple-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Invoices</p>
-                <p className="text-2xl font-bold">{invoices.length}</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+                <p className="text-2xl font-bold">{totalInvoices}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Invoices List */}
+      {/* Invoices Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Invoices</CardTitle>
-          <CardDescription>Manage your billing and pricing</CardDescription>
+          <CardTitle>Invoice Management</CardTitle>
         </CardHeader>
         <CardContent>
           {invoices.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No invoices yet</p>
-              <p className="text-sm text-muted-foreground">Create your first invoice to get started</p>
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="mx-auto h-12 w-12 mb-4" />
+              <p>No invoices found</p>
+              <p className="text-sm">Invoices will appear here when clients approve your applications</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {invoices.map((invoice) => (
-                <div key={invoice.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-4">
-                  <div className="flex items-center gap-4 min-w-0 flex-1">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold truncate">{invoice.invoice_number}</h3>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {getClientName(invoice.client_id)}
-                      </p>
-                      <p className="text-sm text-muted-foreground break-words">
-                        Issued: {new Date(invoice.issued_date).toLocaleDateString()}
-                        {invoice.due_date && (
-                          <span className="block sm:inline">
-                            <span className="hidden sm:inline"> • </span>Due: {new Date(invoice.due_date).toLocaleDateString()}
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-4 flex-shrink-0">
-                    <div className="text-left sm:text-right">
-                      <p className="font-semibold text-lg">${invoice.amount.toFixed(2)}</p>
-                      <Badge variant={getStatusColor(invoice.status)} className="w-fit">
-                        {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Job Title</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Event Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invoices.map((invoice) => (
+                  <TableRow key={invoice.id}>
+                    <TableCell className="font-medium">
+                      {invoice.job_title}
+                    </TableCell>
+                    <TableCell>{invoice.client_name}</TableCell>
+                    <TableCell>
+                      {invoice.event_date ? new Date(invoice.event_date).toLocaleDateString() : '-'}
+                    </TableCell>
+                    <TableCell>${invoice.amount?.toFixed(2) || '0.00'}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusColor(invoice.status)}>
+                        {getStatusText(invoice.status)}
                       </Badge>
-                    </div>
-                    <Button variant="outline" size="sm" className="flex-shrink-0">
-                      <Eye className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        {invoice.status === 'draft' && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditInvoice(invoice)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm"
+                              onClick={() => handleSendInvoice(invoice.id)}
+                            >
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                        {invoice.status === 'paid_planner' && (
+                          <Button 
+                            size="sm"
+                            onClick={() => handleConfirmPayment(invoice.id)}
+                          >
+                            <Check className="h-4 w-4" />
+                            Confirm Receipt
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Invoice Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Invoice</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-amount">Amount</Label>
+              <Input 
+                id="edit-amount" 
+                type="number" 
+                value={editFormData.amount}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, amount: e.target.value }))}
+                placeholder="0.00" 
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-notes">Notes</Label>
+              <Textarea 
+                id="edit-notes" 
+                value={editFormData.notes}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Additional notes..." 
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateInvoice} className="flex-1">
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-}
+};
+
+export { InvoicingSection };
+export default InvoicingSection;
