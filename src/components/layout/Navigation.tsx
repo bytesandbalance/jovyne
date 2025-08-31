@@ -2,6 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { MessageNotifications } from '@/components/notifications/MessageNotifications';
+import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { 
   PartyPopper, 
   MapPin, 
@@ -11,18 +13,52 @@ import {
   LogOut,
   Menu
 } from 'lucide-react';
-import { useState } from 'react';
 
 export function Navigation() {
   const { user, signOut } = useAuthContext();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  const navItems = [
-    { href: '/', label: 'Discover', icon: MapPin },
-    { href: '/planners', label: 'Find Planners', icon: Users },
-    { href: '/dashboard', label: 'Dashboard', icon: Calendar },
-  ];
+  useEffect(() => {
+    if (user) {
+      fetchUserRole();
+    }
+  }, [user]);
+
+  const fetchUserRole = async () => {
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('user_role')
+        .eq('user_id', user?.id)
+        .single();
+      
+      setUserRole(profileData?.user_role || null);
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+    }
+  };
+
+  const getNavItems = () => {
+    const baseItems = [
+      { href: '/', label: 'Discover', icon: MapPin },
+      { href: '/dashboard', label: 'Dashboard', icon: Calendar },
+    ];
+
+    // Only show "Find Planners" for planners and helpers, not clients
+    if (userRole === 'planner' || userRole === 'helper') {
+      return [
+        { href: '/', label: 'Discover', icon: MapPin },
+        { href: '/planners', label: 'Find Planners', icon: Users },
+        { href: '/dashboard', label: 'Dashboard', icon: Calendar },
+      ];
+    }
+
+    return baseItems;
+  };
+
+  const navItems = getNavItems();
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b shadow-confetti">
