@@ -68,11 +68,39 @@ function ApplyButton({ requestId }: { requestId: string }) {
     }
 
     try {
-      // Application functionality is currently disabled
+      // Find the request data by fetching it
+      const { data: requestData } = await supabase
+        .from('helper_requests')
+        .select('*')
+        .eq('id', requestId)
+        .single();
+
+      if (!requestData) {
+        toast({
+          title: "Error",
+          description: "Request not found",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create helper application
+      const { error } = await supabase
+        .from('helper_applications')
+        .insert({
+          helper_request_id: requestId,
+          helper_id: helperData.id,
+          hourly_rate: helperData.hourly_rate || requestData.hourly_rate,
+          estimated_hours: requestData.total_hours,
+          status: 'pending',
+          cover_letter: `I would like to apply for your job "${requestData.title}" on ${new Date(requestData.event_date).toLocaleDateString()}. I am available and can help with the required tasks.`
+        });
+
+      if (error) throw error;
+
       toast({
-        title: "Feature Coming Soon",
-        description: "Job applications will be available in the new workflow",
-        variant: "default"
+        title: "Application submitted!",
+        description: "Your application has been sent to the requester"
       });
       return;
     } catch (error) {
@@ -436,13 +464,30 @@ export default function HelpersPage() {
     }
 
     try {
-      // Application functionality is currently disabled  
+      const request = requests.find(r => r.id === requestId);
+      if (!request) return;
+
+      // Create helper application
+      const { error } = await supabase
+        .from('helper_applications')
+        .insert({
+          helper_request_id: requestId,
+          helper_id: helperData.id,
+          hourly_rate: helperData.hourly_rate || request.hourly_rate,
+          estimated_hours: request.total_hours,
+          status: 'pending',
+          cover_letter: `I would like to apply for your job "${request.title}" on ${new Date(request.event_date).toLocaleDateString()}. I am available and can help with the required tasks.`
+        });
+
+      if (error) throw error;
+
       toast({
-        title: "Feature Coming Soon",
-        description: "Job applications will be available in the new workflow",
-        variant: "default"
+        title: "Application submitted!",
+        description: "Your application has been sent to the requester"
       });
-      return;
+
+      // Refresh data to update UI
+      fetchData();
     } catch (error) {
       console.error('Error applying for job:', error);
       toast({

@@ -66,33 +66,42 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
 
   const applyToRequest = async (requestId: string) => {
     try {
-      // Create a message to the requester instead of application
       const request = requests.find(r => r.id === requestId);
       if (!request) return;
 
-      const recipientId = request.planner_id ? request.planners?.user_id : request.clients?.user_id;
-      if (!recipientId) return;
+      // Get helper data to use current helper's rate as default
+      const { data: helperData } = await supabase
+        .from('helpers')
+        .select('hourly_rate')
+        .eq('id', helperId)
+        .single();
 
+      // Create helper application
       const { error } = await supabase
-        .from('messages')
+        .from('helper_applications')
         .insert({
-          sender_id: (await supabase.from('helpers').select('user_id').eq('id', helperId).single()).data?.user_id,
-          recipient_id: recipientId,
-          subject: 'Application for Helper Request',
-          message: `I would like to apply for your job "${request.title}" on ${new Date(request.event_date).toLocaleDateString()}. I am available and can help with the required tasks.`
+          helper_request_id: requestId,
+          helper_id: helperId,
+          hourly_rate: helperData?.hourly_rate || request.hourly_rate,
+          estimated_hours: request.total_hours,
+          status: 'pending',
+          cover_letter: `I would like to apply for your job "${request.title}" on ${new Date(request.event_date).toLocaleDateString()}. I am available and can help with the required tasks.`
         });
 
       if (error) throw error;
 
       toast({
-        title: "Application sent!",
+        title: "Application submitted!",
         description: "Your application has been sent to the requester"
       });
+
+      // Refresh requests to hide applied ones or show application status
+      fetchRequests();
     } catch (error) {
       console.error('Error applying to request:', error);
       toast({
         title: "Error",
-        description: "Failed to send application",
+        description: "Failed to submit application",
         variant: "destructive"
       });
     }

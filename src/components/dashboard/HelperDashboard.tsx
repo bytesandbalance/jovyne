@@ -18,9 +18,9 @@ import HelperInvoices from '@/components/helpers/HelperInvoices';
 interface HelperApplication {
   id: string;
   status: 'pending' | 'approved' | 'rejected';
-  applied_at: string;
+  created_at: string;
   hourly_rate: number;
-  message: string;
+  cover_letter: string;
   helper_requests: {
     title: string;
     description: string;
@@ -103,9 +103,32 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
 
   const fetchHelperData = async () => {
     try {
-      // For now, we'll show empty applications since the table was removed
-      // When the new application workflow is ready, this will be updated
-      setApplications([]);
+      // Fetch helper applications
+      const { data: applicationsData, error: applicationsError } = await supabase
+        .from('helper_applications')
+        .select('*')
+        .eq('helper_id', helperData.id)
+        .order('created_at', { ascending: false });
+
+      if (applicationsError) throw applicationsError;
+
+      // Fetch request details for applications
+      if (applicationsData && applicationsData.length > 0) {
+        const requestIds = applicationsData.map(app => app.helper_request_id);
+        const { data: requestsData } = await supabase
+          .from('helper_requests')
+          .select('*')
+          .in('id', requestIds);
+
+        const enrichedApplications = applicationsData.map(app => ({
+          ...app,
+          helper_requests: requestsData?.find(r => r.id === app.helper_request_id) || null
+        }));
+
+        setApplications(enrichedApplications as any);
+      } else {
+        setApplications([]);
+      }
 
       // Fetch available jobs from helper_requests
       let jobsQuery = supabase
@@ -130,11 +153,56 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
   };
 
   const handleApplyForJob = async (requestId: string) => {
-    toast({
-      title: "Feature Coming Soon",
-      description: "Job applications will be available when the new workflow is implemented",
-      variant: "default"
-    });
+    try {
+      // Check if already applied
+      const { data: existingApp } = await supabase
+        .from('helper_applications')
+        .select('id')
+        .eq('helper_request_id', requestId)
+        .eq('helper_id', helperData.id)
+        .single();
+
+      if (existingApp) {
+        toast({
+          title: "Already applied",
+          description: "You have already applied for this job",
+          variant: "default"
+        });
+        return;
+      }
+
+      const request = availableJobs.find(r => r.id === requestId);
+      if (!request) return;
+
+      // Create helper application
+      const { error } = await supabase
+        .from('helper_applications')
+        .insert({
+          helper_request_id: requestId,
+          helper_id: helperData.id,
+          hourly_rate: helperProfile.hourly_rate || request.hourly_rate,
+          estimated_hours: request.total_hours,
+          status: 'pending',
+          cover_letter: `I would like to apply for your job "${request.title}" on ${new Date(request.event_date).toLocaleDateString()}. I am available and can help with the required tasks.`
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Application submitted!",
+        description: "Your application has been sent to the requester"
+      });
+
+      // Refresh data
+      fetchHelperData();
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -470,7 +538,7 @@ export default function HelperDashboard({ user, helperData }: HelperDashboardPro
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Applied: {new Date(application.applied_at).toLocaleDateString()}
+                            Applied: {new Date(application.created_at).toLocaleDateString()}
                           </p>
                         </div>
                           <Badge variant={getStatusColor(application.status)} className="flex items-center gap-1 w-fit">

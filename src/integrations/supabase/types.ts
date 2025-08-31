@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      helper_applications: {
+        Row: {
+          cover_letter: string | null
+          created_at: string
+          estimated_hours: number | null
+          helper_id: string
+          helper_request_id: string
+          hourly_rate: number | null
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cover_letter?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          helper_id: string
+          helper_request_id: string
+          hourly_rate?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cover_letter?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          helper_id?: string
+          helper_request_id?: string
+          hourly_rate?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       helper_invoices: {
         Row: {
           amount: number | null
