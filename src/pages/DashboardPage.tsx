@@ -41,6 +41,7 @@ const DashboardPage = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
   const [helperProfile, setHelperProfile] = useState<any>(null);
+  const [clientProfile, setClientProfile] = useState<any>(null);
   const [plannerRequests, setPlannerRequests] = useState<any[]>([]);
   const [profileForm, setProfileForm] = useState({
     full_name: '',
@@ -115,6 +116,17 @@ const DashboardPage = () => {
 
         setPlannerRequests(requestsData || []);
         console.log('Planner requests with clients:', requestsData);
+      }
+
+      // Fetch client profile for clients
+      if (profileData?.user_role === 'client') {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('user_id', user?.id)
+          .single();
+        
+        setClientProfile(clientData);
       }
 
       const { data: helperData } = await supabase
@@ -614,10 +626,22 @@ const DashboardPage = () => {
           {isClientView && (
             <>
               <TabsContent value="requests" className="space-y-6">
-                <ClientDashboardRestructured user={user} clientData={userProfile} />
+                {clientProfile ? (
+                  <ClientDashboardRestructured user={user} clientData={clientProfile} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Loading your requests...</p>
+                  </div>
+                )}
               </TabsContent>
               <TabsContent value="invoicing" className="space-y-6">
-                <ClientInvoiceSection clientProfile={userProfile} />
+                {clientProfile ? (
+                  <ClientInvoiceSection clientProfile={clientProfile} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Loading your invoices...</p>
+                  </div>
+                )}
               </TabsContent>
             </>
           )}
