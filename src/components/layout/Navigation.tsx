@@ -20,7 +20,7 @@ export function Navigation() {
 
   const navItems = [
     { href: '/', label: 'Discover', icon: MapPin },
-    { href: '/helpers', label: 'Find Helpers', icon: Users },
+    { href: '/planners', label: 'Find Planners', icon: Users },
     { href: '/dashboard', label: 'Dashboard', icon: Calendar },
   ];
 

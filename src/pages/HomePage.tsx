@@ -117,8 +117,8 @@ export default function HomePage() {
             </h1>
             
             <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
-              Discover amazing party planners near you, plan unforgettable events, 
-              and connect with talented helpers for any celebration
+              Discover amazing party planners near you and plan unforgettable events 
+              with professional planning services
             </p>
 
             {/* Search Bar */}
