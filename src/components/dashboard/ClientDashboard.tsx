@@ -14,21 +14,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
-interface ClientHelperRequest {
-  id: string;
-  title: string;
-  description: string;
-  event_date: string;
-  start_time: string;
-  end_time: string;
-  location_city: string;
-  hourly_rate: number;
-  total_hours: number;
-  status: string;
-  required_skills: string[];
-  created_at: string;
-}
-
 interface ClientPlannerRequest {
   id: string;
   title: string;
@@ -53,7 +38,6 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'overview';
-  const [helperRequests, setHelperRequests] = useState<ClientHelperRequest[]>([]);
   const [plannerRequests, setPlannerRequests] = useState<ClientPlannerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -94,16 +78,6 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
 
   const fetchClientData = async () => {
     try {
-      // Fetch client's helper requests
-      const { data: helperRequestsData, error: helperRequestsError } = await supabase
-        .from('helper_requests')
-        .select('*')
-        .eq('client_id', clientData.id)
-        .order('created_at', { ascending: false });
-
-      if (helperRequestsError) throw helperRequestsError;
-      setHelperRequests(helperRequestsData || []);
-
       // Fetch client's planner requests
       const { data: plannerRequestsData, error: plannerRequestsError } = await supabase
         .from('planner_requests')
@@ -189,11 +163,10 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
   return (
     <div className="space-y-6">
       <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+        <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="helper-requests">Helper Requests</TabsTrigger>
           <TabsTrigger value="planner-requests">Planner Requests</TabsTrigger>
           <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
@@ -201,17 +174,7 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
 
         <TabsContent value="overview" className="space-y-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Helper Requests</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{helperRequests.length}</div>
-              </CardContent>
-            </Card>
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Planner Requests</CardTitle>
@@ -229,8 +192,7 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {helperRequests.filter(req => req.status === 'open').length + 
-                   plannerRequests.filter(req => req.status === 'open').length}
+                  {plannerRequests.filter(req => req.status === 'open').length}
                 </div>
               </CardContent>
             </Card>
@@ -242,8 +204,7 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  €{(plannerRequests.reduce((sum, req) => sum + (req.budget || 0), 0) +
-                     helperRequests.reduce((sum, req) => sum + (req.hourly_rate * req.total_hours || 0), 0)).toFixed(0)}
+                  €{plannerRequests.reduce((sum, req) => sum + (req.budget || 0), 0).toFixed(0)}
                 </div>
               </CardContent>
             </Card>
@@ -257,13 +218,13 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
               <CardDescription>Events with active requests</CardDescription>
             </CardHeader>
             <CardContent>
-              {[...helperRequests, ...plannerRequests].filter(req => req.status === 'open').length > 0 ? (
+              {plannerRequests.filter(req => req.status === 'open').length > 0 ? (
                 <div className="space-y-4">
-                  {[...helperRequests, ...plannerRequests]
+                  {plannerRequests
                     .filter(req => req.status === 'open')
                     .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
-                    .map((request, index) => (
-                      <div key={`${request.id}-${index}`} className="p-4 border rounded-lg">
+                    .map((request) => (
+                      <div key={request.id} className="p-4 border rounded-lg">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold">{request.title}</h4>
@@ -285,14 +246,12 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
                               </div>
                               <div className="flex items-center gap-1">
                                 <DollarSign className="w-4 h-4" />
-                                <span>
-                                  {'budget' in request ? `€${request.budget}` : `€${request.hourly_rate}/hr`}
-                                </span>
+                                <span>€{request.budget}</span>
                               </div>
                             </div>
                           </div>
                           <Badge variant="default" className="capitalize w-fit">
-                            {'budget' in request ? 'Planner Request' : 'Helper Request'}
+                            Planner Request
                           </Badge>
                         </div>
                       </div>
@@ -403,67 +362,6 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
           </Dialog>
         </TabsContent>
 
-        <TabsContent value="helper-requests" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Helper Requests</CardTitle>
-              <CardDescription>Requests for event helpers</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {helperRequests.length > 0 ? (
-                <div className="space-y-4">
-                  {helperRequests.map((request) => (
-                    <div key={request.id} className="p-4 border rounded-lg">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold">{request.title}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {request.description}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              <span>{new Date(request.event_date).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              <span>{request.start_time} - {request.end_time}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              <span>{request.location_city}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="w-4 h-4" />
-                              <span>€{request.hourly_rate}/hr · {request.total_hours}h</span>
-                            </div>
-                          </div>
-                          {request.required_skills.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-3">
-                              {request.required_skills.map(skill => (
-                                <Badge key={skill} variant="outline" className="text-xs">{skill}</Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <Badge variant={getStatusColor(request.status)} className="capitalize w-fit">
-                          {getStatusIcon(request.status)}
-                          <span className="ml-1">{request.status}</span>
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No helper requests yet</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="planner-requests" className="space-y-4">
           <Card>
             <CardHeader>
@@ -533,7 +431,7 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
           <Card>
             <CardHeader>
               <CardTitle>Invoices</CardTitle>
-              <CardDescription>Invoices from helpers and planners</CardDescription>
+              <CardDescription>Invoices from planners</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
