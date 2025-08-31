@@ -55,11 +55,10 @@ export function Navigation() {
       ];
     }
 
-    // Helpers see "Find Planners" to find work opportunities  
+    // Helpers only see simplified navigation
     if (userRole === 'helper') {
       return [
         { href: '/', label: 'Discover', icon: MapPin },
-        { href: '/planners', label: 'Find Planners', icon: Users },
         { href: '/dashboard', label: 'Dashboard', icon: Calendar },
       ];
     }

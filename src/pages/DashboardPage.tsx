@@ -366,7 +366,12 @@ const DashboardPage = () => {
                 <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
             )}
-            {isHelperView && <TabsTrigger value="helper-dashboard" className="px-4 py-2">Dashboard</TabsTrigger>}
+            {isHelperView && (
+              <>
+                <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
+                <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
+              </>
+            )}
           </TabsList>
 
           {/* Profile Tab */}
@@ -674,9 +679,26 @@ const DashboardPage = () => {
 
           {/* Helper Dashboard */}
           {isHelperView && (
-            <TabsContent value="helper-dashboard" className="space-y-6">
-              <HelperDashboardFixed user={user} helperData={helperProfile} />
-            </TabsContent>
+            <>
+              <TabsContent value="requests" className="space-y-6">
+                {helperProfile ? (
+                  <HelperRequests helperId={helperProfile.id} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Loading your requests...</p>
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="invoicing" className="space-y-6">
+                {helperProfile ? (
+                  <HelperInvoices helperId={helperProfile.id} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Loading your invoices...</p>
+                  </div>
+                )}
+              </TabsContent>
+            </>
           )}
         </Tabs>
       </div>
