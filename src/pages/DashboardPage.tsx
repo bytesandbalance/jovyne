@@ -19,7 +19,7 @@ import InvoicingSection from '@/components/dashboard/InvoicingSection';
 import ClientInvoiceSection from '@/components/dashboard/ClientInvoiceSection';
 import PlannerApplications from '@/components/dashboard/PlannerApplications';
 import HelperDashboardFixed from '@/components/dashboard/HelperDashboardFixed';
-import ClientDashboardRestructured from '@/components/dashboard/ClientDashboardRestructured';
+import ClientRequestsSection from '@/components/dashboard/ClientRequestsSection';
 import HelperRequests from '@/components/dashboard/HelperRequests';
 import HelperInvoices from '@/components/helpers/HelperInvoices';
 import HelperTasks from '@/components/helpers/HelperTasks';
@@ -627,7 +627,7 @@ const DashboardPage = () => {
             <>
               <TabsContent value="requests" className="space-y-6">
                 {clientProfile ? (
-                  <ClientDashboardRestructured user={user} clientData={clientProfile} />
+                  <ClientRequestsSection clientProfile={clientProfile} />
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <p>Loading your requests...</p>
