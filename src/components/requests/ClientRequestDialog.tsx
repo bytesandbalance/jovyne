@@ -97,11 +97,12 @@ export default function ClientRequestDialog({
       const totalHours = calculateTotalHours(formData.start_time, formData.end_time);
 
       if (recipientType === 'planner') {
-        // Create planner request
+        // Create planner request sent directly to specific planner
         const { error } = await supabase
           .from('planner_requests')
           .insert({
             client_id: clientData.id,
+            planner_id: recipientId, // Set planner_id directly for the workflow
             title: formData.title,
             description: formData.description,
             event_date: formData.event_date,
@@ -111,7 +112,7 @@ export default function ClientRequestDialog({
             budget: formData.budget ? parseFloat(formData.budget) : null,
             total_hours: totalHours,
             required_services: formData.required_services,
-        status: 'pending'
+            status: 'pending'
           });
 
         if (error) throw error;
@@ -129,8 +130,8 @@ export default function ClientRequestDialog({
             .insert({
               sender_id: clientData.user_id,
               recipient_id: plannerProfile.user_id,
-              subject: 'New Event Planning Request',
-              message: `Hi ${recipientName}, I would like to request your services for "${formData.title}" on ${new Date(formData.event_date).toLocaleDateString()}. ${formData.message || 'Please check your requests dashboard for details.'}`
+              subject: 'New Request Received',
+              message: `You have received a new request for "${formData.title}" on ${new Date(formData.event_date).toLocaleDateString()}. Please check your Requests tab to approve or decline. ${formData.message ? 'Additional message: ' + formData.message : ''}`
             });
         }
 

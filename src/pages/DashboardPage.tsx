@@ -18,13 +18,13 @@ import InvoicingSection from '@/components/dashboard/InvoicingSection';
 import ClientInvoiceSection from '@/components/dashboard/ClientInvoiceSection';
 import PlannerApplications from '@/components/dashboard/PlannerApplications';
 import ClientRequestsSection from '@/components/dashboard/ClientRequestsSection';
+import PlannerRequestsSection from '@/components/dashboard/PlannerRequestsSection';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [processingRequest, setProcessingRequest] = useState<string | null>(null);
   
   // Safe default tab calculation that doesn't cause initialization errors
   const urlTab = searchParams.get('tab');
@@ -35,9 +35,7 @@ const DashboardPage = () => {
   // State
   const [userProfile, setUserProfile] = useState<any>(null);
   const [plannerProfile, setPlannerProfile] = useState<any>(null);
-  const [helperProfile, setHelperProfile] = useState<any>(null);
   const [clientProfile, setClientProfile] = useState<any>(null);
-  const [plannerRequests, setPlannerRequests] = useState<any[]>([]);
   const [profileForm, setProfileForm] = useState({
     full_name: '',
     phone: ''
@@ -98,18 +96,6 @@ const DashboardPage = () => {
             years_experience: plannerData.years_experience?.toString() || ''
           });
         }
-
-        // Fetch planner requests for planners
-        const { data: requestsData } = await supabase
-          .from('planner_requests')
-          .select(`
-            *,
-            clients!inner(user_id, full_name, email, phone)
-          `)
-          .order('created_at', { ascending: false });
-
-        setPlannerRequests(requestsData || []);
-        console.log('Planner requests with clients:', requestsData);
       }
 
       // Fetch client profile for clients
@@ -130,122 +116,6 @@ const DashboardPage = () => {
     }
   };
 
-  const handleRequestAction = async (requestId: string, action: 'approved' | 'rejected') => {
-    try {
-      console.log('Starting request action:', { requestId, action });
-      
-      // Set processing state for this specific request
-      setProcessingRequest(requestId);
-      
-      // Get current planner ID
-      if (!plannerProfile?.id) {
-        throw new Error('Planner profile not found');
-      }
-
-      // Update the request status and set planner_id to claim the request
-      const updateData = {
-        status: action,
-        planner_id: plannerProfile.id
-      };
-      
-      const { error: updateError } = await supabase
-        .from('planner_requests')
-        .update(updateData)
-        .eq('id', requestId);
-
-      if (updateError) {
-        console.error('Error updating status:', updateError);
-        throw updateError;
-      }
-
-      console.log('Status updated successfully to:', action);
-
-      // Optimistically update the local state immediately
-      setPlannerRequests(prev => 
-        prev.map(request => 
-          request.id === requestId 
-            ? { ...request, status: action, planner_id: plannerProfile.id }
-            : request
-        )
-      );
-
-      // Get the client info separately to ensure we can access it
-      const request = plannerRequests.find(r => r.id === requestId);
-      console.log('Found request:', request);
-      
-      if (request?.client_id && user?.id) {
-        // Get client user_id directly
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('user_id, full_name')
-          .eq('id', request.client_id)
-          .single();
-
-        if (!clientError && clientData?.user_id) {
-          console.log('Sending notification to client user_id:', clientData.user_id);
-          
-          const { error: messageError } = await supabase
-            .from('messages')
-            .insert({
-              sender_id: user.id,
-              recipient_id: clientData.user_id,
-              subject: action === 'approved' ? 'Request Approved' : 'Request Declined',
-              message: action === 'approved' 
-                ? `Great news! Your planner request "${request.title}" has been approved by ${plannerProfile?.business_name || 'a planner'}. We'll be in touch soon to discuss next steps and planning details.`
-                : `Thank you for your interest. Your planner request "${request.title}" was declined by ${plannerProfile?.business_name || 'the planner'}. You may want to try submitting another request with different requirements.`
-            });
-
-          if (messageError) {
-            console.error('Error sending notification:', messageError);
-          } else {
-            console.log('Notification sent successfully');
-          }
-        } else {
-          console.error('Could not fetch client data:', clientError);
-        }
-
-        // If request was approved, link the client to this planner
-        if (action === 'approved' && request?.client_id) {
-          const { error: clientUpdateError } = await supabase
-            .from('clients')
-            .update({ planner_id: plannerProfile.id })
-            .eq('id', request.client_id);
-
-          if (clientUpdateError) {
-            console.error('Error linking client to planner:', clientUpdateError);
-          } else {
-            console.log('Client successfully linked to planner');
-          }
-        }
-      } else {
-        console.error('Missing request client_id or planner user_id');
-      }
-
-      toast({
-        title: action === 'approved' ? "Request approved!" : "Request declined",
-        description: action === 'approved' 
-          ? "The client has been notified of your acceptance and related records have been created." 
-          : "The client has been notified of your decision."
-      });
-
-      // Refresh the data to show updated status (after a short delay for optimistic update to show)
-      setTimeout(() => {
-        fetchUserData();
-      }, 1000);
-    } catch (error) {
-      console.error('Error updating request:', error);
-      toast({
-        title: "Error updating request",
-        description: "Please try again.",
-        variant: "destructive"
-      });
-      
-      // Revert optimistic update on error
-      fetchUserData();
-    } finally {
-      setProcessingRequest(null);
-    }
-  };
 
   const handleUpdateProfile = async () => {
     try {
@@ -458,134 +328,10 @@ const DashboardPage = () => {
             )}
           </TabsContent>
 
-          {/* Requests Tab for Planners - Show planner requests that they can approve/decline */}
+          {/* Requests Tab for Planners */}
           {isPlannerView && (
             <TabsContent value="requests" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Planner Requests</h2>
-                <Badge variant="outline">
-                  {plannerRequests.filter(r => r.status === 'pending').length} Pending
-                </Badge>
-              </div>
-
-              {plannerRequests.length > 0 ? (
-                <div className="grid gap-6">
-                  {plannerRequests.map((request) => (
-                    <Card key={request.id}>
-                      <CardContent className="p-6">
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="text-xl font-semibold mb-2">{request.title}</h3>
-                              <p className="text-muted-foreground mb-4">{request.description}</p>
-                            </div>
-                            <Badge variant={
-                              request.status === 'pending' ? 'secondary' :
-                              request.status === 'approved' ? 'default' : 'destructive'
-                            }>
-                              {request.status}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(request.event_date).toLocaleDateString()}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Clock className="w-4 h-4" />
-                              {request.start_time} - {request.end_time}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              {request.location_city}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="w-4 h-4" />
-                              Budget: ${request.budget}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Users className="w-4 h-4" />
-                              Duration: {request.total_hours}h
-                            </div>
-                            {request.clients && (
-                              <div className="flex items-center gap-2">
-                                <Mail className="w-4 h-4" />
-                                {request.clients.full_name}
-                              </div>
-                            )}
-                          </div>
-
-                          {request.required_services && request.required_services.length > 0 && (
-                            <div>
-                              <Label className="text-sm font-medium">Required Services:</Label>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {request.required_services.map((service, index) => (
-                                  <Badge key={index} variant="outline">
-                                    {service}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {request.status === 'pending' && (
-                            <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
-                              <Button 
-                                onClick={() => handleRequestAction(request.id, 'approved')}
-                                className="flex-1 sm:flex-none"
-                                size="sm"
-                                disabled={processingRequest === request.id}
-                              >
-                                {processingRequest === request.id ? (
-                                  <>
-                                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Processing...
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                    Approve Request
-                                  </>
-                                )}
-                              </Button>
-                              <Button 
-                                onClick={() => handleRequestAction(request.id, 'rejected')}
-                                variant="outline"
-                                className="flex-1 sm:flex-none"
-                                size="sm"
-                                disabled={processingRequest === request.id}
-                              >
-                                {processingRequest === request.id ? (
-                                  <>
-                                    <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                    Processing...
-                                  </>
-                                ) : (
-                                  <>
-                                    <XCircle className="w-4 h-4 mr-2" />
-                                    Decline Request
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <Card>
-                  <CardContent className="text-center py-12">
-                    <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No requests yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Planner requests will appear here when clients submit them
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+              <PlannerRequestsSection plannerProfile={plannerProfile} />
             </TabsContent>
           )}
 

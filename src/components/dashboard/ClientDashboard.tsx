@@ -163,14 +163,13 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
   return (
     <div className="space-y-6">
       <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="planner-requests">Planner Requests</TabsTrigger>
-          <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
-        </TabsList>
+          <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="planner-requests">Requests</TabsTrigger>
+            <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* Stats Cards */}
@@ -423,9 +422,6 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
           </Card>
         </TabsContent>
 
-        <TabsContent value="applications" className="space-y-4">
-          <PlannerApplications clientData={clientData} />
-        </TabsContent>
 
         <TabsContent value="invoices" className="space-y-4">
           <Card>
