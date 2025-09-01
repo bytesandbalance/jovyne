@@ -22,7 +22,7 @@ import HelperDashboardFixed from '@/components/dashboard/HelperDashboardFixed';
 import ClientRequestsSection from '@/components/dashboard/ClientRequestsSection';
 import HelperRequests from '@/components/dashboard/HelperRequests';
 import HelperInvoices from '@/components/helpers/HelperInvoices';
-import HelperApplications from '@/components/dashboard/HelperApplications';
+import HelperTasks from '@/components/helpers/HelperTasks';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
@@ -354,7 +354,6 @@ const DashboardPage = () => {
             {isPlannerView && (
               <>
                 <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
-                <TabsTrigger value="applications" className="px-4 py-2">Helper Applications</TabsTrigger>
                 <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
                 <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
@@ -362,16 +361,10 @@ const DashboardPage = () => {
             {!isPlannerView && !isHelperView && (
               <>
                 <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
-                <TabsTrigger value="applications" className="px-4 py-2">Helper Applications</TabsTrigger>
                 <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
             )}
-            {isHelperView && (
-              <>
-                <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
-                <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
-              </>
-            )}
+            {isHelperView && <TabsTrigger value="helper-dashboard" className="px-4 py-2">Dashboard</TabsTrigger>}
           </TabsList>
 
           {/* Profile Tab */}
@@ -612,18 +605,6 @@ const DashboardPage = () => {
             </TabsContent>
           )}
 
-          {/* Helper Applications Tab for Planners */}
-          {isPlannerView && (
-            <TabsContent value="applications" className="space-y-6">
-              {plannerProfile && (
-                <HelperApplications 
-                  requesterId={plannerProfile.id} 
-                  requesterType="planner" 
-                />
-              )}
-            </TabsContent>
-          )}
-
           {/* Client Contacts Tab */}
           {isPlannerView && (
             <TabsContent value="clients" className="space-y-6">
@@ -653,18 +634,6 @@ const DashboardPage = () => {
                   </div>
                 )}
               </TabsContent>
-              <TabsContent value="applications" className="space-y-6">
-                {clientProfile ? (
-                  <HelperApplications 
-                    requesterId={clientProfile.id} 
-                    requesterType="client" 
-                  />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Loading applications...</p>
-                  </div>
-                )}
-              </TabsContent>
               <TabsContent value="invoicing" className="space-y-6">
                 {clientProfile ? (
                   <ClientInvoiceSection clientProfile={clientProfile} />
@@ -679,26 +648,9 @@ const DashboardPage = () => {
 
           {/* Helper Dashboard */}
           {isHelperView && (
-            <>
-              <TabsContent value="requests" className="space-y-6">
-                {helperProfile ? (
-                  <HelperRequests helperId={helperProfile.id} />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Loading your requests...</p>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="invoicing" className="space-y-6">
-                {helperProfile ? (
-                  <HelperInvoices helperId={helperProfile.id} />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Loading your invoices...</p>
-                  </div>
-                )}
-              </TabsContent>
-            </>
+            <TabsContent value="helper-dashboard" className="space-y-6">
+              <HelperDashboardFixed user={user} helperData={helperProfile} />
+            </TabsContent>
           )}
         </Tabs>
       </div>

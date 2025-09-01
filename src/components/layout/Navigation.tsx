@@ -46,19 +46,11 @@ export function Navigation() {
       { href: '/dashboard', label: 'Dashboard', icon: Calendar },
     ];
 
-    // Planners see "Find Helpers" to hire helpers for their events
-    if (userRole === 'planner') {
+    // Only show "Find Planners" for planners and helpers, not clients
+    if (userRole === 'planner' || userRole === 'helper') {
       return [
         { href: '/', label: 'Discover', icon: MapPin },
-        { href: '/helpers', label: 'Find Helpers', icon: Users },
-        { href: '/dashboard', label: 'Dashboard', icon: Calendar },
-      ];
-    }
-
-    // Helpers only see simplified navigation
-    if (userRole === 'helper') {
-      return [
-        { href: '/', label: 'Discover', icon: MapPin },
+        { href: '/planners', label: 'Find Planners', icon: Users },
         { href: '/dashboard', label: 'Dashboard', icon: Calendar },
       ];
     }
