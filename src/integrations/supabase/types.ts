@@ -186,6 +186,7 @@ export type Database = {
           end_time: string | null
           event_date: string
           event_id: string | null
+          helper_id: string | null
           hourly_rate: number | null
           id: string
           location_city: string
@@ -204,6 +205,7 @@ export type Database = {
           end_time?: string | null
           event_date: string
           event_id?: string | null
+          helper_id?: string | null
           hourly_rate?: number | null
           id?: string
           location_city: string
@@ -222,6 +224,7 @@ export type Database = {
           end_time?: string | null
           event_date?: string
           event_id?: string | null
+          helper_id?: string | null
           hourly_rate?: number | null
           id?: string
           location_city?: string
@@ -239,6 +242,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helper_requests_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "helpers"
             referencedColumns: ["id"]
           },
           {

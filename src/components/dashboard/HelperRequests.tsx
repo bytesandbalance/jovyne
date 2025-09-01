@@ -47,7 +47,8 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
           planners(business_name, user_id),
           clients(full_name, user_id)
         `)
-        .eq('status', 'open')
+        .eq('helper_id', helperId)
+        .in('status', ['pending', 'approved', 'declined'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -64,44 +65,32 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
     }
   };
 
-  const applyToRequest = async (requestId: string) => {
+  const handleRequestAction = async (requestId: string, action: 'approved' | 'declined') => {
     try {
-      const request = requests.find(r => r.id === requestId);
-      if (!request) return;
-
-      // Get helper data to use current helper's rate as default
-      const { data: helperData } = await supabase
-        .from('helpers')
-        .select('hourly_rate')
-        .eq('id', helperId)
-        .single();
-
-      // Create helper application
       const { error } = await supabase
-        .from('helper_applications')
-        .insert({
-          helper_request_id: requestId,
-          helper_id: helperId,
-          hourly_rate: helperData?.hourly_rate || request.hourly_rate,
-          estimated_hours: request.total_hours,
-          status: 'pending',
-          cover_letter: `I would like to apply for your job "${request.title}" on ${new Date(request.event_date).toLocaleDateString()}. I am available and can help with the required tasks.`
-        });
+        .from('helper_requests')
+        .update({ 
+          status: action,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
 
       if (error) throw error;
 
       toast({
-        title: "Application submitted!",
-        description: "Your application has been sent to the requester"
+        title: action === 'approved' ? "Request approved!" : "Request declined",
+        description: action === 'approved' 
+          ? "An invoice draft has been created in your Invoicing tab" 
+          : "The requester has been notified"
       });
 
-      // Refresh requests to hide applied ones or show application status
+      // Refresh requests to show updated status
       fetchRequests();
     } catch (error) {
-      console.error('Error applying to request:', error);
+      console.error('Error updating request:', error);
       toast({
         title: "Error",
-        description: "Failed to submit application",
+        description: "Failed to update request",
         variant: "destructive"
       });
     }
@@ -119,8 +108,8 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Available Helper Requests</CardTitle>
-        <CardDescription>Open requests from planners and clients</CardDescription>
+        <CardTitle>My Requests</CardTitle>
+        <CardDescription>Requests sent to you by planners</CardDescription>
       </CardHeader>
       <CardContent>
         {requests.length > 0 ? (
@@ -172,15 +161,30 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <Badge variant="default" className="capitalize">
+                    <Badge 
+                      variant={request.status === 'approved' ? 'default' : 
+                              request.status === 'declined' ? 'destructive' : 'secondary'} 
+                      className="capitalize"
+                    >
                       {request.status}
                     </Badge>
-                    <Button
-                      size="sm"
-                      onClick={() => applyToRequest(request.id)}
-                    >
-                      Apply
-                    </Button>
+                    {request.status === 'pending' && (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRequestAction(request.id, 'declined')}
+                        >
+                          Decline
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleRequestAction(request.id, 'approved')}
+                        >
+                          Approve
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -189,7 +193,7 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
         ) : (
           <div className="text-center py-8">
             <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No open requests available</p>
+            <p className="text-muted-foreground">No requests sent to you yet</p>
           </div>
         )}
       </CardContent>
