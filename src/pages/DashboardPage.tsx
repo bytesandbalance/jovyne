@@ -65,14 +65,32 @@ const DashboardPage = () => {
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid errors when no profile exists
 
       if (profileError) throw profileError;
-      setUserProfile(profileData);
+      
+      if (!profileData) {
+        // No profile exists, create one from user metadata
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.email,
+            user_role: user.user_metadata?.user_role || 'client'
+          })
+          .select()
+          .single();
+          
+        if (createError) throw createError;
+        setUserProfile(newProfile);
+      } else {
+        setUserProfile(profileData);
+      }
 
       // Initialize form with current data
       setProfileForm({
-        full_name: profileData?.full_name || '',
+        full_name: profileData?.full_name || user.user_metadata?.full_name || '',
         phone: profileData?.phone || ''
       });
 
@@ -81,7 +99,7 @@ const DashboardPage = () => {
           .from('planners')
           .select('*')
           .eq('user_id', user?.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle here too
         
         setPlannerProfile(plannerData);
 
@@ -104,7 +122,7 @@ const DashboardPage = () => {
           .from('clients')
           .select('*')
           .eq('user_id', user?.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle here too
         
         setClientProfile(clientData);
       }

@@ -64,15 +64,15 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
   }, [clientData]);
 
   useEffect(() => {
-    const loadProfile = async () => {
-      if (!clientData?.user_id) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, email, phone, avatar_url')
-        .eq('user_id', clientData.user_id)
-        .maybeSingle();
-      setUserProfile(data || null);
-    };
+  const loadProfile = async () => {
+    if (!clientData?.user_id) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, email, phone, avatar_url')
+      .eq('user_id', clientData.user_id)
+      .maybeSingle(); // Use maybeSingle to avoid errors
+    setUserProfile(data || null);
+  };
     loadProfile();
   }, [clientData?.user_id]);
 
