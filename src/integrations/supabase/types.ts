@@ -768,7 +768,14 @@ export type Database = {
         | "awaiting_payment"
         | "paid_planner"
         | "completed"
-      helper_request_status: "open" | "in_review" | "filled" | "cancelled"
+      helper_request_status:
+        | "open"
+        | "in_review"
+        | "filled"
+        | "cancelled"
+        | "pending"
+        | "approved"
+        | "declined"
       planner_request_status: "pending" | "approved" | "rejected"
       user_role: "client" | "planner" | "helper"
     }
@@ -913,7 +920,15 @@ export const Constants = {
         "paid_planner",
         "completed",
       ],
-      helper_request_status: ["open", "in_review", "filled", "cancelled"],
+      helper_request_status: [
+        "open",
+        "in_review",
+        "filled",
+        "cancelled",
+        "pending",
+        "approved",
+        "declined",
+      ],
       planner_request_status: ["pending", "approved", "rejected"],
       user_role: ["client", "planner", "helper"],
     },

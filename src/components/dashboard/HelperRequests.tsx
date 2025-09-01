@@ -48,7 +48,7 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
           clients(full_name, user_id)
         `)
         .eq('helper_id', helperId)
-        .in('status', ['pending', 'approved', 'declined'])
+        .in('status', ['pending', 'approved', 'declined'] as any)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -70,7 +70,7 @@ export default function HelperRequests({ helperId }: HelperRequestsProps) {
       const { error } = await supabase
         .from('helper_requests')
         .update({ 
-          status: action,
+          status: action as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', requestId);
