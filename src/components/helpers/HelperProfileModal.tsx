@@ -246,7 +246,7 @@ export function HelperProfileModal({
       <RequestDialog
         isOpen={showRequestDialog}
         onClose={() => setShowRequestDialog(false)}
-        recipientId={helper.user_id}
+        recipientId={helper.id}
         recipientType="helper"
         senderType={currentUserRole === 'planner' ? 'planner' : 'client'}
       />
