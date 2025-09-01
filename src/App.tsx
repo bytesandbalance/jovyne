@@ -9,7 +9,6 @@ import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
-import HelpersPage from "./pages/HelpersPage";
 import PlannersPage from "./pages/PlannersPage";
 import NotFound from "./pages/NotFound";
 import PlannersRequestsPage from "./pages/PlannersRequestsPage";
@@ -29,7 +28,6 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/helpers" element={<HelpersPage />} />
             <Route path="/planners" element={<PlannersPage />} />
             <Route path="/planner-requests" element={<PlannersRequestsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

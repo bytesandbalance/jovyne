@@ -12,7 +12,7 @@ interface RequestDialogProps {
   isOpen: boolean;
   onClose: () => void;
   recipientId: string;
-  recipientType: 'helper' | 'planner';
+  recipientType: 'planner';
   senderType: 'client' | 'planner';
 }
 
@@ -97,63 +97,6 @@ export function RequestDialog({
           });
 
         if (error) throw error;
-      } else if (recipientType === 'helper' && senderType === 'planner') {
-        // Get planner data
-        const { data: plannerData } = await supabase
-          .from('planners')
-          .select('id')
-          .eq('user_id', userData.user.id)
-          .single();
-
-        if (!plannerData) throw new Error('Planner profile not found');
-
-        // Create helper request
-        const { error } = await supabase
-          .from('helper_requests')
-          .insert({
-            planner_id: plannerData.id,
-            title: formData.title,
-            description: formData.description,
-            event_date: formData.eventDate,
-            start_time: formData.startTime || null,
-            end_time: formData.endTime || null,
-            location_city: formData.locationCity,
-            hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
-            total_hours: totalHours,
-            required_skills: skills,
-            status: 'open'
-          });
-
-        if (error) throw error;
-      } else if (recipientType === 'helper' && senderType === 'client') {
-        // Get client data
-        const { data: clientData } = await supabase
-          .from('clients')
-          .select('id')
-          .eq('user_id', userData.user.id)
-          .single();
-
-        if (!clientData) throw new Error('Client profile not found');
-
-        // Create helper request with client_id (planner_id as null/undefined)
-        const { error } = await supabase
-          .from('helper_requests')
-          .insert({
-            client_id: clientData.id,
-            planner_id: null,
-            title: formData.title,
-            description: formData.description,
-            event_date: formData.eventDate,
-            start_time: formData.startTime || null,
-            end_time: formData.endTime || null,
-            location_city: formData.locationCity,
-            hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
-            total_hours: totalHours,
-            required_skills: skills,
-            status: 'open'
-          });
-
-        if (error) throw error;
       } else {
         // Fallback to direct message for unsupported combinations
         const { error } = await supabase
@@ -211,7 +154,7 @@ ${formData.message ? `Additional Message: ${formData.message}` : ''}`
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Send Request to {recipientType === 'helper' ? 'Helper' : 'Planner'}</DialogTitle>
+          <DialogTitle>Send Request to Planner</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

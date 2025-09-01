@@ -46,8 +46,8 @@ export function Navigation() {
       { href: '/dashboard', label: 'Dashboard', icon: Calendar },
     ];
 
-    // Only show "Find Planners" for planners and helpers, not clients
-    if (userRole === 'planner' || userRole === 'helper') {
+    // Only show "Find Planners" for planners, not clients
+    if (userRole === 'planner') {
       return [
         { href: '/', label: 'Discover', icon: MapPin },
         { href: '/planners', label: 'Find Planners', icon: Users },

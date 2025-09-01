@@ -99,12 +99,6 @@ export default function AuthPage() {
                             Offer party planning services
                           </div>
                         </SelectItem>
-                        <SelectItem value="helper">
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4" />
-                            Help with party services
-                          </div>
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

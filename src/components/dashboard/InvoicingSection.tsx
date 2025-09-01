@@ -95,7 +95,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
         }
       }
 
-      setInvoices(invoicesData || []);
+      setInvoices((invoicesData as any) || []);
     } catch (error) {
       console.error('Error in fetchInvoicesAndData:', error);
       toast({
@@ -113,7 +113,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
     try {
       const { error } = await supabase
         .from('planner_invoices')
-        .update({ status: 'awaiting_payment' })
+        .update({ status: 'awaiting_payment' } as any)
         .eq('id', invoiceId);
 
       if (error) throw error;
@@ -137,7 +137,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
     try {
       const { error } = await supabase
         .from('planner_invoices')
-        .update({ status: 'completed' })
+        .update({ status: 'completed' } as any)
         .eq('id', invoiceId);
 
       if (error) throw error;

@@ -56,7 +56,7 @@ const ClientInvoiceSection: React.FC<ClientInvoiceSectionProps> = ({ clientProfi
         return;
       }
 
-      setInvoices(invoicesData || []);
+      setInvoices((invoicesData as any) || []);
     } catch (error) {
       console.error('Error in fetchInvoices:', error);
       toast({
@@ -73,7 +73,7 @@ const ClientInvoiceSection: React.FC<ClientInvoiceSectionProps> = ({ clientProfi
     try {
       const { error } = await supabase
         .from('planner_invoices')
-        .update({ status: 'paid_planner' })
+        .update({ status: 'paid_planner' } as any)
         .eq('id', invoiceId);
 
       if (error) throw error;

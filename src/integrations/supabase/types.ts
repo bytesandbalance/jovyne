@@ -53,294 +53,6 @@ export type Database = {
         }
         Relationships: []
       }
-      helper_applications: {
-        Row: {
-          cover_letter: string | null
-          created_at: string
-          estimated_hours: number | null
-          helper_id: string
-          helper_request_id: string
-          hourly_rate: number | null
-          id: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          cover_letter?: string | null
-          created_at?: string
-          estimated_hours?: number | null
-          helper_id: string
-          helper_request_id: string
-          hourly_rate?: number | null
-          id?: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          cover_letter?: string | null
-          created_at?: string
-          estimated_hours?: number | null
-          helper_id?: string
-          helper_request_id?: string
-          hourly_rate?: number | null
-          id?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      helper_invoices: {
-        Row: {
-          amount: number | null
-          client_id: string | null
-          completed_at: string | null
-          created_at: string
-          event_date: string | null
-          event_id: string | null
-          helper_application_id: string | null
-          helper_id: string
-          helper_name: string | null
-          helper_request_id: string | null
-          hourly_rate: number | null
-          id: string
-          job_title: string
-          line_items: Json
-          notes: string | null
-          paid_at: string | null
-          planner_contact_email: string | null
-          planner_contact_phone: string | null
-          planner_id: string
-          planner_name: string | null
-          sent_at: string | null
-          status: Database["public"]["Enums"]["helper_invoice_status"]
-          total_hours: number | null
-          updated_at: string
-        }
-        Insert: {
-          amount?: number | null
-          client_id?: string | null
-          completed_at?: string | null
-          created_at?: string
-          event_date?: string | null
-          event_id?: string | null
-          helper_application_id?: string | null
-          helper_id: string
-          helper_name?: string | null
-          helper_request_id?: string | null
-          hourly_rate?: number | null
-          id?: string
-          job_title: string
-          line_items?: Json
-          notes?: string | null
-          paid_at?: string | null
-          planner_contact_email?: string | null
-          planner_contact_phone?: string | null
-          planner_id: string
-          planner_name?: string | null
-          sent_at?: string | null
-          status?: Database["public"]["Enums"]["helper_invoice_status"]
-          total_hours?: number | null
-          updated_at?: string
-        }
-        Update: {
-          amount?: number | null
-          client_id?: string | null
-          completed_at?: string | null
-          created_at?: string
-          event_date?: string | null
-          event_id?: string | null
-          helper_application_id?: string | null
-          helper_id?: string
-          helper_name?: string | null
-          helper_request_id?: string | null
-          hourly_rate?: number | null
-          id?: string
-          job_title?: string
-          line_items?: Json
-          notes?: string | null
-          paid_at?: string | null
-          planner_contact_email?: string | null
-          planner_contact_phone?: string | null
-          planner_id?: string
-          planner_name?: string | null
-          sent_at?: string | null
-          status?: Database["public"]["Enums"]["helper_invoice_status"]
-          total_hours?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "helper_invoices_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      helper_requests: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          description: string
-          end_time: string | null
-          event_date: string
-          event_id: string | null
-          helper_id: string | null
-          hourly_rate: number | null
-          id: string
-          location_city: string
-          planner_id: string | null
-          required_skills: string[] | null
-          start_time: string | null
-          status: Database["public"]["Enums"]["helper_request_status"] | null
-          title: string
-          total_hours: number | null
-          updated_at: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          description: string
-          end_time?: string | null
-          event_date: string
-          event_id?: string | null
-          helper_id?: string | null
-          hourly_rate?: number | null
-          id?: string
-          location_city: string
-          planner_id?: string | null
-          required_skills?: string[] | null
-          start_time?: string | null
-          status?: Database["public"]["Enums"]["helper_request_status"] | null
-          title: string
-          total_hours?: number | null
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          description?: string
-          end_time?: string | null
-          event_date?: string
-          event_id?: string | null
-          helper_id?: string | null
-          hourly_rate?: number | null
-          id?: string
-          location_city?: string
-          planner_id?: string | null
-          required_skills?: string[] | null
-          start_time?: string | null
-          status?: Database["public"]["Enums"]["helper_request_status"] | null
-          title?: string
-          total_hours?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "helper_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_requests_helper_id_fkey"
-            columns: ["helper_id"]
-            isOneToOne: false
-            referencedRelation: "helpers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helper_requests_planner_id_fkey"
-            columns: ["planner_id"]
-            isOneToOne: false
-            referencedRelation: "planners"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      helper_tasks: {
-        Row: {
-          created_at: string
-          description: string | null
-          due_date: string | null
-          helper_id: string
-          id: string
-          is_completed: boolean
-          priority: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          helper_id: string
-          id?: string
-          is_completed?: boolean
-          priority?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          helper_id?: string
-          id?: string
-          is_completed?: boolean
-          priority?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      helpers: {
-        Row: {
-          availability_cities: string[] | null
-          average_rating: number | null
-          bio: string | null
-          created_at: string
-          experience_years: number | null
-          hourly_rate: number | null
-          id: string
-          portfolio_images: string[] | null
-          skills: string[] | null
-          total_jobs: number | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          availability_cities?: string[] | null
-          average_rating?: number | null
-          bio?: string | null
-          created_at?: string
-          experience_years?: number | null
-          hourly_rate?: number | null
-          id?: string
-          portfolio_images?: string[] | null
-          skills?: string[] | null
-          total_jobs?: number | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          availability_cities?: string[] | null
-          average_rating?: number | null
-          bio?: string | null
-          created_at?: string
-          experience_years?: number | null
-          hourly_rate?: number | null
-          id?: string
-          portfolio_images?: string[] | null
-          skills?: string[] | null
-          total_jobs?: number | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       messages: {
         Row: {
           created_at: string
@@ -447,7 +159,6 @@ export type Database = {
           planner_request_id: string | null
           proposed_fee: number | null
           sent_at: string | null
-          status: Database["public"]["Enums"]["helper_invoice_status"]
           total_hours: number | null
           updated_at: string
         }
@@ -472,7 +183,6 @@ export type Database = {
           planner_request_id?: string | null
           proposed_fee?: number | null
           sent_at?: string | null
-          status?: Database["public"]["Enums"]["helper_invoice_status"]
           total_hours?: number | null
           updated_at?: string
         }
@@ -497,7 +207,6 @@ export type Database = {
           planner_request_id?: string | null
           proposed_fee?: number | null
           sent_at?: string | null
-          status?: Database["public"]["Enums"]["helper_invoice_status"]
           total_hours?: number | null
           updated_at?: string
         }
@@ -762,22 +471,8 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
-      helper_invoice_status:
-        | "draft"
-        | "sent_to_planner"
-        | "awaiting_payment"
-        | "paid_planner"
-        | "completed"
-      helper_request_status:
-        | "open"
-        | "in_review"
-        | "filled"
-        | "cancelled"
-        | "pending"
-        | "approved"
-        | "declined"
       planner_request_status: "pending" | "approved" | "rejected"
-      user_role: "client" | "planner" | "helper"
+      user_role: "client" | "planner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -913,24 +608,8 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
-      helper_invoice_status: [
-        "draft",
-        "sent_to_planner",
-        "awaiting_payment",
-        "paid_planner",
-        "completed",
-      ],
-      helper_request_status: [
-        "open",
-        "in_review",
-        "filled",
-        "cancelled",
-        "pending",
-        "approved",
-        "declined",
-      ],
       planner_request_status: ["pending", "approved", "rejected"],
-      user_role: ["client", "planner", "helper"],
+      user_role: ["client", "planner"],
     },
   },
 } as const

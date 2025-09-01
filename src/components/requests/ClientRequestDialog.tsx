@@ -135,42 +135,8 @@ export default function ClientRequestDialog({
         }
 
       } else {
-        // Create helper request
-        const { error } = await supabase
-          .from('helper_requests')
-          .insert({
-            client_id: clientData.id,
-            title: formData.title,
-            description: formData.description,
-            event_date: formData.event_date,
-            start_time: formData.start_time,
-            end_time: formData.end_time,
-            location_city: formData.location_city,
-            hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null,
-            total_hours: totalHours,
-            required_skills: formData.required_skills,
-            status: 'open'
-          });
-
-        if (error) throw error;
-
-        // Send direct message to helper
-        const { data: helperProfile } = await supabase
-          .from('helpers')
-          .select('user_id')
-          .eq('id', recipientId)
-          .single();
-
-        if (helperProfile) {
-          await supabase
-            .from('messages')
-            .insert({
-              sender_id: clientData.user_id,
-              recipient_id: helperProfile.user_id,
-              subject: 'New Event Helper Request',
-              message: `Hi ${recipientName}, I would like to request your help for "${formData.title}" on ${new Date(formData.event_date).toLocaleDateString()}. ${formData.message || 'Please check your requests dashboard for details.'}`
-            });
-        }
+        // Helper requests are no longer supported
+        throw new Error('Helper requests are not supported');
       }
 
       toast({

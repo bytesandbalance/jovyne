@@ -14,15 +14,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Users, Star, DollarSign, Settings, Plus, UserCheck, BarChart3, CreditCard, Clock, MapPin, Phone, Mail, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ClientContactList from '@/components/dashboard/ClientContactList';
-import PlannerPendingPayments from '@/components/dashboard/PlannerPendingPayments';
 import InvoicingSection from '@/components/dashboard/InvoicingSection';
 import ClientInvoiceSection from '@/components/dashboard/ClientInvoiceSection';
 import PlannerApplications from '@/components/dashboard/PlannerApplications';
-import HelperDashboardFixed from '@/components/dashboard/HelperDashboardFixed';
 import ClientRequestsSection from '@/components/dashboard/ClientRequestsSection';
-import HelperRequests from '@/components/dashboard/HelperRequests';
-import HelperInvoices from '@/components/helpers/HelperInvoices';
-import HelperTasks from '@/components/helpers/HelperTasks';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
@@ -58,7 +53,6 @@ const DashboardPage = () => {
 
   // Derived states
   const isPlannerView = userProfile?.user_role === 'planner';
-  const isHelperView = userProfile?.user_role === 'helper';
   const isClientView = userProfile?.user_role === 'client';
 
   useEffect(() => {
@@ -128,14 +122,6 @@ const DashboardPage = () => {
         
         setClientProfile(clientData);
       }
-
-      const { data: helperData } = await supabase
-        .from('helpers')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-      
-      setHelperProfile(helperData);
 
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -343,7 +329,6 @@ const DashboardPage = () => {
           </h1>
           <p className="text-muted-foreground text-lg">
             {isPlannerView ? 'Manage your events and grow your business' : 
-             isHelperView ? 'Find opportunities and manage your applications' : 
              'Track your events and bookings'}
           </p>
         </div>
@@ -358,13 +343,12 @@ const DashboardPage = () => {
                 <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
             )}
-            {!isPlannerView && !isHelperView && (
+            {!isPlannerView && (
               <>
                 <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
                 <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
               </>
             )}
-            {isHelperView && <TabsTrigger value="helper-dashboard" className="px-4 py-2">Dashboard</TabsTrigger>}
           </TabsList>
 
           {/* Profile Tab */}
@@ -615,10 +599,7 @@ const DashboardPage = () => {
           {/* Invoicing Tab */}
           {isPlannerView && (
             <TabsContent value="invoicing" className="space-y-6">
-              <div className="space-y-6">
-                <PlannerPendingPayments plannerProfile={plannerProfile} />
-                <InvoicingSection plannerProfile={plannerProfile} />
-              </div>
+              <InvoicingSection plannerProfile={plannerProfile} />
             </TabsContent>
           )}
 
@@ -646,12 +627,6 @@ const DashboardPage = () => {
             </>
           )}
 
-          {/* Helper Dashboard */}
-          {isHelperView && (
-            <TabsContent value="helper-dashboard" className="space-y-6">
-              <HelperDashboardFixed user={user} helperData={helperProfile} />
-            </TabsContent>
-          )}
         </Tabs>
       </div>
 
