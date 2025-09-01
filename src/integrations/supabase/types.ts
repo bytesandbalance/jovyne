@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      helper_applications: {
+        Row: {
+          cover_letter: string | null
+          created_at: string
+          estimated_hours: number | null
+          helper_id: string
+          helper_request_id: string
+          hourly_rate: number | null
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cover_letter?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          helper_id: string
+          helper_request_id: string
+          hourly_rate?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cover_letter?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          helper_id?: string
+          helper_request_id?: string
+          hourly_rate?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       helper_invoices: {
         Row: {
           amount: number | null
@@ -150,6 +186,7 @@ export type Database = {
           end_time: string | null
           event_date: string
           event_id: string | null
+          helper_id: string | null
           hourly_rate: number | null
           id: string
           location_city: string
@@ -168,6 +205,7 @@ export type Database = {
           end_time?: string | null
           event_date: string
           event_id?: string | null
+          helper_id?: string | null
           hourly_rate?: number | null
           id?: string
           location_city: string
@@ -186,6 +224,7 @@ export type Database = {
           end_time?: string | null
           event_date?: string
           event_id?: string | null
+          helper_id?: string | null
           hourly_rate?: number | null
           id?: string
           location_city?: string
@@ -203,6 +242,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helper_requests_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "helpers"
             referencedColumns: ["id"]
           },
           {
@@ -722,7 +768,14 @@ export type Database = {
         | "awaiting_payment"
         | "paid_planner"
         | "completed"
-      helper_request_status: "open" | "in_review" | "filled" | "cancelled"
+      helper_request_status:
+        | "open"
+        | "in_review"
+        | "filled"
+        | "cancelled"
+        | "pending"
+        | "approved"
+        | "declined"
       planner_request_status: "pending" | "approved" | "rejected"
       user_role: "client" | "planner" | "helper"
     }
@@ -867,7 +920,15 @@ export const Constants = {
         "paid_planner",
         "completed",
       ],
-      helper_request_status: ["open", "in_review", "filled", "cancelled"],
+      helper_request_status: [
+        "open",
+        "in_review",
+        "filled",
+        "cancelled",
+        "pending",
+        "approved",
+        "declined",
+      ],
       planner_request_status: ["pending", "approved", "rejected"],
       user_role: ["client", "planner", "helper"],
     },
