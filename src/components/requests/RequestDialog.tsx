@@ -107,11 +107,12 @@ export function RequestDialog({
 
         if (!plannerData) throw new Error('Planner profile not found');
 
-        // Create helper request
+        // Create helper request sent directly to specific helper
         const { error } = await supabase
           .from('helper_requests')
           .insert({
             planner_id: plannerData.id,
+            helper_id: recipientId, // Direct request to specific helper
             title: formData.title,
             description: formData.description,
             event_date: formData.eventDate,
@@ -121,7 +122,7 @@ export function RequestDialog({
             hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
             total_hours: totalHours,
             required_skills: skills,
-            status: 'open'
+            status: 'pending' as any // Direct request starts as pending
           });
 
         if (error) throw error;
