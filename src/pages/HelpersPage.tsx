@@ -933,6 +933,7 @@ export default function HelpersPage() {
             open={showHelperProfile}
             onOpenChange={setShowHelperProfile}
             currentUserId={user?.id}
+            currentUserRole={userRole}
           />
         )}
       </div>

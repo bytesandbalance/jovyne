@@ -18,13 +18,15 @@ interface HelperProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentUserId?: string;
+  currentUserRole?: string;
 }
 
 export function HelperProfileModal({ 
   helper, 
   open, 
   onOpenChange, 
-  currentUserId 
+  currentUserId,
+  currentUserRole 
 }: HelperProfileModalProps) {
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactForm, setContactForm] = useState({
@@ -246,7 +248,7 @@ export function HelperProfileModal({
         onClose={() => setShowRequestDialog(false)}
         recipientId={helper.user_id}
         recipientType="helper"
-        senderType="client"
+        senderType={currentUserRole === 'planner' ? 'planner' : 'client'}
       />
     </Dialog>
   );
