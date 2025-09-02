@@ -19,6 +19,7 @@ interface PlannerRequest {
   status: 'pending' | 'approved' | 'rejected';
   required_services: string[];
   created_at: string;
+  planner_id: string | null;
   clients: {
     id: string;
     user_id: string;
@@ -52,7 +53,7 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
           *,
           clients!inner(id, user_id, full_name, email, phone)
         `)
-        .eq('planner_id', plannerProfile.id)
+        .or(`planner_id.is.null,planner_id.eq.${plannerProfile.id}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -73,9 +74,14 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
     try {
       setProcessingRequest(requestId);
       
+      // When approving, assign the planner to the request
+      const updateData = action === 'approved' 
+        ? { status: action, planner_id: plannerProfile.id }
+        : { status: action };
+      
       const { error } = await supabase
         .from('planner_requests')
-        .update({ status: action })
+        .update(updateData)
         .eq('id', requestId);
 
       if (error) throw error;
@@ -84,7 +90,7 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
       setRequests(prev => 
         prev.map(request => 
           request.id === requestId 
-            ? { ...request, status: action }
+            ? { ...request, status: action, planner_id: action === 'approved' ? plannerProfile.id : request.planner_id }
             : request
         )
       );
