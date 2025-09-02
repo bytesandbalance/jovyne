@@ -53,7 +53,7 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
           *,
           clients!inner(id, user_id, full_name, email, phone)
         `)
-        .or(`planner_id.is.null,planner_id.eq.${plannerProfile.id}`)
+        .eq('planner_id', plannerProfile.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
