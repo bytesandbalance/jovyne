@@ -95,12 +95,14 @@ const DashboardPage = () => {
       });
 
       if (profileData?.user_role === 'planner') {
-        const { data: plannerData } = await supabase
+        console.log('Fetching planner profile for user_id:', user?.id);
+        const { data: plannerData, error: plannerError } = await supabase
           .from('planners')
           .select('*')
           .eq('user_id', user?.id)
           .maybeSingle(); // Use maybeSingle here too
         
+        console.log('Planner data:', plannerData, 'Error:', plannerError);
         setPlannerProfile(plannerData);
 
         // Initialize planner form
