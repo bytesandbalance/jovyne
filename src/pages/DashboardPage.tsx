@@ -349,7 +349,13 @@ const DashboardPage = () => {
           {/* Requests Tab for Planners */}
           {isPlannerView && (
             <TabsContent value="requests" className="space-y-6">
-              <PlannerRequestsSection plannerProfile={plannerProfile} />
+              {plannerProfile ? (
+                <PlannerRequestsSection plannerProfile={plannerProfile} />
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Loading planner profile...</p>
+                </div>
+              )}
             </TabsContent>
           )}
 
