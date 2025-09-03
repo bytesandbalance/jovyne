@@ -32,6 +32,16 @@ export function PlannerProfileSelector() {
 
   const fetchAvailableProfiles = async () => {
     try {
+      // Get current user's email from profiles
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      
+      // Only fetch planner profiles that match the user's email
       const { data, error } = await supabase
         .from('planners')
         .select(`
@@ -44,9 +54,11 @@ export function PlannerProfileSelector() {
           specialties,
           years_experience,
           average_rating,
-          total_reviews
+          total_reviews,
+          email
         `)
         .is('user_id', null)
+        .eq('email', userProfile.email)
         .order('business_name');
 
       if (error) throw error;
