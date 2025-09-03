@@ -155,36 +155,44 @@ export function MessageNotifications() {
       .single();
 
     const isClient = profile?.user_role === 'client';
+    
+    // Convert message subject and content to lowercase for case-insensitive matching
+    const subjectLower = message.subject.toLowerCase();
+    const messageLower = message.message.toLowerCase();
+    const fullText = `${subjectLower} ${messageLower}`;
 
-    // Navigate to specific dashboard tab based on message subject and user role
-    if (message.subject.toLowerCase().includes('invoice') || 
-       message.subject.toLowerCase().includes('payment') || 
-       message.subject.toLowerCase().includes('paid') || 
-       message.subject.toLowerCase().includes('billing') || 
-       message.subject.toLowerCase().includes('received') ||
-       message.subject.toLowerCase().includes('amount') || 
-       message.subject.toLowerCase().includes('due') || 
-       message.subject.toLowerCase().includes('bill')) {
+    // Check for invoice-related notifications first (most specific)
+    if (fullText.includes('invoice') || 
+       fullText.includes('payment') || 
+       fullText.includes('paid') || 
+       fullText.includes('billing') || 
+       fullText.includes('received invoice') ||
+       fullText.includes('amount due') || 
+       fullText.includes('bill')) {
       // For invoice-related notifications, go to invoicing tab
       navigate('/dashboard?tab=invoicing');
-    } else if (message.subject.toLowerCase().includes('application')) {
-      // For application notifications, both roles go to different places
-      if (isClient) {
-        navigate('/dashboard?tab=requests'); // Clients see applications in requests
-      } else {
-        navigate('/dashboard?tab=requests'); // Planners also see applications in requests
-      }
-    } else if (message.subject.toLowerCase().includes('request') || 
-               message.subject.toLowerCase().includes('approve') || 
-               message.subject.toLowerCase().includes('approved') || 
-               message.subject.toLowerCase().includes('decline') || 
-               message.subject.toLowerCase().includes('declined') || 
-               message.subject.toLowerCase().includes('reject') || 
-               message.subject.toLowerCase().includes('rejected')) {
-      // For request-related notifications (approve/decline), go to requests tab
+    } 
+    // Check for any request-related notifications
+    else if (fullText.includes('request') || 
+             fullText.includes('application') ||
+             fullText.includes('approve') || 
+             fullText.includes('approved') || 
+             fullText.includes('decline') || 
+             fullText.includes('declined') || 
+             fullText.includes('reject') || 
+             fullText.includes('rejected') ||
+             fullText.includes('accept') ||
+             fullText.includes('accepted') ||
+             fullText.includes('status') ||
+             fullText.includes('planner request') ||
+             fullText.includes('event request') ||
+             fullText.includes('booking') ||
+             fullText.includes('proposal')) {
+      // All request-related notifications go to requests tab
       navigate('/dashboard?tab=requests');
-    } else {
-      // Default navigation
+    } 
+    // Default navigation for any other notifications
+    else {
       navigate('/dashboard');
     }
   };
