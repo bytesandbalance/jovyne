@@ -17,10 +17,12 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [isValidToken, setIsValidToken] = useState(false);
 
-  // Check if we have the required tokens from the URL
+  // Check if we have the required tokens from the URL hash
   useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
     
     if (accessToken && refreshToken) {
       setIsValidToken(true);
@@ -36,7 +38,7 @@ export default function ResetPasswordPage() {
         variant: "destructive"
       });
     }
-  }, [searchParams]);
+  }, []);
 
   // Redirect if already authenticated and not resetting password
   if (user && !isValidToken) {
