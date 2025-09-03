@@ -40,13 +40,18 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
   const [processingRequest, setProcessingRequest] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('PlannerRequestsSection useEffect - plannerProfile:', plannerProfile);
     if (plannerProfile?.id) {
+      console.log('Calling fetchRequests with planner ID:', plannerProfile.id);
       fetchRequests();
+    } else {
+      console.log('No planner profile ID available');
     }
   }, [plannerProfile?.id]);
 
   const fetchRequests = async () => {
     try {
+      console.log('fetchRequests called for planner ID:', plannerProfile.id);
       const { data, error } = await supabase
         .from('planner_requests')
         .select(`
@@ -56,7 +61,9 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
         .eq('planner_id', plannerProfile.id)
         .order('created_at', { ascending: false });
 
+      console.log('Query result - data:', data, 'error:', error);
       if (error) throw error;
+      console.log('Setting requests to:', data || []);
       setRequests(data || []);
     } catch (error) {
       console.error('Error fetching planner requests:', error);
