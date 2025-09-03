@@ -54,6 +54,7 @@ const DashboardPage = () => {
   const isClientView = userProfile?.user_role === 'client';
 
   useEffect(() => {
+    console.log('DashboardPage useEffect triggered, user:', user?.id, user?.email);
     if (user) {
       fetchUserData();
     }
