@@ -382,10 +382,29 @@ export default function PlannersPage() {
                       className="overflow-hidden hover:shadow-party transition-party hover-bounce"
                     >
                       <div className="aspect-video relative overflow-hidden bg-gradient-party">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Avatar className="w-16 h-16">
+                        {planner.portfolio_images && planner.portfolio_images.length > 0 ? (
+                          <>
+                            <img 
+                              src={planner.portfolio_images[0]} 
+                              alt={`${planner.business_name} portfolio`}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/20" />
+                          </>
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Avatar className="w-16 h-16">
+                              <AvatarImage src={planner.avatar_url} />
+                              <AvatarFallback className="text-lg bg-white/20 text-white">
+                                {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
+                              </AvatarFallback>
+                            </Avatar>
+                          </div>
+                        )}
+                        <div className="absolute top-4 left-4">
+                          <Avatar className="w-12 h-12 border-2 border-white shadow-lg">
                             <AvatarImage src={planner.avatar_url} />
-                            <AvatarFallback className="text-lg bg-white/20 text-white">
+                            <AvatarFallback className="text-sm bg-white/90 text-primary">
                               {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
                             </AvatarFallback>
                           </Avatar>
