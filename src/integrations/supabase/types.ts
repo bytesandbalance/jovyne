@@ -379,7 +379,7 @@ export type Database = {
           specialties: string[] | null
           total_reviews: number | null
           updated_at: string
-          user_id: string
+          user_id: string | null
           website_url: string | null
           years_experience: number | null
         }
@@ -401,7 +401,7 @@ export type Database = {
           specialties?: string[] | null
           total_reviews?: number | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           website_url?: string | null
           years_experience?: number | null
         }
@@ -423,7 +423,7 @@ export type Database = {
           specialties?: string[] | null
           total_reviews?: number | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           website_url?: string | null
           years_experience?: number | null
         }
