@@ -245,7 +245,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
     .reduce((sum, inv) => sum + inv.amount, 0);
 
   const paidAmount = invoices
-    .filter(inv => inv.status === 'paid_planner')
+    .filter(inv => inv.status === 'paid_planner' || inv.status === 'completed')
     .reduce((sum, inv) => sum + inv.amount, 0);
 
   const totalInvoices = invoices.length;
