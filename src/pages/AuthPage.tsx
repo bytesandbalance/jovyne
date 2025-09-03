@@ -9,8 +9,9 @@ import { useAuthContext } from '@/components/auth/AuthProvider';
 import { Sparkles, PartyPopper, Users, Calendar } from 'lucide-react';
 
 export default function AuthPage() {
-  const { user, signIn, signUp } = useAuthContext();
+  const { user, signIn, signUp, resetPassword } = useAuthContext();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -26,7 +27,11 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
 
-    if (isSignUp) {
+    if (showForgotPassword) {
+      await resetPassword(email);
+      setShowForgotPassword(false);
+      setEmail('');
+    } else if (isSignUp) {
       await signUp(email, password, { full_name: fullName, user_role: userRole });
     } else {
       await signIn(email, password);
@@ -55,19 +60,22 @@ export default function AuthPage() {
         <Card className="shadow-party border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              {isSignUp ? 'Join the Party!' : 'Welcome Back!'}
+              {showForgotPassword ? 'Reset Password' : (isSignUp ? 'Join the Party!' : 'Welcome Back!')}
             </CardTitle>
             <CardDescription>
-              {isSignUp 
-                ? 'Create your account to start planning amazing events'
-                : 'Sign in to continue your party planning journey'
+              {showForgotPassword 
+                ? 'Enter your email to receive a password reset link'
+                : (isSignUp 
+                  ? 'Create your account to start planning amazing events'
+                  : 'Sign in to continue your party planning journey'
+                )
               }
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {isSignUp && (
+              {!showForgotPassword && isSignUp && (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name</Label>
@@ -117,38 +125,69 @@ export default function AuthPage() {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                />
-              </div>
+              {!showForgotPassword && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    {!isSignUp && (
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-primary hover:text-primary/80 transition-party"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+              )}
               
               <Button 
                 type="submit" 
                 className="w-full hover-bounce"
                 disabled={loading}
               >
-                {loading ? 'Loading...' : (isSignUp ? 'Start Partying! 🎊' : 'Sign In 🎉')}
+                {loading ? 'Loading...' : (
+                  showForgotPassword ? 'Send Reset Link 📧' : 
+                  (isSignUp ? 'Start Partying! 🎊' : 'Sign In 🎉')
+                )}
               </Button>
             </form>
             
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-primary hover:text-primary/80 transition-party"
-              >
-                {isSignUp 
-                  ? 'Already have an account? Sign in'
-                  : "Don't have an account? Join the party!"
-                }
-              </button>
+            <div className="mt-6 text-center space-y-2">
+              {!showForgotPassword && (
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-primary hover:text-primary/80 transition-party"
+                >
+                  {isSignUp 
+                    ? 'Already have an account? Sign in'
+                    : "Don't have an account? Join the party!"
+                  }
+                </button>
+              )}
+              
+              {showForgotPassword && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setEmail('');
+                  }}
+                  className="text-primary hover:text-primary/80 transition-party"
+                >
+                  Back to sign in
+                </button>
+              )}
             </div>
           </CardContent>
         </Card>
