@@ -210,6 +210,7 @@ export type Database = {
           planner_request_id: string | null
           proposed_fee: number | null
           sent_at: string | null
+          status: Database["public"]["Enums"]["helper_invoice_status"]
           total_hours: number | null
           updated_at: string
         }
@@ -234,6 +235,7 @@ export type Database = {
           planner_request_id?: string | null
           proposed_fee?: number | null
           sent_at?: string | null
+          status?: Database["public"]["Enums"]["helper_invoice_status"]
           total_hours?: number | null
           updated_at?: string
         }
@@ -258,6 +260,7 @@ export type Database = {
           planner_request_id?: string | null
           proposed_fee?: number | null
           sent_at?: string | null
+          status?: Database["public"]["Enums"]["helper_invoice_status"]
           total_hours?: number | null
           updated_at?: string
         }
@@ -522,6 +525,12 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      helper_invoice_status:
+        | "draft"
+        | "sent_to_planner"
+        | "awaiting_payment"
+        | "paid_planner"
+        | "completed"
       planner_request_status: "pending" | "approved" | "rejected"
       user_role: "client" | "planner"
     }
@@ -658,6 +667,13 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+      ],
+      helper_invoice_status: [
+        "draft",
+        "sent_to_planner",
+        "awaiting_payment",
+        "paid_planner",
+        "completed",
       ],
       planner_request_status: ["pending", "approved", "rejected"],
       user_role: ["client", "planner"],
