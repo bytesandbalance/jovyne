@@ -264,196 +264,133 @@ export default function PlannersPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">
-            {userProfile?.user_role === 'planner' ? 'Client Requests' : 'Find Party Planners'}
+            {userProfile?.user_role === 'planner' ? 'Planner Hub' : 'Find Party Planners'}
           </h1>
           <p className="text-xl text-muted-foreground">
             {userProfile?.user_role === 'planner' 
-              ? 'Manage incoming client requests and find new opportunities'
+              ? 'Browse planners and manage client requests'
               : 'Discover amazing party planners in your area'
             }
           </p>
         </div>
 
-        {userProfile?.user_role === 'planner' ? (
-          // Planner view - show incoming requests
-          <div className="space-y-6">
-            {incomingRequests.length > 0 ? (
-              <div className="grid gap-6">
-                {incomingRequests.map((request) => (
-                  <Card key={request.id}>
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle>{request.title}</CardTitle>
-                          <CardDescription className="mt-2">{request.description}</CardDescription>
-                          <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(request.event_date).toLocaleDateString()}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {request.location_city}
-                            </div>
-                            {request.budget && (
-                              <div>Budget: ${request.budget}</div>
-                            )}
-                          </div>
-                        </div>
-                        <Badge variant="outline">
-                          <Clock className="w-3 h-3 mr-1" />
-                          Pending
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-end gap-3">
-                        <Button
-                          variant="outline"
-                          onClick={() => handleRequestAction(request.id, 'rejected')}
-                        >
-                          <XCircle className="w-4 h-4 mr-2" />
-                          Decline
-                        </Button>
-                        <Button
-                          onClick={() => handleRequestAction(request.id, 'approved')}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Approve
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No pending requests</h3>
-                  <p className="text-muted-foreground">
-                    New client requests will appear here when they're submitted.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        ) : (
-          // Client view - show planners and requests
-          <Tabs defaultValue="browse" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="browse">Browse Planners</TabsTrigger>
-              <TabsTrigger value="requests">My Requests</TabsTrigger>
-            </TabsList>
+        {/* Universal tabbed view for all users */}
+        <Tabs defaultValue="browse" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="browse">Browse Planners</TabsTrigger>
+            <TabsTrigger value={userProfile?.user_role === 'planner' ? 'requests' : 'my-requests'}>
+              {userProfile?.user_role === 'planner' ? 'Client Requests' : 'My Requests'}
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="browse" className="space-y-6">
-
-              {/* Search and Filters */}
-              <div className="mb-8 space-y-4">
-                <div className="flex gap-4 flex-wrap">
-                  <div className="flex-1 min-w-64">
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Enter city, state, or business name..."
-                        value={searchLocation}
-                        onChange={(e) => setSearchLocation(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+          <TabsContent value="browse" className="space-y-6">
+            {/* Search and Filters */}
+            <div className="mb-8 space-y-4">
+              <div className="flex gap-4 flex-wrap">
+                <div className="flex-1 min-w-64">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Enter city, state, or business name..."
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                  <Button variant="outline">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filters
-                  </Button>
                 </div>
+                <Button variant="outline">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filters
+                </Button>
               </div>
+            </div>
 
-              {/* Content */}
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : filteredPlanners.length > 0 ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {filteredPlanners.map((planner) => (
-                    <Card 
-                      key={planner.id} 
-                      className="overflow-hidden hover:shadow-party transition-party hover-bounce"
-                    >
-                      <div className="aspect-video relative overflow-hidden bg-gradient-party">
-                        {planner.portfolio_images && planner.portfolio_images.length > 0 ? (
-                          <>
-                            <img 
-                              src={planner.portfolio_images[0]} 
-                              alt={`${planner.business_name} portfolio`}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/20" />
-                          </>
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Avatar className="w-16 h-16">
-                              <AvatarImage src={planner.avatar_url} />
-                              <AvatarFallback className="text-lg bg-white/20 text-white">
-                                {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </div>
-                        )}
-                        <div className="absolute top-4 left-4">
-                          <Avatar className="w-12 h-12 border-2 border-white shadow-lg">
+            {/* Content */}
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : filteredPlanners.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {filteredPlanners.map((planner) => (
+                  <Card 
+                    key={planner.id} 
+                    className="overflow-hidden hover:shadow-party transition-party hover-bounce"
+                  >
+                    <div className="aspect-video relative overflow-hidden bg-gradient-party">
+                      {planner.portfolio_images && planner.portfolio_images.length > 0 ? (
+                        <>
+                          <img 
+                            src={planner.portfolio_images[0]} 
+                            alt={`${planner.business_name} portfolio`}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/20" />
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Avatar className="w-16 h-16">
                             <AvatarImage src={planner.avatar_url} />
-                            <AvatarFallback className="text-sm bg-white/90 text-primary">
+                            <AvatarFallback className="text-lg bg-white/20 text-white">
                               {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
                             </AvatarFallback>
                           </Avatar>
                         </div>
-                        <div className="absolute top-4 right-4">
-                          <Badge className="bg-white/90 text-primary shadow-sm">
-                            ${planner.base_price || 0}+
-                          </Badge>
+                      )}
+                      <div className="absolute top-4 left-4">
+                        <Avatar className="w-12 h-12 border-2 border-white shadow-lg">
+                          <AvatarImage src={planner.avatar_url} />
+                          <AvatarFallback className="text-sm bg-white/90 text-primary">
+                            {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-white/90 text-primary shadow-sm">
+                          ${planner.base_price || 0}+
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-xl mb-1">{planner.business_name}</CardTitle>
+                          <p className="text-sm text-muted-foreground mb-2">{planner.full_name}</p>
+                          {(planner.location_city || planner.location_state) && (
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <MapPin className="w-4 h-4" />
+                              {[planner.location_city, planner.location_state].filter(Boolean).join(', ')}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm font-medium">{planner.average_rating || 0}</span>
                         </div>
                       </div>
-                      
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-xl mb-1">{planner.business_name}</CardTitle>
-                            <p className="text-sm text-muted-foreground mb-2">{planner.full_name}</p>
-                            {(planner.location_city || planner.location_state) && (
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <MapPin className="w-4 h-4" />
-                                {[planner.location_city, planner.location_state].filter(Boolean).join(', ')}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-medium">{planner.average_rating || 0}</span>
-                          </div>
+                      <CardDescription>{planner.description}</CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      {planner.specialties && planner.specialties.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {planner.specialties.slice(0, 3).map((specialty) => (
+                            <Badge key={specialty} variant="secondary">
+                              {specialty}
+                            </Badge>
+                          ))}
+                          {planner.specialties.length > 3 && (
+                            <Badge variant="outline">
+                              +{planner.specialties.length - 3} more
+                            </Badge>
+                          )}
                         </div>
-                        <CardDescription>{planner.description}</CardDescription>
-                      </CardHeader>
+                      )}
                       
-                      <CardContent>
-                        {planner.specialties && planner.specialties.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {planner.specialties.slice(0, 3).map((specialty) => (
-                              <Badge key={specialty} variant="secondary">
-                                {specialty}
-                              </Badge>
-                            ))}
-                            {planner.specialties.length > 3 && (
-                              <Badge variant="outline">
-                                +{planner.specialties.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                        
+                      {userProfile?.user_role === 'client' && (
                         <Button 
-                          className="w-full hover-bounce"
+                          className="w-full hover-bounce mb-2"
                           onClick={() => {
                             console.log('Send Request clicked. Client data:', clientData);
                             if (!clientData) {
@@ -469,8 +406,86 @@ export default function PlannersPage() {
                             setShowRequestDialog(true);
                           }}
                         >
+                          <Users className="w-4 h-4 mr-2" />
                           Send Request
                         </Button>
+                      )}
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => handleViewProfile(planner)}
+                      >
+                        View Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No planners found</h3>
+                  <p className="text-muted-foreground">
+                    {searchLocation 
+                      ? `Try adjusting your search for "${searchLocation}"`
+                      : 'Check back later as more planners join our platform'
+                    }
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Client Requests Tab - for Planners */}
+          {userProfile?.user_role === 'planner' && (
+            <TabsContent value="requests" className="space-y-6">
+              {incomingRequests.length > 0 ? (
+                <div className="grid gap-6">
+                  {incomingRequests.map((request) => (
+                    <Card key={request.id}>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle>{request.title}</CardTitle>
+                            <CardDescription className="mt-2">{request.description}</CardDescription>
+                            <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(request.event_date).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                {request.location_city}
+                              </div>
+                              {request.budget && (
+                                <div>Budget: ${request.budget}</div>
+                              )}
+                            </div>
+                          </div>
+                          <Badge variant="outline">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Pending
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex justify-end gap-3">
+                          <Button
+                            variant="outline"
+                            onClick={() => handleRequestAction(request.id, 'rejected')}
+                          >
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Decline
+                          </Button>
+                          <Button
+                            onClick={() => handleRequestAction(request.id, 'approved')}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Approve
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -478,17 +493,20 @@ export default function PlannersPage() {
               ) : (
                 <Card>
                   <CardContent className="text-center py-12">
-                    <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No planners found</h3>
+                    <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No pending requests</h3>
                     <p className="text-muted-foreground">
-                      Try adjusting your search criteria or check back later for new planners
+                      New client requests will appear here when they're submitted.
                     </p>
                   </CardContent>
                 </Card>
               )}
             </TabsContent>
+          )}
 
-            <TabsContent value="requests" className="space-y-6">
+          {/* My Requests Tab - for Clients */}
+          {userProfile?.user_role === 'client' && (
+            <TabsContent value="my-requests" className="space-y-6">
               {plannerRequests.length > 0 ? (
                 <div className="grid gap-6">
                   {plannerRequests.map((request) => (
@@ -511,38 +529,31 @@ export default function PlannersPage() {
                                 <div>Budget: ${request.budget}</div>
                               )}
                             </div>
+                            {request.planners && (
+                              <div className="flex items-center gap-2 mt-2">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarImage src={request.planners.profiles?.avatar_url} />
+                                  <AvatarFallback className="text-xs">
+                                    {getInitials(request.planners.profiles?.full_name || request.planners.business_name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm">
+                                  Assigned to {request.planners.business_name}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                          <Badge variant={
-                            request.status === 'filled' ? 'default' : 
-                            request.status === 'cancelled' ? 'destructive' : 'secondary'
-                          }>
-                            {request.status === 'open' && <Clock className="w-3 h-3 mr-1" />}
-                            {request.status === 'filled' && <CheckCircle className="w-3 h-3 mr-1" />}
-                            {request.status === 'cancelled' && <XCircle className="w-3 h-3 mr-1" />}
-                            {request.status === 'open' ? 'pending' : 
-                             request.status === 'filled' ? 'approved' : 
-                             request.status === 'cancelled' ? 'rejected' : request.status}
+                          <Badge 
+                            variant={
+                              request.status === 'open' ? 'default' : 
+                              request.status === 'filled' ? 'default' : 
+                              'secondary'
+                            }
+                          >
+                            {request.status}
                           </Badge>
                         </div>
                       </CardHeader>
-                      {request.planners && (
-                        <CardContent>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={request.planners.profiles?.avatar_url} />
-                              <AvatarFallback>
-                                {getInitials(request.planners.business_name)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{request.planners.business_name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {request.planners.profiles?.full_name}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      )}
                     </Card>
                   ))}
                 </div>
@@ -551,18 +562,15 @@ export default function PlannersPage() {
                   <CardContent className="text-center py-12">
                     <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No requests yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Browse planners and send your first request to get started.
+                    <p className="text-muted-foreground">
+                      Your submitted requests will appear here.
                     </p>
-                    <Button onClick={() => setShowRequestDialog(true)}>
-                      Browse Planners
-                    </Button>
                   </CardContent>
                 </Card>
               )}
             </TabsContent>
-          </Tabs>
-        )}
+          )}
+        </Tabs>
 
         {/* Planner Profile Modal */}
         {selectedPlanner && (
