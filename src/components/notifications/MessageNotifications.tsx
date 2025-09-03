@@ -142,6 +142,11 @@ export function MessageNotifications() {
   };
 
   const handleNotificationClick = async (message: Message) => {
+    console.log('Notification clicked:', { 
+      subject: message.subject, 
+      message: message.message 
+    });
+
     // Mark as read
     if (!message.is_read) {
       markAsRead(message.id);
@@ -161,6 +166,12 @@ export function MessageNotifications() {
     const messageLower = message.message.toLowerCase();
     const fullText = `${subjectLower} ${messageLower}`;
 
+    console.log('Navigation logic check:', {
+      fullText,
+      isClient,
+      userRole: profile?.user_role
+    });
+
     // Check for invoice-related notifications first (most specific)
     if (fullText.includes('invoice') || 
        fullText.includes('payment') || 
@@ -169,7 +180,7 @@ export function MessageNotifications() {
        fullText.includes('received invoice') ||
        fullText.includes('amount due') || 
        fullText.includes('bill')) {
-      // For invoice-related notifications, go to invoicing tab
+      console.log('Navigating to invoicing tab');
       navigate('/dashboard?tab=invoicing');
     } 
     // Check for any request-related notifications
@@ -188,11 +199,12 @@ export function MessageNotifications() {
              fullText.includes('event request') ||
              fullText.includes('booking') ||
              fullText.includes('proposal')) {
-      // All request-related notifications go to requests tab
+      console.log('Navigating to requests tab');
       navigate('/dashboard?tab=requests');
     } 
     // Default navigation for any other notifications
     else {
+      console.log('Navigating to default dashboard');
       navigate('/dashboard');
     }
   };
