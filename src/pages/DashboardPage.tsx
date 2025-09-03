@@ -107,6 +107,8 @@ const DashboardPage = () => {
           .maybeSingle();
         
         console.log('Planner query result - data:', plannerData, 'error:', plannerError);
+        console.log('Expected planner user_id: db7cde5f-003f-484f-8c8d-e2ba9e513fa8');
+        console.log('Expected planner id: 76ead27a-91b0-4a41-9de0-90e6d5d9ca49');
         setPlannerProfile(plannerData);
 
         // Initialize planner form
