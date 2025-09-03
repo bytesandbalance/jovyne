@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import { Navigation } from "@/components/layout/Navigation";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import PlannersPage from "./pages/PlannersPage";
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/planners" element={<PlannersPage />} />
