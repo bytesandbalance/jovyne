@@ -47,7 +47,6 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
 
   const fetchRequests = async () => {
     try {
-      console.log('Fetching requests for planner ID:', plannerProfile.id);
       const { data, error } = await supabase
         .from('planner_requests')
         .select(`
@@ -56,8 +55,6 @@ export default function PlannerRequestsSection({ plannerProfile }: PlannerReques
         `)
         .eq('planner_id', plannerProfile.id)
         .order('created_at', { ascending: false });
-      
-      console.log('Query result:', { data, error });
 
       if (error) throw error;
       setRequests(data || []);
