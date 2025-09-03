@@ -61,6 +61,10 @@ const DashboardPage = () => {
 
   const fetchUserData = async () => {
     try {
+      console.log('=== DASHBOARD DEBUG ===');
+      console.log('Current logged in user ID:', user.id);
+      console.log('User email:', user.email);
+      
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
