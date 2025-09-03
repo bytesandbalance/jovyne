@@ -53,6 +53,57 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          budget: number | null
+          client_id: string
+          created_at: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          guest_count: number | null
+          id: string
+          planner_id: string
+          status: string
+          title: string
+          updated_at: string
+          venue_address: string | null
+          venue_name: string | null
+        }
+        Insert: {
+          budget?: number | null
+          client_id: string
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          guest_count?: number | null
+          id?: string
+          planner_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Update: {
+          budget?: number | null
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          guest_count?: number | null
+          id?: string
+          planner_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
