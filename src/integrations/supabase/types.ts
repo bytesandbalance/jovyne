@@ -367,6 +367,7 @@ export type Database = {
           business_name: string
           created_at: string
           description: string | null
+          email: string | null
           id: string
           instagram_handle: string | null
           is_verified: boolean | null
@@ -389,6 +390,7 @@ export type Database = {
           business_name: string
           created_at?: string
           description?: string | null
+          email?: string | null
           id?: string
           instagram_handle?: string | null
           is_verified?: boolean | null
@@ -411,6 +413,7 @@ export type Database = {
           business_name?: string
           created_at?: string
           description?: string | null
+          email?: string | null
           id?: string
           instagram_handle?: string | null
           is_verified?: boolean | null
