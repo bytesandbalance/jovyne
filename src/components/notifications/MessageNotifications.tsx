@@ -172,36 +172,36 @@ export function MessageNotifications() {
       userRole: profile?.user_role
     });
 
-    // Check for invoice-related notifications first (most specific)
-    if (fullText.includes('invoice') || 
-       fullText.includes('payment') || 
-       fullText.includes('paid') || 
-       fullText.includes('billing') || 
-       fullText.includes('received invoice') ||
-       fullText.includes('amount due') || 
-       fullText.includes('bill')) {
-      console.log('Navigating to invoicing tab');
-      navigate('/dashboard?tab=invoicing');
-    } 
-    // Check for any request-related notifications
-    else if (fullText.includes('request') || 
-             fullText.includes('application') ||
-             fullText.includes('approve') || 
-             fullText.includes('approved') || 
-             fullText.includes('decline') || 
-             fullText.includes('declined') || 
-             fullText.includes('reject') || 
-             fullText.includes('rejected') ||
-             fullText.includes('accept') ||
-             fullText.includes('accepted') ||
-             fullText.includes('status') ||
-             fullText.includes('planner request') ||
-             fullText.includes('event request') ||
-             fullText.includes('booking') ||
-             fullText.includes('proposal')) {
+    // Check for request-related notifications first
+    if (fullText.includes('request') || 
+       fullText.includes('application') ||
+       fullText.includes('approve') || 
+       fullText.includes('approved') || 
+       fullText.includes('decline') || 
+       fullText.includes('declined') || 
+       fullText.includes('reject') || 
+       fullText.includes('rejected') ||
+       fullText.includes('accept') ||
+       fullText.includes('accepted') ||
+       fullText.includes('status') ||
+       fullText.includes('planner request') ||
+       fullText.includes('event request') ||
+       fullText.includes('booking') ||
+       fullText.includes('proposal')) {
       console.log('Navigating to requests tab');
       navigate('/dashboard?tab=requests');
     } 
+    // Check for invoice-related notifications (more specific patterns)
+    else if (fullText.includes('invoice received') || 
+             fullText.includes('payment received') || 
+             fullText.includes('paid') || 
+             fullText.includes('billing') || 
+             fullText.includes('amount due') || 
+             fullText.includes('bill') ||
+             (fullText.includes('invoice') && !fullText.includes('request'))) {
+      console.log('Navigating to invoicing tab');
+      navigate('/dashboard?tab=invoicing');
+    }
     // Default navigation for any other notifications
     else {
       console.log('Navigating to default dashboard');
