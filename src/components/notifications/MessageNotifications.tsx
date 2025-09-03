@@ -154,18 +154,26 @@ export function MessageNotifications() {
       .eq('user_id', user?.id)
       .single();
 
+    const isClient = profile?.user_role === 'client';
+
     // Navigate to specific dashboard tab based on message subject and user role
-    // Check for invoice-related messages first (more specific)
     if (message.subject.toLowerCase().includes('invoice') || 
        message.subject.toLowerCase().includes('payment') || 
        message.subject.toLowerCase().includes('paid') || 
        message.subject.toLowerCase().includes('billing') || 
+       message.subject.toLowerCase().includes('received') ||
        message.subject.toLowerCase().includes('amount') || 
        message.subject.toLowerCase().includes('due') || 
        message.subject.toLowerCase().includes('bill')) {
+      // For invoice-related notifications, go to invoicing tab
       navigate('/dashboard?tab=invoicing');
     } else if (message.subject.toLowerCase().includes('application')) {
-      navigate('/dashboard?tab=applications'); // Both helpers and planners have applications tab
+      // For application notifications, both roles go to different places
+      if (isClient) {
+        navigate('/dashboard?tab=requests'); // Clients see applications in requests
+      } else {
+        navigate('/dashboard?tab=requests'); // Planners also see applications in requests
+      }
     } else if (message.subject.toLowerCase().includes('request') || 
                message.subject.toLowerCase().includes('approve') || 
                message.subject.toLowerCase().includes('approved') || 
@@ -173,7 +181,7 @@ export function MessageNotifications() {
                message.subject.toLowerCase().includes('declined') || 
                message.subject.toLowerCase().includes('reject') || 
                message.subject.toLowerCase().includes('rejected')) {
-      // Navigate to requests tab for request-related notifications
+      // For request-related notifications (approve/decline), go to requests tab
       navigate('/dashboard?tab=requests');
     } else {
       // Default navigation
