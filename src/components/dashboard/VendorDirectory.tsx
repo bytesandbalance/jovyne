@@ -519,8 +519,8 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
             <div className="grid gap-4">
               {filteredVendors.map((vendor) => (
                 <div key={vendor.id} className="p-4 border rounded-lg">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-lg">{vendor.name}</h3>
                         <Badge variant="secondary">
@@ -534,8 +534,8 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(vendor)}>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 sm:mt-0 sm:ml-4">
+                      <Button variant="outline" size="sm" onClick={() => openEditDialog(vendor)} className="w-full sm:w-auto">
                         <Edit className="w-3 h-3 mr-1" />
                         Edit
                       </Button>
@@ -547,6 +547,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                             deleteVendor(vendor.id);
                           }
                         }}
+                        className="w-full sm:w-auto"
                       >
                         Delete
                       </Button>
