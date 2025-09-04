@@ -342,15 +342,17 @@ const DashboardPage = () => {
                         {plannerProfile.base_price ? `$${plannerProfile.base_price}` : 'Not set'}
                       </p>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Rating</Label>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-muted-foreground">
-                          {plannerProfile.average_rating || '0.0'} ({plannerProfile.total_reviews || 0} reviews)
-                        </span>
+                    {plannerProfile.total_reviews > 0 && (
+                      <div>
+                        <Label className="text-sm font-medium">Rating</Label>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-muted-foreground">
+                            {plannerProfile.average_rating || '0.0'} ({plannerProfile.total_reviews || 0} reviews)
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div>
                       <Label className="text-sm font-medium">Verification Status</Label>
                       <Badge variant={plannerProfile.is_verified ? "default" : "secondary"}>

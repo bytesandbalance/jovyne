@@ -144,11 +144,13 @@ export function PlannerProfileSelector() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">{profile.business_name}</CardTitle>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{profile.average_rating}</span>
-                      <span className="text-sm text-muted-foreground">({profile.total_reviews})</span>
-                    </div>
+                    {profile.total_reviews > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{profile.average_rating}</span>
+                        <span className="text-sm text-muted-foreground">({profile.total_reviews})</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
@@ -166,10 +168,12 @@ export function PlannerProfileSelector() {
                       <Calendar className="h-4 w-4" />
                       <span>{profile.years_experience} years exp.</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>{profile.total_reviews} reviews</span>
-                    </div>
+                    {profile.total_reviews > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{profile.total_reviews} reviews</span>
+                      </div>
+                    )}
                   </div>
 
                   {profile.services && profile.services.length > 0 && (

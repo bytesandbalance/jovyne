@@ -104,13 +104,15 @@ export function PlannerProfileModal({
               <h3 className="text-2xl font-bold">{planner.business_name}</h3>
               <p className="text-lg text-muted-foreground">{planner.full_name}</p>
               
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{planner.average_rating || 0}</span>
-                  <span className="text-muted-foreground">({planner.total_reviews || 0} reviews)</span>
+              {planner.total_reviews > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-medium">{planner.average_rating || 0}</span>
+                    <span className="text-muted-foreground">({planner.total_reviews || 0} reviews)</span>
+                  </div>
                 </div>
-              </div>
+              )}
               
               <div className="flex items-center gap-1 mt-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />

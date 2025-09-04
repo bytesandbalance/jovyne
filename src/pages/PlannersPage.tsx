@@ -288,10 +288,12 @@ export default function PlannersPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{planner.average_rating || 0}</span>
-                    </div>
+                    {planner.total_reviews > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{planner.average_rating || 0}</span>
+                      </div>
+                    )}
                   </div>
                   <CardDescription>{planner.description}</CardDescription>
                 </CardHeader>

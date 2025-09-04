@@ -325,10 +325,12 @@ export default function ProfilePage() {
                   <span>{plannerProfile.location_city}, {plannerProfile.location_state}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 text-yellow-500" />
-                <span>{plannerProfile?.average_rating || '0.0'} ({plannerProfile?.total_reviews || 0} reviews)</span>
-              </div>
+              {plannerProfile?.total_reviews > 0 && (
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  <span>{plannerProfile?.average_rating || '0.0'} ({plannerProfile?.total_reviews || 0} reviews)</span>
+                </div>
+              )}
               <Badge variant={plannerProfile?.is_verified ? "default" : "secondary"}>
                 {plannerProfile?.is_verified ? "Verified" : "Pending"}
               </Badge>

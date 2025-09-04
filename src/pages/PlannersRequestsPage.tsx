@@ -458,11 +458,13 @@ export default function PlannersRequestsPage() {
                         <div className="flex-1">
                           <CardTitle className="text-lg">{planner.business_name}</CardTitle>
                           <p className="text-sm text-muted-foreground">{planner.profiles?.full_name}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Star className="w-4 h-4 text-yellow-500" />
-                            <span>{planner.average_rating.toFixed(1)}</span>
-                            <span>({planner.total_reviews} reviews)</span>
-                          </div>
+                          {planner.total_reviews > 0 && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Star className="w-4 h-4 text-yellow-500" />
+                              <span>{planner.average_rating.toFixed(1)}</span>
+                              <span>({planner.total_reviews} reviews)</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardHeader>

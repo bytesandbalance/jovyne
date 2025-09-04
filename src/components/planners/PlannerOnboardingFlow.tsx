@@ -250,11 +250,13 @@ export function PlannerOnboardingFlow() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl">{existingProfile.business_name}</CardTitle>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-medium">{existingProfile.average_rating}</span>
-                  <span className="text-sm text-muted-foreground">({existingProfile.total_reviews})</span>
-                </div>
+                {existingProfile.total_reviews > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-medium">{existingProfile.average_rating}</span>
+                    <span className="text-sm text-muted-foreground">({existingProfile.total_reviews})</span>
+                  </div>
+                )}
               </div>
               <CardDescription className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -291,10 +293,12 @@ export function PlannerOnboardingFlow() {
                   <Calendar className="h-4 w-4" />
                   {existingProfile.years_experience} years experience
                 </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  {existingProfile.total_reviews} reviews
-                </div>
+                {existingProfile.total_reviews > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    {existingProfile.total_reviews} reviews
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
