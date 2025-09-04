@@ -19,6 +19,7 @@ interface PlannerProfileModalProps {
   onOpenChange: (open: boolean) => void;
   currentUserId?: string;
   userRole?: string;
+  currentUserIsVerified?: boolean;
 }
 
 export function PlannerProfileModal({ 
@@ -26,7 +27,8 @@ export function PlannerProfileModal({
   open, 
   onOpenChange, 
   currentUserId,
-  userRole 
+  userRole,
+  currentUserIsVerified 
 }: PlannerProfileModalProps) {
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactForm, setContactForm] = useState({
@@ -218,22 +220,48 @@ export function PlannerProfileModal({
           <div className="space-y-4">
             {!showContactForm ? (
               <div className={userRole === 'client' ? "grid grid-cols-2 gap-2" : "flex"}>
-                <Button 
-                  onClick={() => setShowContactForm(true)}
-                  variant="outline"
-                  size="lg"
-                  className={userRole === 'client' ? "" : "w-full"}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Contact Planner
-                </Button>
-                {userRole === 'client' && (
+                {/* Show contact button for verified planners or clients to verified planners */}
+                {(userRole === 'client' && planner.is_verified) || 
+                 (userRole === 'planner' && planner.is_verified && currentUserIsVerified) ? (
+                  <Button 
+                    onClick={() => setShowContactForm(true)}
+                    variant="outline"
+                    size="lg"
+                    className={userRole === 'client' ? "" : "w-full"}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Contact Planner
+                  </Button>
+                ) : (
+                  <Button 
+                    disabled
+                    variant="outline"
+                    size="lg"
+                    className={userRole === 'client' ? "" : "w-full"}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Verification Required
+                  </Button>
+                )}
+                
+                {userRole === 'client' && planner.is_verified && (
                   <Button 
                     onClick={() => setShowRequestDialog(true)}
                     size="lg"
                   >
                     <FileText className="w-4 h-4 mr-2" />
                     Send Request
+                  </Button>
+                )}
+                
+                {userRole === 'client' && !planner.is_verified && (
+                  <Button 
+                    disabled
+                    size="lg"
+                    variant="outline"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Verification Required
                   </Button>
                 )}
               </div>

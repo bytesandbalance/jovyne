@@ -45,6 +45,7 @@ export default function PlannersPage() {
   const [searchParams] = useSearchParams();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [clientData, setClientData] = useState<any>(null);
+  const [currentUserPlannerData, setCurrentUserPlannerData] = useState<any>(null);
   const [showRequestDialog, setShowRequestDialog] = useState(false);
 
   useEffect(() => {
@@ -116,6 +117,21 @@ export default function PlannersPage() {
           finalClientData = clientRecord;
           setClientData(clientRecord);
         }
+      }
+
+      // If user is a planner, fetch their planner data
+      if (profile?.user_role === 'planner') {
+        console.log('User is a planner, fetching planner record...');
+        
+        const { data: plannerRecord, error: plannerError } = await supabase
+          .from('planners')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        console.log('Planner record:', plannerRecord);
+        console.log('Planner error:', plannerError);
+        setCurrentUserPlannerData(plannerRecord);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -296,7 +312,7 @@ export default function PlannersPage() {
                     </div>
                   )}
                   
-                  {userProfile?.user_role === 'client' && (
+                  {userProfile?.user_role === 'client' && planner.is_verified && (
                     <Button 
                       className="w-full hover-bounce mb-2"
                       onClick={() => {
@@ -316,6 +332,17 @@ export default function PlannersPage() {
                     >
                       <Users className="w-4 h-4 mr-2" />
                       Send Request
+                    </Button>
+                  )}
+                  
+                  {userProfile?.user_role === 'client' && !planner.is_verified && (
+                    <Button 
+                      className="w-full mb-2"
+                      disabled
+                      variant="outline"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Verification Required
                     </Button>
                   )}
                   
@@ -353,6 +380,7 @@ export default function PlannersPage() {
             onOpenChange={setShowPlannerProfile}
             currentUserId={user?.id}
             userRole={userProfile?.user_role}
+            currentUserIsVerified={currentUserPlannerData?.is_verified}
           />
         )}
 

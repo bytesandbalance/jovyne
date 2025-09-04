@@ -115,6 +115,7 @@ interface Planner {
   portfolio_images: string[];
   website_url: string;
   instagram_handle: string;
+  is_verified: boolean;
   profiles: {
     full_name: string;
     avatar_url: string;
@@ -789,6 +790,10 @@ export default function PlannersRequestsPage() {
             onOpenChange={setShowPlannerProfile}
             currentUserId={user?.id}
             userRole={userRole || undefined}
+            currentUserIsVerified={userRole === 'planner' ? 
+              planners.find(p => p.user_id === user?.id)?.is_verified : 
+              undefined
+            }
           />
         )}
       </div>
