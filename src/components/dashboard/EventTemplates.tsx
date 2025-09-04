@@ -53,6 +53,110 @@ export default function EventTemplates({ plannerProfile }: EventTemplatesProps) 
     { value: 'package', label: 'Service Package' }
   ];
 
+  const prebuiltTemplates = {
+    wedding: {
+      checklist: {
+        name: "Wedding Planning Checklist",
+        description: "Comprehensive wedding planning checklist",
+        content: `• 12-6 months before: Book venue, set budget, create guest list
+• 6-4 months before: Send invitations, book catering, order flowers
+• 4-2 months before: Final headcount, wedding cake, seating chart
+• 2 weeks before: Confirm all vendors, final dress fitting
+• 1 week before: Pack for honeymoon, final venue walkthrough
+• Day of: Relax and enjoy your special day!`,
+        estimated_budget: 25000,
+        estimated_hours: 200
+      },
+      timeline: {
+        name: "Wedding Day Timeline",
+        description: "Sample wedding day schedule",
+        content: `10:00 AM - Bridal party hair & makeup begins
+2:00 PM - Groom and groomsmen get ready
+3:00 PM - First look photos
+4:00 PM - Wedding party photos
+5:30 PM - Ceremony begins
+6:00 PM - Cocktail hour
+7:00 PM - Reception dinner
+9:00 PM - Dancing begins
+11:00 PM - Last dance & send-off`,
+        estimated_budget: 5000,
+        estimated_hours: 12
+      },
+      budget: {
+        name: "Wedding Budget Breakdown",
+        description: "Typical wedding budget allocation",
+        content: `Venue (40%): $10,000
+Catering (30%): $7,500
+Photography/Video (15%): $3,750
+Flowers/Decor (10%): $2,500
+Music/Entertainment (8%): $2,000
+Wedding Attire (5%): $1,250
+Miscellaneous (7%): $1,750
+Total: $28,750`,
+        estimated_budget: 28750,
+        estimated_hours: 150
+      }
+    },
+    birthday: {
+      checklist: {
+        name: "Birthday Party Checklist",
+        description: "Complete birthday party planning guide",
+        content: `• 4-6 weeks before: Choose theme, set date, create guest list
+• 3-4 weeks before: Send invitations, book venue if needed
+• 2-3 weeks before: Order cake, plan menu, buy decorations
+• 1 week before: Confirm RSVPs, prepare party favors
+• Day before: Set up decorations, prepare food
+• Day of: Final setup, enjoy the celebration!`,
+        estimated_budget: 800,
+        estimated_hours: 25
+      },
+      timeline: {
+        name: "Birthday Party Timeline",
+        description: "Sample birthday party schedule",
+        content: `2:00 PM - Setup begins (decorations, tables)
+3:00 PM - Final food preparation
+4:00 PM - Guests arrive, welcome drinks
+4:30 PM - Party activities/games
+5:30 PM - Cake ceremony & singing
+6:00 PM - Dinner/food service
+7:00 PM - More activities, dancing
+8:00 PM - Party favors, thank you & goodbye`,
+        estimated_budget: 600,
+        estimated_hours: 8
+      }
+    },
+    corporate: {
+      checklist: {
+        name: "Corporate Event Checklist",
+        description: "Professional corporate event planning",
+        content: `• 8-10 weeks before: Define objectives, set budget, book venue
+• 6-8 weeks before: Send invitations, arrange catering
+• 4-6 weeks before: Confirm speakers, plan agenda
+• 2-4 weeks before: Final headcount, AV equipment check
+• 1 week before: Rehearsal, final confirmations
+• Day of: Setup, registration, smooth execution`,
+        estimated_budget: 15000,
+        estimated_hours: 80
+      },
+      timeline: {
+        name: "Corporate Event Timeline",
+        description: "Sample corporate event schedule",
+        content: `8:00 AM - Setup begins, AV equipment test
+9:00 AM - Registration opens, welcome coffee
+9:30 AM - Opening remarks
+10:00 AM - Keynote presentation
+11:00 AM - Networking break
+11:30 AM - Panel discussion
+12:30 PM - Lunch break
+2:00 PM - Workshops/breakout sessions
+4:00 PM - Closing remarks & networking
+5:00 PM - Event concludes`,
+        estimated_budget: 8000,
+        estimated_hours: 10
+      }
+    }
+  };
+
   const eventTypes = [
     { value: 'wedding', label: 'Wedding' },
     { value: 'corporate', label: 'Corporate Event' },
@@ -268,19 +372,27 @@ export default function EventTemplates({ plannerProfile }: EventTemplatesProps) 
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Event Templates</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => {
-              setEditingTemplate(null);
-              setNewTemplate({
-                name: '', template_type: '', event_type: '', estimated_budget: '',
-                estimated_hours: '', description: '', content: ''
-              });
-            }}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Template
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsDialogOpen(true)}
+            className="mr-2"
+          >
+            Use Pre-built Template
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => {
+                setEditingTemplate(null);
+                setNewTemplate({
+                  name: '', template_type: '', event_type: '', estimated_budget: '',
+                  estimated_hours: '', description: '', content: ''
+                });
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Template
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingTemplate ? 'Edit Template' : 'Create New Template'}</DialogTitle>
@@ -392,6 +504,7 @@ export default function EventTemplates({ plannerProfile }: EventTemplatesProps) 
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -475,6 +588,47 @@ export default function EventTemplates({ plannerProfile }: EventTemplatesProps) 
           </CardContent>
         </Card>
       </div>
+
+      {/* Pre-built Templates */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Pre-built Templates</CardTitle>
+          <CardDescription>Quick start with professionally designed templates</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Object.entries(prebuiltTemplates).map(([eventType, templates]) => (
+              <div key={eventType} className="space-y-3">
+                <h4 className="font-semibold capitalize">{eventType} Templates</h4>
+                {Object.entries(templates).map(([templateType, template]) => (
+                  <div key={templateType} className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                       onClick={() => {
+                         setNewTemplate({
+                           name: template.name,
+                           template_type: templateType,
+                           event_type: eventType,
+                           description: template.description,
+                           content: template.content,
+                           estimated_budget: template.estimated_budget?.toString() || '',
+                           estimated_hours: template.estimated_hours?.toString() || ''
+                         });
+                         setEditingTemplate(null);
+                         setIsDialogOpen(true);
+                       }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <h5 className="font-medium text-sm">{template.name}</h5>
+                      <Badge variant="secondary" className="text-xs">
+                        {templateTypes.find(t => t.value === templateType)?.label}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{template.description}</p>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Templates List */}
       <Card>

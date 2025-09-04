@@ -61,7 +61,15 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
   const eventTypes = [
     { value: 'availability_block', label: 'Availability Block', color: 'bg-green-100 text-green-800' },
     { value: 'vendor_meeting', label: 'Vendor Meeting', color: 'bg-blue-100 text-blue-800' },
+    { value: 'client_consultation', label: 'Client Consultation', color: 'bg-orange-100 text-orange-800' },
+    { value: 'wedding_planning', label: 'Wedding Planning', color: 'bg-pink-100 text-pink-800' },
+    { value: 'birthday_party', label: 'Birthday Party Planning', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'corporate_function', label: 'Corporate Function', color: 'bg-indigo-100 text-indigo-800' },
+    { value: 'anniversary_celebration', label: 'Anniversary Celebration', color: 'bg-rose-100 text-rose-800' },
+    { value: 'graduation_party', label: 'Graduation Party', color: 'bg-teal-100 text-teal-800' },
     { value: 'marketing_activity', label: 'Marketing Activity', color: 'bg-purple-100 text-purple-800' },
+    { value: 'venue_visit', label: 'Venue Visit', color: 'bg-cyan-100 text-cyan-800' },
+    { value: 'event_execution', label: 'Event Execution', color: 'bg-red-100 text-red-800' },
     { value: 'personal', label: 'Personal', color: 'bg-gray-100 text-gray-800' }
   ];
 
