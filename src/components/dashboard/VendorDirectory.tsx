@@ -70,8 +70,12 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
   ];
 
   useEffect(() => {
+    console.log('VendorDirectory useEffect - plannerProfile:', plannerProfile);
     if (plannerProfile) {
+      console.log('Calling fetchVendors with planner ID:', plannerProfile.id);
       fetchVendors();
+    } else {
+      console.log('No plannerProfile available');
     }
   }, [plannerProfile]);
 
@@ -95,6 +99,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
   }, [vendors, searchTerm, filterType]);
 
   const fetchVendors = async () => {
+    console.log('fetchVendors called with plannerProfile.id:', plannerProfile?.id);
     try {
       const { data, error } = await supabase
         .from('planner_vendors')
@@ -102,6 +107,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
         .eq('planner_id', plannerProfile.id)
         .order('name', { ascending: true });
 
+      console.log('Vendor fetch result - data:', data, 'error:', error);
       if (error) throw error;
       setVendors(data || []);
     } catch (error) {
