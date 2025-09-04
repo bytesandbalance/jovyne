@@ -258,140 +258,132 @@ const DashboardPage = () => {
           </p>
         </div>
 
-        <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className="bg-transparent p-0 h-auto gap-2 flex flex-wrap justify-center w-full">
-            <TabsTrigger value="profile" className="px-4 py-2">Profile</TabsTrigger>
-            {isPlannerView && (
-              <>
-                <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
-                <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
-                <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
-                <TabsTrigger value="tasks" className="px-4 py-2">Tasks</TabsTrigger>
-                <TabsTrigger value="vendors" className="px-4 py-2">Vendors</TabsTrigger>
-                <TabsTrigger value="templates" className="px-4 py-2">Templates</TabsTrigger>
-                <TabsTrigger value="calendar" className="px-4 py-2">Calendar</TabsTrigger>
-                <TabsTrigger value="inventory" className="px-4 py-2">Inventory</TabsTrigger>
-              </>
-            )}
-            {!isPlannerView && (
-              <>
-                <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
-                <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
-              </>
-            )}
-          </TabsList>
+        {/* Show Client Dashboard directly without outer tabs to avoid nesting */}
+        {isClientView && clientProfile ? (
+          <ClientDashboard user={user} clientData={clientProfile} />
+        ) : (
+          /* Show Planner Dashboard with tabs */
+          <Tabs defaultValue={defaultTab} className="space-y-6">
+            <TabsList className="bg-transparent p-0 h-auto gap-2 flex flex-wrap justify-center w-full">
+              <TabsTrigger value="profile" className="px-4 py-2">Profile</TabsTrigger>
+              <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
+              <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
+              <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
+              <TabsTrigger value="tasks" className="px-4 py-2">Tasks</TabsTrigger>
+              <TabsTrigger value="vendors" className="px-4 py-2">Vendors</TabsTrigger>
+              <TabsTrigger value="templates" className="px-4 py-2">Templates</TabsTrigger>
+              <TabsTrigger value="calendar" className="px-4 py-2">Calendar</TabsTrigger>
+              <TabsTrigger value="inventory" className="px-4 py-2">Inventory</TabsTrigger>
+            </TabsList>
 
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  Profile Information
-                </CardTitle>
-                <CardDescription>Manage your personal information</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium">Full Name</Label>
-                    <p className="text-muted-foreground">{userProfile?.full_name || 'Not set'}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Email</Label>
-                    <p className="text-muted-foreground">{userProfile?.email}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Phone</Label>
-                    <p className="text-muted-foreground">{userProfile?.phone || 'Not set'}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Account Type</Label>
-                    <Badge variant="secondary" className="capitalize">
-                      {userProfile?.user_role}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button onClick={() => setIsProfileDialogOpen(true)}>
-                    Edit Profile
-                  </Button>
-                  {isPlannerView && (
-                    <Button variant="outline" onClick={() => setIsPlannerDialogOpen(true)}>
-                      Edit Business Profile
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Business Profile for Planners */}
-            {isPlannerView && plannerProfile && (
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <UserCheck className="w-5 h-5" />
-                    Business Profile
+                    <Settings className="w-5 h-5" />
+                    Profile Information
                   </CardTitle>
-                  <CardDescription>Your planner business information</CardDescription>
+                  <CardDescription>Manage your personal information</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-sm font-medium">Business Name</Label>
-                      <p className="text-muted-foreground">{plannerProfile.business_name || 'Not set'}</p>
+                      <Label className="text-sm font-medium">Full Name</Label>
+                      <p className="text-muted-foreground">{userProfile?.full_name || 'Not set'}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Location</Label>
-                      <p className="text-muted-foreground">
-                        {plannerProfile.location_city && plannerProfile.location_state
-                          ? `${plannerProfile.location_city}, ${plannerProfile.location_state}`
-                          : 'Not set'}
-                      </p>
+                      <Label className="text-sm font-medium">Email</Label>
+                      <p className="text-muted-foreground">{userProfile?.email}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Years of Experience</Label>
-                      <p className="text-muted-foreground">{plannerProfile.years_experience || 'Not set'}</p>
+                      <Label className="text-sm font-medium">Phone</Label>
+                      <p className="text-muted-foreground">{userProfile?.phone || 'Not set'}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">Base Price</Label>
-                      <p className="text-muted-foreground">
-                        {plannerProfile.base_price ? `$${plannerProfile.base_price}` : 'Not set'}
-                      </p>
-                    </div>
-                    {plannerProfile.total_reviews > 0 && (
-                      <div>
-                        <Label className="text-sm font-medium">Rating</Label>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-muted-foreground">
-                            {plannerProfile.average_rating || '0.0'} ({plannerProfile.total_reviews || 0} reviews)
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    <div>
-                      <Label className="text-sm font-medium">Verification Status</Label>
-                      <Badge variant={plannerProfile.is_verified ? "default" : "secondary"}>
-                        {plannerProfile.is_verified ? "Verified" : "Pending"}
+                      <Label className="text-sm font-medium">Account Type</Label>
+                      <Badge variant="secondary" className="capitalize">
+                        {userProfile?.user_role}
                       </Badge>
                     </div>
                   </div>
                   
-                  {plannerProfile.description && (
-                    <div>
-                      <Label className="text-sm font-medium">Description</Label>
-                      <p className="text-muted-foreground">{plannerProfile.description}</p>
-                    </div>
-                  )}
+                  <div className="flex gap-2">
+                    <Button onClick={() => setIsProfileDialogOpen(true)}>
+                      Edit Profile
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsPlannerDialogOpen(true)}>
+                      Edit Business Profile
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
-            )}
-          </TabsContent>
 
-          {/* Requests Tab for Planners */}
-          {isPlannerView && (
+              {/* Business Profile for Planners */}
+              {plannerProfile && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserCheck className="w-5 h-5" />
+                      Business Profile
+                    </CardTitle>
+                    <CardDescription>Your planner business information</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Business Name</Label>
+                        <p className="text-muted-foreground">{plannerProfile.business_name || 'Not set'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Location</Label>
+                        <p className="text-muted-foreground">
+                          {plannerProfile.location_city && plannerProfile.location_state
+                            ? `${plannerProfile.location_city}, ${plannerProfile.location_state}`
+                            : 'Not set'}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Years of Experience</Label>
+                        <p className="text-muted-foreground">{plannerProfile.years_experience || 'Not set'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Base Price</Label>
+                        <p className="text-muted-foreground">
+                          {plannerProfile.base_price ? `$${plannerProfile.base_price}` : 'Not set'}
+                        </p>
+                      </div>
+                      {plannerProfile.total_reviews > 0 && (
+                        <div>
+                          <Label className="text-sm font-medium">Rating</Label>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-muted-foreground">
+                              {plannerProfile.average_rating || '0.0'} ({plannerProfile.total_reviews || 0} reviews)
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="text-sm font-medium">Verification Status</Label>
+                        <Badge variant={plannerProfile.is_verified ? "default" : "secondary"}>
+                          {plannerProfile.is_verified ? "Verified" : "Pending"}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    {plannerProfile.description && (
+                      <div>
+                        <Label className="text-sm font-medium">Description</Label>
+                        <p className="text-muted-foreground">{plannerProfile.description}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Requests Tab for Planners */}
             <TabsContent value="requests" className="space-y-6">
               {plannerProfile ? (
                 <PlannerRequestsSection plannerProfile={plannerProfile} />
@@ -401,49 +393,35 @@ const DashboardPage = () => {
                 </div>
               )}
             </TabsContent>
-          )}
 
-          {/* Client Contacts Tab */}
-          {isPlannerView && (
+            {/* Client Contacts Tab */}
             <TabsContent value="clients" className="space-y-6">
               <ClientContactList plannerProfile={plannerProfile} />
             </TabsContent>
-          )}
 
-          {/* Invoicing Tab */}
-          {isPlannerView && (
+            {/* Invoicing Tab */}
             <TabsContent value="invoicing" className="space-y-6">
               <InvoicingSection plannerProfile={plannerProfile} />
             </TabsContent>
-          )}
 
-          {/* Organizational Features for Planners */}
-          {isPlannerView && (
-            <>
-              <TabsContent value="tasks" className="space-y-6">
-                <TaskManagement plannerProfile={plannerProfile} />
-              </TabsContent>
-              <TabsContent value="vendors" className="space-y-6">
-                <VendorDirectory plannerProfile={plannerProfile} />
-              </TabsContent>
-              <TabsContent value="templates" className="space-y-6">
-                <EventTemplates plannerProfile={plannerProfile} />
-              </TabsContent>
-              <TabsContent value="calendar" className="space-y-6">
-                <BusinessCalendar plannerProfile={plannerProfile} />
-              </TabsContent>
-              <TabsContent value="inventory" className="space-y-6">
-                <InventoryManagement plannerProfile={plannerProfile} />
-              </TabsContent>
-            </>
-          )}
-
-          {/* Client Dashboard */}
-          {isClientView && clientProfile && (
-            <ClientDashboard user={user} clientData={clientProfile} />
-          )}
-
-        </Tabs>
+            {/* Organizational Features for Planners */}
+            <TabsContent value="tasks" className="space-y-6">
+              <TaskManagement plannerProfile={plannerProfile} />
+            </TabsContent>
+            <TabsContent value="vendors" className="space-y-6">
+              <VendorDirectory plannerProfile={plannerProfile} />
+            </TabsContent>
+            <TabsContent value="templates" className="space-y-6">
+              <EventTemplates plannerProfile={plannerProfile} />
+            </TabsContent>
+            <TabsContent value="calendar" className="space-y-6">
+              <BusinessCalendar plannerProfile={plannerProfile} />
+            </TabsContent>
+            <TabsContent value="inventory" className="space-y-6">
+              <InventoryManagement plannerProfile={plannerProfile} />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
 
       {/* Edit Profile Dialog */}
