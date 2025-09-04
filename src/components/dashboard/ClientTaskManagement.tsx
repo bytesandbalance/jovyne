@@ -65,7 +65,7 @@ export default function ClientTaskManagement({ clientData }: ClientTaskManagemen
 
   const fetchTasks = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('client_tasks')
         .select('*')
         .eq('client_id', clientData.id)
@@ -96,7 +96,7 @@ export default function ClientTaskManagement({ clientData }: ClientTaskManagemen
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('client_tasks')
         .insert([{
           ...newTask,
@@ -131,7 +131,7 @@ export default function ClientTaskManagement({ clientData }: ClientTaskManagemen
   const handleToggleComplete = async (task: ClientTask) => {
     try {
       const newStatus = task.status === 'completed' ? 'pending' : 'completed';
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('client_tasks')
         .update({
           status: newStatus,
@@ -153,7 +153,7 @@ export default function ClientTaskManagement({ clientData }: ClientTaskManagemen
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('client_tasks')
         .delete()
         .eq('id', taskId);

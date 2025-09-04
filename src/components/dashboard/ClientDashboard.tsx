@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Clock, DollarSign, MapPin, Star, Briefcase, CheckCircle, XCircle, User, Users } from 'lucide-react';
 import PlannerApplications from './PlannerApplications';
+import ClientTaskManagement from './ClientTaskManagement';
+import ClientBudgetTracker from './ClientBudgetTracker';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -163,8 +165,10 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
   return (
     <div className="space-y-6">
       <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-4xl mx-auto p-1 h-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-5xl mx-auto p-1 h-auto sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="budget">Budget</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="planner-requests">Requests</TabsTrigger>
@@ -208,6 +212,14 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="tasks" className="space-y-6">
+          <ClientTaskManagement clientData={clientData} />
+        </TabsContent>
+
+        <TabsContent value="budget" className="space-y-6">
+          <ClientBudgetTracker clientData={clientData} />
         </TabsContent>
 
         <TabsContent value="events" className="space-y-4">

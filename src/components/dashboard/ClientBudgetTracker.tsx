@@ -75,7 +75,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
   const fetchBudgetData = async () => {
     try {
       // Fetch budget categories
-      const { data: categoriesData, error: categoriesError } = await supabase
+      const { data: categoriesData, error: categoriesError } = await (supabase as any)
         .from('client_budget_categories')
         .select('*')
         .eq('client_id', clientData.id)
@@ -84,7 +84,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
       if (categoriesError) throw categoriesError;
 
       // Fetch expenses
-      const { data: expensesData, error: expensesError } = await supabase
+      const { data: expensesData, error: expensesError } = await (supabase as any)
         .from('client_budget_expenses')
         .select('*')
         .eq('client_id', clientData.id)
@@ -117,7 +117,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('client_budget_categories')
         .insert([{
           name: newCategory.name,
@@ -156,7 +156,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
       const amount = parseFloat(newExpense.amount);
       
       // Insert expense
-      const { error: expenseError } = await supabase
+      const { error: expenseError } = await (supabase as any)
         .from('client_budget_expenses')
         .insert([{
           category_id: newExpense.category_id,
@@ -172,7 +172,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
       // Update spent amount in category
       const category = categories.find(c => c.id === newExpense.category_id);
       if (category) {
-        const { error: updateError } = await supabase
+        const { error: updateError } = await (supabase as any)
           .from('client_budget_categories')
           .update({ spent_amount: category.spent_amount + amount })
           .eq('id', newExpense.category_id);
@@ -203,7 +203,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
   const handleDeleteExpense = async (expense: BudgetExpense) => {
     try {
       // Delete expense
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await (supabase as any)
         .from('client_budget_expenses')
         .delete()
         .eq('id', expense.id);
@@ -213,7 +213,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
       // Update spent amount in category
       const category = categories.find(c => c.id === expense.category_id);
       if (category) {
-        const { error: updateError } = await supabase
+        const { error: updateError } = await (supabase as any)
           .from('client_budget_categories')
           .update({ spent_amount: Math.max(0, category.spent_amount - expense.amount) })
           .eq('id', expense.category_id);
