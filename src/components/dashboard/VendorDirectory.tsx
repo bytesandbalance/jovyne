@@ -250,174 +250,173 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Vendor Directory</h2>
-        <div className="flex gap-2">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-                console.log('Add Vendor button clicked');
-                setEditingVendor(null);
-                setNewVendor({
-                  name: '', business_type: '', contact_person: '', email: '', phone: '',
-                  address: '', website: '', rating: '', notes: '', pricing_info: '', availability_notes: ''
-                });
-              }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Vendor
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingVendor ? 'Edit Vendor' : 'Add New Vendor'}</DialogTitle>
-                <DialogDescription>
-                  {editingVendor ? 'Update vendor information' : 'Add a new vendor to your directory'}
-                </DialogDescription>
-              </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="vendor-name">Vendor Name *</Label>
-                  <Input
-                    id="vendor-name"
-                    value={newVendor.name}
-                    onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Vendor business name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vendor-type">Business Type *</Label>
-                  <Select value={newVendor.business_type} onValueChange={(value) => setNewVendor(prev => ({ ...prev, business_type: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {businessTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="vendor-contact">Contact Person</Label>
-                  <Input
-                    id="vendor-contact"
-                    value={newVendor.contact_person}
-                    onChange={(e) => setNewVendor(prev => ({ ...prev, contact_person: e.target.value }))}
-                    placeholder="Contact person name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vendor-rating">Rating (1-5)</Label>
-                  <Select value={newVendor.rating} onValueChange={(value) => setNewVendor(prev => ({ ...prev, rating: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No rating</SelectItem>
-                      <SelectItem value="1">1 Star</SelectItem>
-                      <SelectItem value="2">2 Stars</SelectItem>
-                      <SelectItem value="3">3 Stars</SelectItem>
-                      <SelectItem value="4">4 Stars</SelectItem>
-                      <SelectItem value="5">5 Stars</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="vendor-email">Email</Label>
-                  <Input
-                    id="vendor-email"
-                    type="email"
-                    value={newVendor.email}
-                    onChange={(e) => setNewVendor(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="vendor@example.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vendor-phone">Phone</Label>
-                  <Input
-                    id="vendor-phone"
-                    value={newVendor.phone}
-                    onChange={(e) => setNewVendor(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="vendor-website">Website</Label>
-                <Input
-                  id="vendor-website"
-                  type="url"
-                  value={newVendor.website}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, website: e.target.value }))}
-                  placeholder="https://vendor-website.com"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="vendor-address">Address</Label>
-                <Textarea
-                  id="vendor-address"
-                  value={newVendor.address}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Business address"
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="vendor-pricing">Pricing Information</Label>
-                <Textarea
-                  id="vendor-pricing"
-                  value={newVendor.pricing_info}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, pricing_info: e.target.value }))}
-                  placeholder="Pricing details, packages, rates..."
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="vendor-availability">Availability Notes</Label>
-                <Textarea
-                  id="vendor-availability"
-                  value={newVendor.availability_notes}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, availability_notes: e.target.value }))}
-                  placeholder="Availability information, booking requirements..."
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="vendor-notes">Notes</Label>
-                <Textarea
-                  id="vendor-notes"
-                  value={newVendor.notes}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Additional notes about this vendor"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmit}>
-                  {editingVendor ? 'Update Vendor' : 'Add Vendor'}
-                </Button>
-              </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Button 
+          onClick={() => {
+            console.log('Add Vendor button clicked - opening dialog');
+            setEditingVendor(null);
+            setNewVendor({
+              name: '', business_type: '', contact_person: '', email: '', phone: '',
+              address: '', website: '', rating: '', notes: '', pricing_info: '', availability_notes: ''
+            });
+            setIsDialogOpen(true);
+          }}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Vendor
+        </Button>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingVendor ? 'Edit Vendor' : 'Add New Vendor'}</DialogTitle>
+            <DialogDescription>
+              {editingVendor ? 'Update vendor information' : 'Add a new vendor to your directory'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="vendor-name">Vendor Name *</Label>
+                <Input
+                  id="vendor-name"
+                  value={newVendor.name}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Vendor business name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="vendor-type">Business Type *</Label>
+                <Select value={newVendor.business_type} onValueChange={(value) => setNewVendor(prev => ({ ...prev, business_type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {businessTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="vendor-contact">Contact Person</Label>
+                <Input
+                  id="vendor-contact"
+                  value={newVendor.contact_person}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, contact_person: e.target.value }))}
+                  placeholder="Contact person name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="vendor-rating">Rating (1-5)</Label>
+                <Select value={newVendor.rating} onValueChange={(value) => setNewVendor(prev => ({ ...prev, rating: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select rating" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No rating</SelectItem>
+                    <SelectItem value="1">1 Star</SelectItem>
+                    <SelectItem value="2">2 Stars</SelectItem>
+                    <SelectItem value="3">3 Stars</SelectItem>
+                    <SelectItem value="4">4 Stars</SelectItem>
+                    <SelectItem value="5">5 Stars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="vendor-email">Email</Label>
+                <Input
+                  id="vendor-email"
+                  type="email"
+                  value={newVendor.email}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="vendor@example.com"
+                />
+              </div>
+              <div>
+                <Label htmlFor="vendor-phone">Phone</Label>
+                <Input
+                  id="vendor-phone"
+                  value={newVendor.phone}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="vendor-website">Website</Label>
+              <Input
+                id="vendor-website"
+                type="url"
+                value={newVendor.website}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, website: e.target.value }))}
+                placeholder="https://vendor-website.com"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="vendor-address">Address</Label>
+              <Textarea
+                id="vendor-address"
+                value={newVendor.address}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="Business address"
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="vendor-pricing">Pricing Information</Label>
+              <Textarea
+                id="vendor-pricing"
+                value={newVendor.pricing_info}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, pricing_info: e.target.value }))}
+                placeholder="Pricing details, packages, rates..."
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="vendor-availability">Availability Notes</Label>
+              <Textarea
+                id="vendor-availability"
+                value={newVendor.availability_notes}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, availability_notes: e.target.value }))}
+                placeholder="Availability information, booking requirements..."
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="vendor-notes">Notes</Label>
+              <Textarea
+                id="vendor-notes"
+                value={newVendor.notes}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Additional notes about this vendor"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit}>
+                {editingVendor ? 'Update Vendor' : 'Add Vendor'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Search and Filters */}
       <Card>
