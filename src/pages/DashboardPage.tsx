@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthContext } from '@/components/auth/AuthProvider';
-import { PlannerProfileSelector } from '@/components/planners/PlannerProfileSelector';
+import { PlannerOnboardingFlow } from '@/components/planners/PlannerOnboardingFlow';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -217,9 +217,9 @@ const DashboardPage = () => {
     );
   }
 
-  // Show profile selector if user is a planner but no planner profile is linked
+  // Show onboarding flow if user is a planner but no planner profile is linked
   if (userProfile?.user_role === 'planner' && !plannerProfile) {
-    return <PlannerProfileSelector />;
+    return <PlannerOnboardingFlow />;
   }
 
   return (
