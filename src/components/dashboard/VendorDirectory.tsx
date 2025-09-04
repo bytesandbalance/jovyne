@@ -250,26 +250,28 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Vendor Directory</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => {
-              setEditingVendor(null);
-              setNewVendor({
-                name: '', business_type: '', contact_person: '', email: '', phone: '',
-                address: '', website: '', rating: '', notes: '', pricing_info: '', availability_notes: ''
-              });
-            }}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Vendor
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingVendor ? 'Edit Vendor' : 'Add New Vendor'}</DialogTitle>
-              <DialogDescription>
-                {editingVendor ? 'Update vendor information' : 'Add a new vendor to your directory'}
-              </DialogDescription>
-            </DialogHeader>
+        <div className="flex gap-2">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => {
+                console.log('Add Vendor button clicked');
+                setEditingVendor(null);
+                setNewVendor({
+                  name: '', business_type: '', contact_person: '', email: '', phone: '',
+                  address: '', website: '', rating: '', notes: '', pricing_info: '', availability_notes: ''
+                });
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Vendor
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editingVendor ? 'Edit Vendor' : 'Add New Vendor'}</DialogTitle>
+                <DialogDescription>
+                  {editingVendor ? 'Update vendor information' : 'Add a new vendor to your directory'}
+                </DialogDescription>
+              </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -411,9 +413,10 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                   {editingVendor ? 'Update Vendor' : 'Add Vendor'}
                 </Button>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Search and Filters */}
