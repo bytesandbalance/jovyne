@@ -211,7 +211,7 @@ export default function ClientTaskManagement({ clientData }: ClientTaskManagemen
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Task Management</h2>
+        <h2 className="text-2xl font-bold">Tasks</h2>
         <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Add Task
