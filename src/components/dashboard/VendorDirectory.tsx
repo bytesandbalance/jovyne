@@ -249,7 +249,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Vendor Directory</h2>
+        <h2 className="text-2xl font-bold">Vendors</h2>
         <Button 
           type="button"
           onClick={(e) => {
@@ -277,7 +277,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vendor-name">Vendor Name *</Label>
                 <Input
@@ -304,7 +304,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vendor-contact">Contact Person</Label>
                 <Input
@@ -331,7 +331,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vendor-email">Email</Label>
                 <Input

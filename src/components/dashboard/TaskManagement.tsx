@@ -240,7 +240,7 @@ export default function TaskManagement({ plannerProfile }: TaskManagementProps) 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Task Management</h2>
+        <h2 className="text-2xl font-bold">Tasks</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => {

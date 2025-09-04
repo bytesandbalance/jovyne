@@ -265,10 +265,10 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Business Calendar</h2>
-        <div className="flex gap-2">
+        <h2 className="text-2xl font-bold">Calendar</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
           <Select value={viewMode} onValueChange={(value: 'calendar' | 'list') => setViewMode(value)}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -307,7 +307,7 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="event-type">Event Type *</Label>
                     <Select value={newEvent.event_type} onValueChange={(value) => setNewEvent(prev => ({ ...prev, event_type: value }))}>
@@ -343,7 +343,7 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="start-date">Start Date *</Label>
                     <Input
@@ -364,7 +364,7 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="end-date">End Date</Label>
                     <Input
@@ -640,9 +640,10 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          <Button variant="outline" size="sm" onClick={() => openEditDialog(event)}>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
+                          <Button variant="outline" size="sm" onClick={() => openEditDialog(event)} className="w-full sm:w-auto">
                             <Edit className="w-3 h-3" />
+                            <span className="ml-1 sm:hidden">Edit</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -652,8 +653,10 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                                 deleteEvent(event.id);
                               }
                             }}
+                            className="w-full sm:w-auto"
                           >
-                            Delete
+                            <span className="sm:hidden">Delete</span>
+                            <span className="hidden sm:inline">Delete</span>
                           </Button>
                         </div>
                       </div>

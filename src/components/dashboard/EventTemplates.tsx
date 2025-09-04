@@ -371,12 +371,12 @@ Total: $28,750`,
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Event Templates</h2>
-        <div className="flex gap-2">
+        <h2 className="text-2xl font-bold">Templates</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button 
             variant="outline" 
             onClick={() => setIsDialogOpen(true)}
-            className="mr-2"
+            className="w-full sm:w-auto"
           >
             Use Pre-built Template
           </Button>
@@ -401,7 +401,7 @@ Total: $28,750`,
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="template-name">Template Name *</Label>
                   <Input
@@ -428,7 +428,7 @@ Total: $28,750`,
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="event-type">Event Type</Label>
                   <Select value={newTemplate.event_type} onValueChange={(value) => setNewTemplate(prev => ({ ...prev, event_type: value }))}>
