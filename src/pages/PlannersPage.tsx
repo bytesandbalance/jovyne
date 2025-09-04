@@ -352,6 +352,7 @@ export default function PlannersPage() {
             open={showPlannerProfile}
             onOpenChange={setShowPlannerProfile}
             currentUserId={user?.id}
+            userRole={userProfile?.user_role}
           />
         )}
 

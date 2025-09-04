@@ -788,6 +788,7 @@ export default function PlannersRequestsPage() {
             open={showPlannerProfile}
             onOpenChange={setShowPlannerProfile}
             currentUserId={user?.id}
+            userRole={userRole || undefined}
           />
         )}
       </div>

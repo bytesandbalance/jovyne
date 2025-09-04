@@ -18,13 +18,15 @@ interface PlannerProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentUserId?: string;
+  userRole?: string;
 }
 
 export function PlannerProfileModal({ 
   planner, 
   open, 
   onOpenChange, 
-  currentUserId 
+  currentUserId,
+  userRole 
 }: PlannerProfileModalProps) {
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactForm, setContactForm] = useState({
@@ -215,22 +217,25 @@ export function PlannerProfileModal({
           {/* Contact Section */}
           <div className="space-y-4">
             {!showContactForm ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className={userRole === 'client' ? "grid grid-cols-2 gap-2" : "flex"}>
                 <Button 
                   onClick={() => setShowContactForm(true)}
                   variant="outline"
                   size="lg"
+                  className={userRole === 'client' ? "" : "w-full"}
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Contact Planner
                 </Button>
-                <Button 
-                  onClick={() => setShowRequestDialog(true)}
-                  size="lg"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Send Request
-                </Button>
+                {userRole === 'client' && (
+                  <Button 
+                    onClick={() => setShowRequestDialog(true)}
+                    size="lg"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Send Request
+                  </Button>
+                )}
               </div>
             ) : (
               <Card>
