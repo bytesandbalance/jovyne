@@ -80,10 +80,10 @@ export function PlannerProfileSelector() {
     
     setLinking(true);
     try {
-      // Link the planner profile to current user and verify them
+      // Link the planner profile to current user (verification happens automatically via trigger)
       const { error: plannerError } = await supabase
         .from('planners')
-        .update({ user_id: user.id, is_verified: true })
+        .update({ user_id: user.id })
         .eq('id', plannerId);
 
       if (plannerError) throw plannerError;
