@@ -448,8 +448,8 @@ export default function TaskManagement({ plannerProfile }: TaskManagementProps) 
                 const StatusIcon = getStatusIcon(task.status);
                 return (
                   <div key={task.id} className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className={`font-semibold ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
                             {task.title}
@@ -477,12 +477,12 @@ export default function TaskManagement({ plannerProfile }: TaskManagementProps) 
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 ml-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
                         <Select
                           value={task.status}
                           onValueChange={(value) => updateTaskStatus(task.id, value)}
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="w-full sm:w-32 min-w-0">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -493,20 +493,25 @@ export default function TaskManagement({ plannerProfile }: TaskManagementProps) 
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button variant="outline" size="sm" onClick={() => openEditDialog(task)}>
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm('Are you sure you want to delete this task?')) {
-                              deleteTask(task.id);
-                            }
-                          }}
-                        >
-                          <Trash className="w-3 h-3" />
-                        </Button>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                          <Button variant="outline" size="sm" onClick={() => openEditDialog(task)} className="flex-1 sm:flex-none">
+                            <Edit className="w-3 h-3" />
+                            <span className="ml-1 sm:hidden">Edit</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this task?')) {
+                                deleteTask(task.id);
+                              }
+                            }}
+                            className="flex-1 sm:flex-none"
+                          >
+                            <Trash className="w-3 h-3" />
+                            <span className="ml-1 sm:hidden">Delete</span>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>

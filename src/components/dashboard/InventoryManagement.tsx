@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Package, MapPin, DollarSign, Calendar, AlertTriangle, Edit, Search, Wrench } from 'lucide-react';
+import { Plus, Package, MapPin, DollarSign, Calendar, AlertTriangle, Edit, Search, Wrench, Trash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -557,8 +557,8 @@ export default function InventoryManagement({ plannerProfile }: InventoryManagem
             <div className="grid gap-4">
               {filteredInventory.map((item) => (
                 <div key={item.id} className="p-4 border rounded-lg">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-lg">{item.item_name}</h3>
                         <Badge variant="secondary">
@@ -575,10 +575,10 @@ export default function InventoryManagement({ plannerProfile }: InventoryManagem
                         <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(item)}>
-                        <Edit className="w-3 h-3 mr-1" />
-                        Edit
+                    <div className="flex gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0 w-full sm:w-auto">
+                      <Button variant="outline" size="sm" onClick={() => openEditDialog(item)} className="flex-1 sm:flex-none">
+                        <Edit className="w-3 h-3" />
+                        <span className="ml-1">Edit</span>
                       </Button>
                       <Button
                         variant="outline"
@@ -588,8 +588,10 @@ export default function InventoryManagement({ plannerProfile }: InventoryManagem
                             deleteItem(item.id);
                           }
                         }}
+                        className="flex-1 sm:flex-none"
                       >
-                        Delete
+                        <Trash className="w-3 h-3" />
+                        <span className="ml-1">Delete</span>
                       </Button>
                     </div>
                   </div>
