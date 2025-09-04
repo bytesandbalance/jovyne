@@ -25,6 +25,7 @@ import VendorDirectory from '@/components/dashboard/VendorDirectory';
 import EventTemplates from '@/components/dashboard/EventTemplates';
 import BusinessCalendar from '@/components/dashboard/BusinessCalendar';
 import InventoryManagement from '@/components/dashboard/InventoryManagement';
+import ClientDashboard from '@/components/dashboard/ClientDashboard';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
@@ -132,11 +133,28 @@ const DashboardPage = () => {
 
       // Fetch client profile for clients
       if (profileData?.user_role === 'client') {
-        const { data: clientData } = await supabase
+        let { data: clientData } = await supabase
           .from('clients')
           .select('*')
           .eq('user_id', user?.id)
           .maybeSingle(); // Use maybeSingle here too
+        
+        // If no client profile exists, create one
+        if (!clientData) {
+          const { data: newClientData, error: createClientError } = await supabase
+            .from('clients')
+            .insert({
+              user_id: user.id,
+              full_name: profileData?.full_name || user.user_metadata?.full_name || user.email,
+              email: profileData?.email || user.email
+            })
+            .select()
+            .single();
+          
+          if (!createClientError) {
+            clientData = newClientData;
+          }
+        }
         
         setClientProfile(clientData);
       }
@@ -421,27 +439,8 @@ const DashboardPage = () => {
           )}
 
           {/* Client Dashboard */}
-          {isClientView && (
-            <>
-              <TabsContent value="requests" className="space-y-6">
-                {clientProfile ? (
-                  <ClientRequestsSection clientProfile={clientProfile} />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Loading your requests...</p>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="invoicing" className="space-y-6">
-                {clientProfile ? (
-                  <ClientInvoiceSection clientProfile={clientProfile} />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Loading your invoices...</p>
-                  </div>
-                )}
-              </TabsContent>
-            </>
+          {isClientView && clientProfile && (
+            <ClientDashboard user={user} clientData={clientProfile} />
           )}
 
         </Tabs>
