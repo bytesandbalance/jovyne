@@ -32,14 +32,12 @@ export function PlannerProfileSelector() {
 
   const fetchAvailableProfiles = async () => {
     try {
-      // Get current user's email from profiles
-      const { data: userProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError) throw profileError;
+      // Use email directly from auth user object
+      const userEmail = user?.email;
+      
+      if (!userEmail) {
+        throw new Error('No user email found');
+      }
       
       // Only fetch planner profiles that match the user's email
       const { data, error } = await supabase
@@ -58,9 +56,11 @@ export function PlannerProfileSelector() {
           email
         `)
         .is('user_id', null)
-        .eq('email', userProfile.email)
+        .eq('email', userEmail)
         .order('business_name');
 
+      console.log('Planner query result - data:', data, 'error:', error);
+      
       if (error) throw error;
       setAvailableProfiles(data || []);
     } catch (error) {
