@@ -320,14 +320,13 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                   <SelectTrigger>
                     <SelectValue placeholder="Select rating" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">No rating</SelectItem>
-                    <SelectItem value="1">1 Star</SelectItem>
-                    <SelectItem value="2">2 Stars</SelectItem>
-                    <SelectItem value="3">3 Stars</SelectItem>
-                    <SelectItem value="4">4 Stars</SelectItem>
-                    <SelectItem value="5">5 Stars</SelectItem>
-                  </SelectContent>
+                    <SelectContent>
+                      <SelectItem value="1">1 Star</SelectItem>
+                      <SelectItem value="2">2 Stars</SelectItem>
+                      <SelectItem value="3">3 Stars</SelectItem>
+                      <SelectItem value="4">4 Stars</SelectItem>
+                      <SelectItem value="5">5 Stars</SelectItem>
+                    </SelectContent>
                 </Select>
               </div>
             </div>
