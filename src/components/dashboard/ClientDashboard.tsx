@@ -41,6 +41,7 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'profile';
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [plannerRequests, setPlannerRequests] = useState<ClientPlannerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -165,7 +166,7 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
 
   return (
     <div className="space-y-6">
-      <Tabs value={defaultTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-3xl mx-auto p-1 h-auto sm:grid sm:grid-cols-5">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="requests">Requests</TabsTrigger>
