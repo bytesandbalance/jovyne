@@ -131,7 +131,7 @@ export function PlannerOnboardingFlow() {
 
       toast({
         title: "Profile connected successfully! 🎉",
-        description: `You are now connected to ${existingProfile.business_name}. Welcome to Jovyne!`
+        description: `You are now connected to ${existingProfile.business_name}. Welcome to Jovial!`
       });
 
       // Reload to refresh app state
@@ -187,7 +187,7 @@ export function PlannerOnboardingFlow() {
 
       toast({
         title: "Profile created successfully! 🎉",
-        description: "Your planner profile has been created. Welcome to Jovyne!"
+        description: "Your planner profile has been created. Welcome to Jovial!"
       });
 
       // Reload to refresh app state

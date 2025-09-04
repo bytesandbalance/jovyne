@@ -61,7 +61,7 @@ export function Navigation() {
               <PartyPopper className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold gradient-party bg-clip-text text-transparent">
-              Jovyne
+              Jovial
             </span>
           </Link>
 

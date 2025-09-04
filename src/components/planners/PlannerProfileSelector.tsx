@@ -90,7 +90,7 @@ export function PlannerProfileSelector() {
 
       toast({
         title: "Profile linked successfully! 🎉",
-        description: `You are now connected to ${businessName}. Welcome to Jovyne!`
+        description: `You are now connected to ${businessName}. Welcome to Jovial!`
       });
 
       // Reload the page to refresh the app state
