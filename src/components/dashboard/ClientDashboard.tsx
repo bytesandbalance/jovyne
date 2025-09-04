@@ -55,6 +55,11 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
   });
 
   useEffect(() => {
+    const tabFromUrl = searchParams.get('tab') || 'profile';
+    setActiveTab(tabFromUrl);
+  }, [searchParams]);
+
+  useEffect(() => {
     if (clientData) {
       fetchClientData();
       setEditForm({
