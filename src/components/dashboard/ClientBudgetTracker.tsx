@@ -270,14 +270,14 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Budget Tracker</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsCategoryDialogOpen(true)}>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h2 className="text-2xl font-bold">Budget</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={() => setIsCategoryDialogOpen(true)} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Add Category
           </Button>
-          <Button onClick={() => setIsExpenseDialogOpen(true)}>
+          <Button onClick={() => setIsExpenseDialogOpen(true)} className="w-full sm:w-auto">
             <Receipt className="w-4 h-4 mr-2" />
             Add Expense
           </Button>
@@ -424,7 +424,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
 
       {/* Add Category Dialog */}
       <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Budget Category</DialogTitle>
             <DialogDescription>
@@ -436,7 +436,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
               <Label htmlFor="category-name">Category Name *</Label>
               <div className="space-y-2">
                 <Select value={newCategory.name} onValueChange={(value) => setNewCategory(prev => ({ ...prev, name: value }))}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -453,6 +453,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
                   value={newCategory.name}
                   onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter custom category name"
+                  className="w-full"
                 />
               </div>
             </div>
@@ -467,14 +468,15 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
                 value={newCategory.allocated_amount}
                 onChange={(e) => setNewCategory(prev => ({ ...prev, allocated_amount: e.target.value }))}
                 placeholder="0.00"
+                className="w-full"
               />
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsCategoryDialogOpen(false)}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsCategoryDialogOpen(false)} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={handleCreateCategory}>
+              <Button onClick={handleCreateCategory} className="w-full sm:w-auto">
                 Create Category
               </Button>
             </div>
@@ -484,7 +486,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
 
       {/* Add Expense Dialog */}
       <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Expense</DialogTitle>
             <DialogDescription>
@@ -495,7 +497,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
             <div>
               <Label htmlFor="expense-category">Category *</Label>
               <Select value={newExpense.category_id} onValueChange={(value) => setNewExpense(prev => ({ ...prev, category_id: value }))}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -508,7 +510,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="expense-amount">Amount (€) *</Label>
                 <Input
@@ -519,6 +521,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
                   value={newExpense.amount}
                   onChange={(e) => setNewExpense(prev => ({ ...prev, amount: e.target.value }))}
                   placeholder="0.00"
+                  className="w-full"
                 />
               </div>
               
@@ -529,6 +532,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
                   type="date"
                   value={newExpense.expense_date}
                   onChange={(e) => setNewExpense(prev => ({ ...prev, expense_date: e.target.value }))}
+                  className="w-full"
                 />
               </div>
             </div>
@@ -540,6 +544,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
                 value={newExpense.description}
                 onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="What was this expense for?"
+                className="w-full"
               />
             </div>
 
@@ -550,14 +555,15 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
                 value={newExpense.vendor}
                 onChange={(e) => setNewExpense(prev => ({ ...prev, vendor: e.target.value }))}
                 placeholder="Name of vendor or supplier"
+                className="w-full"
               />
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsExpenseDialogOpen(false)}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsExpenseDialogOpen(false)} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={handleCreateExpense}>
+              <Button onClick={handleCreateExpense} className="w-full sm:w-auto">
                 Add Expense
               </Button>
             </div>
