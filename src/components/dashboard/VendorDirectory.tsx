@@ -277,7 +277,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vendor-name">Vendor Name *</Label>
                 <Input
@@ -285,12 +285,13 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                   value={newVendor.name}
                   onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Vendor business name"
+                  className="w-full"
                 />
               </div>
               <div>
                 <Label htmlFor="vendor-type">Business Type *</Label>
                 <Select value={newVendor.business_type} onValueChange={(value) => setNewVendor(prev => ({ ...prev, business_type: value }))}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -304,7 +305,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vendor-contact">Contact Person</Label>
                 <Input
@@ -312,12 +313,13 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                   value={newVendor.contact_person}
                   onChange={(e) => setNewVendor(prev => ({ ...prev, contact_person: e.target.value }))}
                   placeholder="Contact person name"
+                  className="w-full"
                 />
               </div>
               <div>
                 <Label htmlFor="vendor-rating">Rating (1-5)</Label>
                 <Select value={newVendor.rating} onValueChange={(value) => setNewVendor(prev => ({ ...prev, rating: value }))}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select rating" />
                   </SelectTrigger>
                     <SelectContent>
@@ -331,7 +333,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vendor-email">Email</Label>
                 <Input
@@ -340,6 +342,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                   value={newVendor.email}
                   onChange={(e) => setNewVendor(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="vendor@example.com"
+                  className="w-full"
                 />
               </div>
               <div>
@@ -349,6 +352,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                   value={newVendor.phone}
                   onChange={(e) => setNewVendor(prev => ({ ...prev, phone: e.target.value }))}
                   placeholder="+1 (555) 123-4567"
+                  className="w-full"
                 />
               </div>
             </div>
@@ -361,6 +365,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                 value={newVendor.website}
                 onChange={(e) => setNewVendor(prev => ({ ...prev, website: e.target.value }))}
                 placeholder="https://vendor-website.com"
+                className="w-full"
               />
             </div>
 
@@ -372,6 +377,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                 onChange={(e) => setNewVendor(prev => ({ ...prev, address: e.target.value }))}
                 placeholder="Business address"
                 rows={2}
+                className="w-full resize-none"
               />
             </div>
 
@@ -383,6 +389,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                 onChange={(e) => setNewVendor(prev => ({ ...prev, pricing_info: e.target.value }))}
                 placeholder="Pricing details, packages, rates..."
                 rows={2}
+                className="w-full resize-none"
               />
             </div>
 
@@ -394,6 +401,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                 onChange={(e) => setNewVendor(prev => ({ ...prev, availability_notes: e.target.value }))}
                 placeholder="Availability information, booking requirements..."
                 rows={2}
+                className="w-full resize-none"
               />
             </div>
 
@@ -405,6 +413,7 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                 onChange={(e) => setNewVendor(prev => ({ ...prev, notes: e.target.value }))}
                 placeholder="Additional notes about this vendor"
                 rows={3}
+                className="w-full resize-none"
               />
             </div>
 
@@ -519,39 +528,19 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
             <div className="grid gap-4">
               {filteredVendors.map((vendor) => (
                 <div key={vendor.id} className="p-4 border rounded-lg">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-lg">{vendor.name}</h3>
-                        <Badge variant="secondary">
-                          {businessTypes.find(t => t.value === vendor.business_type)?.label}
-                        </Badge>
-                        {vendor.rating && renderStars(vendor.rating)}
-                      </div>
-                      {vendor.contact_person && (
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Contact: {vendor.contact_person}
-                        </p>
-                      )}
+                  <div className="mb-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-lg">{vendor.name}</h3>
+                      <Badge variant="secondary">
+                        {businessTypes.find(t => t.value === vendor.business_type)?.label}
+                      </Badge>
+                      {vendor.rating && renderStars(vendor.rating)}
                     </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 sm:mt-0 sm:ml-4">
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(vendor)} className="w-full sm:w-auto">
-                        <Edit className="w-3 h-3 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this vendor?')) {
-                            deleteVendor(vendor.id);
-                          }
-                        }}
-                        className="w-full sm:w-auto"
-                      >
-                        Delete
-                      </Button>
-                    </div>
+                    {vendor.contact_person && (
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Contact: {vendor.contact_person}
+                      </p>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -608,6 +597,26 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
                         </div>
                       )}
                     </div>
+                  </div>
+                  
+                  {/* Edit and Delete buttons moved to bottom row */}
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t">
+                    <Button variant="outline" size="sm" onClick={() => openEditDialog(vendor)} className="w-full sm:w-auto">
+                      <Edit className="w-3 h-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this vendor?')) {
+                          deleteVendor(vendor.id);
+                        }
+                      }}
+                      className="w-full sm:w-auto"
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               ))}

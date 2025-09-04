@@ -517,15 +517,16 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
       {viewMode === 'calendar' ? (
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <CardTitle>
                 {format(currentDate, 'MMMM yyyy')}
               </CardTitle>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
+                  className="w-full sm:w-auto"
                 >
                   Previous
                 </Button>
@@ -533,6 +534,7 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                   variant="outline" 
                   size="sm"
                   onClick={() => setCurrentDate(new Date())}
+                  className="w-full sm:w-auto"
                 >
                   Today
                 </Button>
@@ -540,6 +542,7 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                   variant="outline" 
                   size="sm"
                   onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}
+                  className="w-full sm:w-auto"
                 >
                   Next
                 </Button>
@@ -603,61 +606,61 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                   const vendorName = getVendorName(event.vendor_id);
                   return (
                      <div key={event.id} className="p-4 border rounded-lg">
-                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
-                         <div className="flex-1 min-w-0">
-                           <div className="flex items-center gap-2 mb-1">
-                             <h3 className="font-semibold">{event.title}</h3>
-                             <Badge className={getEventTypeColor(event.event_type)}>
-                               {eventTypes.find(t => t.value === event.event_type)?.label}
+                       <div className="mb-2">
+                         <div className="flex items-center gap-2 mb-1">
+                           <h3 className="font-semibold">{event.title}</h3>
+                           <Badge className={getEventTypeColor(event.event_type)}>
+                             {eventTypes.find(t => t.value === event.event_type)?.label}
+                           </Badge>
+                           {event.event_type === 'availability_block' && (
+                             <Badge variant={event.is_available ? "default" : "secondary"}>
+                               {event.is_available ? "Available" : "Unavailable"}
                              </Badge>
-                             {event.event_type === 'availability_block' && (
-                               <Badge variant={event.is_available ? "default" : "secondary"}>
-                                 {event.is_available ? "Available" : "Unavailable"}
-                               </Badge>
-                             )}
-                           </div>
-                           {event.description && (
-                             <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
                            )}
-                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                             <div className="flex items-center gap-1">
-                               <Clock className="w-3 h-3" />
-                               <span>
-                                 {format(new Date(event.start_datetime), 'MMM d, yyyy HH:mm')} - {format(new Date(event.end_datetime), 'HH:mm')}
-                               </span>
-                             </div>
-                             {event.location && (
-                               <div className="flex items-center gap-1">
-                                 <MapPin className="w-3 h-3" />
-                                 <span>{event.location}</span>
-                               </div>
-                             )}
-                             {vendorName && (
-                               <div className="flex items-center gap-1">
-                                 <User className="w-3 h-3" />
-                                 <span>{vendorName}</span>
-                               </div>
-                             )}
+                         </div>
+                         {event.description && (
+                           <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                         )}
+                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                           <div className="flex items-center gap-1">
+                             <Clock className="w-3 h-3" />
+                             <span>
+                               {format(new Date(event.start_datetime), 'MMM d, yyyy HH:mm')} - {format(new Date(event.end_datetime), 'HH:mm')}
+                             </span>
                            </div>
+                           {event.location && (
+                             <div className="flex items-center gap-1">
+                               <MapPin className="w-3 h-3" />
+                               <span>{event.location}</span>
+                             </div>
+                           )}
+                           {vendorName && (
+                             <div className="flex items-center gap-1">
+                               <User className="w-3 h-3" />
+                               <span>{vendorName}</span>
+                             </div>
+                           )}
                          </div>
-                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 sm:mt-0 sm:ml-4">
-                           <Button variant="outline" size="sm" onClick={() => openEditDialog(event)} className="w-full sm:w-auto">
-                             <Edit className="w-3 h-3" />
-                             <span className="ml-1 sm:hidden">Edit</span>
-                           </Button>
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             onClick={() => {
-                               if (confirm('Are you sure you want to delete this event?')) {
-                                 deleteEvent(event.id);
-                               }
-                             }}
-                             className="w-full sm:w-auto"
-                           >
-                             <span>Delete</span>
-                           </Button>
-                         </div>
+                       </div>
+                       
+                       {/* Edit and Delete buttons moved to bottom row */}
+                       <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t">
+                         <Button variant="outline" size="sm" onClick={() => openEditDialog(event)} className="w-full sm:w-auto">
+                           <Edit className="w-3 h-3 mr-1" />
+                           Edit
+                         </Button>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => {
+                             if (confirm('Are you sure you want to delete this event?')) {
+                               deleteEvent(event.id);
+                             }
+                           }}
+                           className="w-full sm:w-auto"
+                         >
+                           Delete
+                         </Button>
                        </div>
                      </div>
                   );
