@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,17 @@ export function PlannerProfileModal({
   });
   const [sending, setSending] = useState(false);
   const [showRequestDialog, setShowRequestDialog] = useState(false);
+
+  // Debug logging for verification status
+  useEffect(() => {
+    console.log('Planner verification debug:', {
+      plannerName: planner.business_name,
+      isVerified: planner.is_verified,
+      isVerifiedType: typeof planner.is_verified,
+      userRole,
+      currentUserIsVerified
+    });
+  }, [planner.is_verified, planner.business_name, userRole, currentUserIsVerified]);
 
   const handleSendMessage = async () => {
     if (!contactForm.subject.trim() || !contactForm.message.trim()) {
@@ -223,8 +234,8 @@ export function PlannerProfileModal({
             {!showContactForm ? (
               <div className={userRole === 'client' ? "grid grid-cols-2 gap-2" : "flex"}>
                 {/* Show contact button for verified planners or clients to verified planners */}
-                {(userRole === 'client' && planner.is_verified) || 
-                 (userRole === 'planner' && planner.is_verified && currentUserIsVerified) ? (
+                {(userRole === 'client' && planner.is_verified === true) || 
+                 (userRole === 'planner' && planner.is_verified === true && currentUserIsVerified) ? (
                   <Button 
                     onClick={() => setShowContactForm(true)}
                     variant="outline"
@@ -246,7 +257,7 @@ export function PlannerProfileModal({
                   </Button>
                 )}
                 
-                {userRole === 'client' && planner.is_verified && (
+                {userRole === 'client' && planner.is_verified === true && (
                   <Button 
                     onClick={() => setShowRequestDialog(true)}
                     size="lg"
@@ -256,7 +267,7 @@ export function PlannerProfileModal({
                   </Button>
                 )}
                 
-                {userRole === 'client' && !planner.is_verified && (
+                {userRole === 'client' && planner.is_verified !== true && (
                   <Button 
                     disabled
                     size="lg"
