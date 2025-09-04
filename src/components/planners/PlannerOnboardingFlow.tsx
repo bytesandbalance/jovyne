@@ -120,15 +120,12 @@ export function PlannerOnboardingFlow() {
 
       if (plannerError) throw plannerError;
 
-      // Create or update profile in profiles table
+      // Profile is already created by handle_new_user trigger
+      // Just update the user_role in the existing profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          email: user.email!,
-          full_name: user.user_metadata?.full_name || user.email!,
-          user_role: 'planner'
-        });
+        .update({ user_role: 'planner' })
+        .eq('user_id', user.id);
 
       if (profileError) throw profileError;
 
@@ -179,15 +176,12 @@ export function PlannerOnboardingFlow() {
 
       if (plannerError) throw plannerError;
 
-      // Create or update profile in profiles table
+      // Profile is already created by handle_new_user trigger
+      // Just update the user_role in the existing profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          email: user.email!,
-          full_name: user.user_metadata?.full_name || user.email!,
-          user_role: 'planner'
-        });
+        .update({ user_role: 'planner' })
+        .eq('user_id', user.id);
 
       if (profileError) throw profileError;
 
