@@ -20,6 +20,11 @@ import ClientInvoiceSection from '@/components/dashboard/ClientInvoiceSection';
 import PlannerApplications from '@/components/dashboard/PlannerApplications';
 import ClientRequestsSection from '@/components/dashboard/ClientRequestsSection';
 import PlannerRequestsSection from '@/components/dashboard/PlannerRequestsSection';
+import TaskManagement from '@/components/dashboard/TaskManagement';
+import VendorDirectory from '@/components/dashboard/VendorDirectory';
+import EventTemplates from '@/components/dashboard/EventTemplates';
+import BusinessCalendar from '@/components/dashboard/BusinessCalendar';
+import InventoryManagement from '@/components/dashboard/InventoryManagement';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
@@ -243,6 +248,11 @@ const DashboardPage = () => {
                 <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
                 <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
                 <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
+                <TabsTrigger value="tasks" className="px-4 py-2">Tasks</TabsTrigger>
+                <TabsTrigger value="vendors" className="px-4 py-2">Vendors</TabsTrigger>
+                <TabsTrigger value="templates" className="px-4 py-2">Templates</TabsTrigger>
+                <TabsTrigger value="calendar" className="px-4 py-2">Calendar</TabsTrigger>
+                <TabsTrigger value="inventory" className="px-4 py-2">Inventory</TabsTrigger>
               </>
             )}
             {!isPlannerView && (
@@ -385,6 +395,27 @@ const DashboardPage = () => {
             <TabsContent value="invoicing" className="space-y-6">
               <InvoicingSection plannerProfile={plannerProfile} />
             </TabsContent>
+          )}
+
+          {/* Organizational Features for Planners */}
+          {isPlannerView && (
+            <>
+              <TabsContent value="tasks" className="space-y-6">
+                <TaskManagement plannerProfile={plannerProfile} />
+              </TabsContent>
+              <TabsContent value="vendors" className="space-y-6">
+                <VendorDirectory plannerProfile={plannerProfile} />
+              </TabsContent>
+              <TabsContent value="templates" className="space-y-6">
+                <EventTemplates plannerProfile={plannerProfile} />
+              </TabsContent>
+              <TabsContent value="calendar" className="space-y-6">
+                <BusinessCalendar plannerProfile={plannerProfile} />
+              </TabsContent>
+              <TabsContent value="inventory" className="space-y-6">
+                <InventoryManagement plannerProfile={plannerProfile} />
+              </TabsContent>
+            </>
           )}
 
           {/* Client Dashboard */}

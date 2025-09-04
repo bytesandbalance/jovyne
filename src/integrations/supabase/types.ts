@@ -188,6 +188,131 @@ export type Database = {
           },
         ]
       }
+      planner_calendar: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_datetime: string
+          event_type: string
+          id: string
+          is_available: boolean | null
+          location: string | null
+          planner_id: string
+          start_datetime: string
+          title: string
+          updated_at: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_datetime: string
+          event_type: string
+          id?: string
+          is_available?: boolean | null
+          location?: string | null
+          planner_id: string
+          start_datetime: string
+          title: string
+          updated_at?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_datetime?: string
+          event_type?: string
+          id?: string
+          is_available?: boolean | null
+          location?: string | null
+          planner_id?: string
+          start_datetime?: string
+          title?: string
+          updated_at?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_calendar_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_calendar_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "planner_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planner_inventory: {
+        Row: {
+          category: string
+          condition: string
+          created_at: string | null
+          current_value: number | null
+          description: string | null
+          id: string
+          item_name: string
+          last_maintenance_date: string | null
+          location: string | null
+          maintenance_notes: string | null
+          next_maintenance_date: string | null
+          planner_id: string
+          purchase_date: string | null
+          purchase_price: number | null
+          quantity: number
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          condition?: string
+          created_at?: string | null
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          item_name: string
+          last_maintenance_date?: string | null
+          location?: string | null
+          maintenance_notes?: string | null
+          next_maintenance_date?: string | null
+          planner_id: string
+          purchase_date?: string | null
+          purchase_price?: number | null
+          quantity?: number
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          condition?: string
+          created_at?: string | null
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          item_name?: string
+          last_maintenance_date?: string | null
+          location?: string | null
+          maintenance_notes?: string | null
+          next_maintenance_date?: string | null
+          planner_id?: string
+          purchase_date?: string | null
+          purchase_price?: number | null
+          quantity?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_inventory_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planner_invoices: {
         Row: {
           amount: number | null
@@ -353,6 +478,168 @@ export type Database = {
           },
           {
             foreignKeyName: "planner_requests_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planner_tasks: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          planner_id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          planner_id: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          planner_id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_tasks_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planner_templates: {
+        Row: {
+          content: Json
+          created_at: string | null
+          description: string | null
+          estimated_budget: number | null
+          estimated_hours: number | null
+          event_type: string | null
+          id: string
+          name: string
+          planner_id: string
+          template_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string | null
+          description?: string | null
+          estimated_budget?: number | null
+          estimated_hours?: number | null
+          event_type?: string | null
+          id?: string
+          name: string
+          planner_id: string
+          template_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          description?: string | null
+          estimated_budget?: number | null
+          estimated_hours?: number | null
+          event_type?: string | null
+          id?: string
+          name?: string
+          planner_id?: string
+          template_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_templates_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planner_vendors: {
+        Row: {
+          address: string | null
+          availability_notes: string | null
+          business_type: string
+          contact_person: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          planner_id: string
+          pricing_info: string | null
+          rating: number | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          availability_notes?: string | null
+          business_type: string
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          planner_id: string
+          pricing_info?: string | null
+          rating?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          availability_notes?: string | null
+          business_type?: string
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          planner_id?: string
+          pricing_info?: string | null
+          rating?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_vendors_planner_id_fkey"
             columns: ["planner_id"]
             isOneToOne: false
             referencedRelation: "planners"
