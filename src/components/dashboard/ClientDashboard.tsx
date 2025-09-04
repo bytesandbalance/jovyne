@@ -10,6 +10,7 @@ import { Calendar, Clock, DollarSign, MapPin, Star, Briefcase, CheckCircle, XCir
 import PlannerApplications from './PlannerApplications';
 import ClientTaskManagement from './ClientTaskManagement';
 import ClientBudgetTracker from './ClientBudgetTracker';
+import ClientInvoiceSection from './ClientInvoiceSection';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -339,19 +340,8 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
         </TabsContent>
 
 
-        <TabsContent value="invoicing" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Invoices</CardTitle>
-              <CardDescription>Invoices from planners</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Invoice management coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="invoicing" className="space-y-6">
+          <ClientInvoiceSection clientProfile={clientData} />
         </TabsContent>
       </Tabs>
     </div>
