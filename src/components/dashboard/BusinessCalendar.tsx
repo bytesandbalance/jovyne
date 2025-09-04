@@ -602,65 +602,64 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
                 {filteredEvents.map((event) => {
                   const vendorName = getVendorName(event.vendor_id);
                   return (
-                    <div key={event.id} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{event.title}</h3>
-                            <Badge className={getEventTypeColor(event.event_type)}>
-                              {eventTypes.find(t => t.value === event.event_type)?.label}
-                            </Badge>
-                            {event.event_type === 'availability_block' && (
-                              <Badge variant={event.is_available ? "default" : "secondary"}>
-                                {event.is_available ? "Available" : "Unavailable"}
-                              </Badge>
-                            )}
-                          </div>
-                          {event.description && (
-                            <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
-                          )}
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              <span>
-                                {format(new Date(event.start_datetime), 'MMM d, yyyy HH:mm')} - {format(new Date(event.end_datetime), 'HH:mm')}
-                              </span>
-                            </div>
-                            {event.location && (
-                              <div className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                <span>{event.location}</span>
-                              </div>
-                            )}
-                            {vendorName && (
-                              <div className="flex items-center gap-1">
-                                <User className="w-3 h-3" />
-                                <span>{vendorName}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
-                          <Button variant="outline" size="sm" onClick={() => openEditDialog(event)} className="w-full sm:w-auto">
-                            <Edit className="w-3 h-3" />
-                            <span className="ml-1 sm:hidden">Edit</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to delete this event?')) {
-                                deleteEvent(event.id);
-                              }
-                            }}
-                            className="w-full sm:w-auto"
-                          >
-                            <span className="sm:hidden">Delete</span>
-                            <span className="hidden sm:inline">Delete</span>
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                     <div key={event.id} className="p-4 border rounded-lg">
+                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                         <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-2 mb-1">
+                             <h3 className="font-semibold">{event.title}</h3>
+                             <Badge className={getEventTypeColor(event.event_type)}>
+                               {eventTypes.find(t => t.value === event.event_type)?.label}
+                             </Badge>
+                             {event.event_type === 'availability_block' && (
+                               <Badge variant={event.is_available ? "default" : "secondary"}>
+                                 {event.is_available ? "Available" : "Unavailable"}
+                               </Badge>
+                             )}
+                           </div>
+                           {event.description && (
+                             <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                           )}
+                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                             <div className="flex items-center gap-1">
+                               <Clock className="w-3 h-3" />
+                               <span>
+                                 {format(new Date(event.start_datetime), 'MMM d, yyyy HH:mm')} - {format(new Date(event.end_datetime), 'HH:mm')}
+                               </span>
+                             </div>
+                             {event.location && (
+                               <div className="flex items-center gap-1">
+                                 <MapPin className="w-3 h-3" />
+                                 <span>{event.location}</span>
+                               </div>
+                             )}
+                             {vendorName && (
+                               <div className="flex items-center gap-1">
+                                 <User className="w-3 h-3" />
+                                 <span>{vendorName}</span>
+                               </div>
+                             )}
+                           </div>
+                         </div>
+                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 sm:mt-0 sm:ml-4">
+                           <Button variant="outline" size="sm" onClick={() => openEditDialog(event)} className="w-full sm:w-auto">
+                             <Edit className="w-3 h-3" />
+                             <span className="ml-1 sm:hidden">Edit</span>
+                           </Button>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => {
+                               if (confirm('Are you sure you want to delete this event?')) {
+                                 deleteEvent(event.id);
+                               }
+                             }}
+                             className="w-full sm:w-auto"
+                           >
+                             <span>Delete</span>
+                           </Button>
+                         </div>
+                       </div>
+                     </div>
                   );
                 })}
               </div>
