@@ -165,7 +165,7 @@ export default function ClientDashboard({ user, clientData }: ClientDashboardPro
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs value={defaultTab} className="space-y-6">
           <TabsList className="flex flex-wrap justify-center gap-1 w-full max-w-3xl mx-auto p-1 h-auto sm:grid sm:grid-cols-5">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="requests">Requests</TabsTrigger>
