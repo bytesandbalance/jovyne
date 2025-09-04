@@ -517,18 +517,18 @@ export default function BusinessCalendar({ plannerProfile }: BusinessCalendarPro
       {viewMode === 'calendar' ? (
         <Card>
           <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <CardTitle>
+            <div className="space-y-3">
+              <CardTitle className="text-center sm:text-left">
                 {format(currentDate, 'MMMM yyyy')}
               </CardTitle>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
                   className="w-full sm:w-auto"
                 >
-                  Previous
+                  Prev
                 </Button>
                 <Button 
                   variant="outline" 
