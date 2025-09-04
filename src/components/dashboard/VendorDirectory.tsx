@@ -251,7 +251,10 @@ export default function VendorDirectory({ plannerProfile }: VendorDirectoryProps
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Vendor Directory</h2>
         <Button 
-          onClick={() => {
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             console.log('Add Vendor button clicked - opening dialog');
             setEditingVendor(null);
             setNewVendor({
