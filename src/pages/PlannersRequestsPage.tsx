@@ -170,11 +170,10 @@ export default function PlannersRequestsPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch planners with profiles
+      // Fetch all planners (verified and unverified)
       const { data: plannersData, error: plannersError } = await supabase
         .from('planners')
         .select('*')
-        .eq('is_verified', true)
         .order('average_rating', { ascending: false });
 
       if (plannersError) {
