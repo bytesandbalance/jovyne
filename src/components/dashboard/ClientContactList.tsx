@@ -2,11 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Phone, Mail, MapPin, User, Edit, Search } from 'lucide-react';
+import { Phone, Mail, MapPin, User, Edit, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Client {
@@ -27,15 +24,7 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [newClient, setNewClient] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    address: '',
-    notes: ''
-  });
 
   useEffect(() => {
     if (plannerProfile) {
@@ -74,66 +63,6 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
     }
   };
 
-  const createClient = async () => {
-    if (!newClient.full_name || !newClient.email) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in name and email",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      // Note: This creates a client record but requires user_id which should come from auth
-      // For now, we'll show an informational message
-      toast({
-        title: "Feature Not Available",
-        description: "Client creation requires user authentication setup. This will be added when auth is implemented.",
-        variant: "destructive"
-      });
-      return;
-
-      /* When auth is ready, uncomment this:
-      const { data, error } = await supabase
-        .from('clients')
-        .insert([{
-          user_id: '', // This needs to come from the auth system
-          planner_id: plannerProfile.id,
-          full_name: newClient.full_name,
-          email: newClient.email,
-          phone: newClient.phone || null,
-          address: newClient.address || null,
-          notes: newClient.notes || null
-        }])
-        .select()
-        .single();
-        
-      if (error) throw error;
-      setClients(prev => [...prev, data]);
-      */
-      setNewClient({
-        full_name: '',
-        email: '',
-        phone: '',
-        address: '',
-        notes: ''
-      });
-      setIsDialogOpen(false);
-
-      toast({
-        title: "Client Added",
-        description: "New client contact has been created successfully",
-      });
-    } catch (error) {
-      console.error('Error creating client:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create client contact",
-        variant: "destructive"
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -150,80 +79,8 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div>
         <h2 className="text-2xl font-bold">Client Contacts</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Client
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
-              <DialogDescription>
-                Create a new client contact for your records
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="client-name">Full Name *</Label>
-                <Input
-                  id="client-name"
-                  value={newClient.full_name}
-                  onChange={(e) => setNewClient(prev => ({ ...prev, full_name: e.target.value }))}
-                  placeholder="Client's full name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="client-email">Email *</Label>
-                <Input
-                  id="client-email"
-                  type="email"
-                  value={newClient.email}
-                  onChange={(e) => setNewClient(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="client@example.com"
-                />
-              </div>
-              <div>
-                <Label htmlFor="client-phone">Phone</Label>
-                <Input
-                  id="client-phone"
-                  value={newClient.phone}
-                  onChange={(e) => setNewClient(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-              <div>
-                <Label htmlFor="client-address">Address</Label>
-                <Textarea
-                  id="client-address"
-                  value={newClient.address}
-                  onChange={(e) => setNewClient(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Client's address"
-                />
-              </div>
-              <div>
-                <Label htmlFor="client-notes">Notes</Label>
-                <Textarea
-                  id="client-notes"
-                  value={newClient.notes}
-                  onChange={(e) => setNewClient(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Additional notes about the client"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={createClient}>
-                  Add Client
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Search Bar */}
