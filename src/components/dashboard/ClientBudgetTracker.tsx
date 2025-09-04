@@ -74,22 +74,26 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
 
   const fetchBudgetData = async () => {
     try {
+      console.log('Fetching budget data for client:', clientData.id);
+      
       // Fetch budget categories
-      const { data: categoriesData, error: categoriesError } = await (supabase as any)
+      const { data: categoriesData, error: categoriesError } = await supabase
         .from('client_budget_categories')
         .select('*')
         .eq('client_id', clientData.id)
         .order('name', { ascending: true });
 
+      console.log('Categories response:', categoriesData, categoriesError);
       if (categoriesError) throw categoriesError;
 
       // Fetch expenses
-      const { data: expensesData, error: expensesError } = await (supabase as any)
+      const { data: expensesData, error: expensesError } = await supabase
         .from('client_budget_expenses')
         .select('*')
         .eq('client_id', clientData.id)
         .order('expense_date', { ascending: false });
 
+      console.log('Expenses response:', expensesData, expensesError);
       if (expensesError) throw expensesError;
 
       setCategories(categoriesData || []);
@@ -98,7 +102,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
       console.error('Error fetching budget data:', error);
       toast({
         title: "Error",
-        description: "Failed to load budget data",
+        description: `Failed to load budget data: ${error.message}`,
         variant: "destructive"
       });
     } finally {
@@ -117,26 +121,31 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
     }
 
     try {
-      const { error } = await (supabase as any)
+      console.log('Creating category:', newCategory, 'for client:', clientData.id);
+      
+      const { data, error } = await supabase
         .from('client_budget_categories')
         .insert([{
           name: newCategory.name,
           allocated_amount: parseFloat(newCategory.allocated_amount),
           spent_amount: 0,
           client_id: clientData.id
-        }]);
+        }])
+        .select();
 
+      console.log('Category creation response:', data, error);
+      
       if (error) throw error;
       
       toast({ title: "Budget category created successfully!" });
       setIsCategoryDialogOpen(false);
       setNewCategory({ name: '', allocated_amount: '' });
-      fetchBudgetData();
-    } catch (error) {
+      await fetchBudgetData();
+    } catch (error: any) {
       console.error('Error creating category:', error);
       toast({
         title: "Error",
-        description: "Failed to create budget category",
+        description: `Failed to create budget category: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -154,9 +163,10 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
 
     try {
       const amount = parseFloat(newExpense.amount);
+      console.log('Creating expense:', newExpense, 'amount:', amount, 'for client:', clientData.id);
       
       // Insert expense
-      const { error: expenseError } = await (supabase as any)
+      const { data: expenseData, error: expenseError } = await supabase
         .from('client_budget_expenses')
         .insert([{
           category_id: newExpense.category_id,
@@ -165,18 +175,23 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
           expense_date: newExpense.expense_date,
           vendor: newExpense.vendor || null,
           client_id: clientData.id
-        }]);
+        }])
+        .select();
 
+      console.log('Expense creation response:', expenseData, expenseError);
+      
       if (expenseError) throw expenseError;
 
       // Update spent amount in category
       const category = categories.find(c => c.id === newExpense.category_id);
       if (category) {
-        const { error: updateError } = await (supabase as any)
+        const { data: updateData, error: updateError } = await supabase
           .from('client_budget_categories')
           .update({ spent_amount: category.spent_amount + amount })
-          .eq('id', newExpense.category_id);
+          .eq('id', newExpense.category_id)
+          .select();
 
+        console.log('Category update response:', updateData, updateError);
         if (updateError) throw updateError;
       }
       
@@ -189,12 +204,12 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
         expense_date: new Date().toISOString().split('T')[0],
         vendor: ''
       });
-      fetchBudgetData();
-    } catch (error) {
+      await fetchBudgetData();
+    } catch (error: any) {
       console.error('Error creating expense:', error);
       toast({
         title: "Error",
-        description: "Failed to add expense",
+        description: `Failed to add expense: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -202,8 +217,10 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
 
   const handleDeleteExpense = async (expense: BudgetExpense) => {
     try {
+      console.log('Deleting expense:', expense.id);
+      
       // Delete expense
-      const { error: deleteError } = await (supabase as any)
+      const { error: deleteError } = await supabase
         .from('client_budget_expenses')
         .delete()
         .eq('id', expense.id);
@@ -213,7 +230,7 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
       // Update spent amount in category
       const category = categories.find(c => c.id === expense.category_id);
       if (category) {
-        const { error: updateError } = await (supabase as any)
+        const { error: updateError } = await supabase
           .from('client_budget_categories')
           .update({ spent_amount: Math.max(0, category.spent_amount - expense.amount) })
           .eq('id', expense.category_id);
@@ -222,12 +239,12 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
       }
 
       toast({ title: "Expense deleted successfully!" });
-      fetchBudgetData();
-    } catch (error) {
+      await fetchBudgetData();
+    } catch (error: any) {
       console.error('Error deleting expense:', error);
       toast({
         title: "Error",
-        description: "Failed to delete expense",
+        description: `Failed to delete expense: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -417,18 +434,27 @@ export default function ClientBudgetTracker({ clientData }: ClientBudgetTrackerP
           <div className="space-y-4">
             <div>
               <Label htmlFor="category-name">Category Name *</Label>
-              <Select value={newCategory.name} onValueChange={(value) => setNewCategory(prev => ({ ...prev, name: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select or type category name" />
-                </SelectTrigger>
-                <SelectContent>
-                  {defaultCategories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Select value={newCategory.name} onValueChange={(value) => setNewCategory(prev => ({ ...prev, name: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {defaultCategories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="text-xs text-muted-foreground">Or enter a custom category:</div>
+                <Input
+                  id="category-name"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter custom category name"
+                />
+              </div>
             </div>
             
             <div>
