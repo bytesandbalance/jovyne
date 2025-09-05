@@ -7,9 +7,10 @@ import { Link } from "react-router-dom";
 
 interface PricingPlansProps {
   onSubscribe?: () => void;
+  showOnlyPro?: boolean;
 }
 
-export function PricingPlans({ onSubscribe }: PricingPlansProps) {
+export function PricingPlans({ onSubscribe, showOnlyPro = false }: PricingPlansProps) {
   const { user } = useAuth();
 
   const clientFeatures = [
@@ -37,43 +38,50 @@ export function PricingPlans({ onSubscribe }: PricingPlansProps) {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Choose Your Perfect Plan</h1>
+        <h1 className="text-4xl font-bold mb-4">
+          {showOnlyPro ? "Jovial Pro Subscription" : "Choose Your Perfect Plan"}
+        </h1>
         <p className="text-xl text-muted-foreground">
-          Whether you're planning events or organizing them, we have the right plan for you
+          {showOnlyPro 
+            ? "Complete business management for event planners with first month free"
+            : "Whether you're planning events or organizing them, we have the right plan for you"
+          }
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div className={`grid gap-8 ${showOnlyPro ? 'max-w-md' : 'md:grid-cols-2 max-w-4xl'} mx-auto`}>
         {/* Client Plan - Free */}
-        <Card className="relative border-2">
-          <CardHeader>
-            <div className="flex items-center gap-2 mb-2">
-              <Heart className="w-6 h-6 text-pink-500" />
-              <Badge variant="secondary">For Clients</Badge>
-            </div>
-            <CardTitle className="text-2xl">Jovial Free</CardTitle>
-            <CardDescription>Perfect for party hosts and event clients</CardDescription>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">Free</span>
-              <span className="text-muted-foreground ml-2">Forever</span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {clientFeatures.map((feature, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full" variant="outline" asChild>
-              <Link to="/">Get Started Free</Link>
-            </Button>
-          </CardFooter>
-        </Card>
+        {!showOnlyPro && (
+          <Card className="relative border-2">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-2">
+                <Heart className="w-6 h-6 text-pink-500" />
+                <Badge variant="secondary">For Clients</Badge>
+              </div>
+              <CardTitle className="text-2xl">Jovial Free</CardTitle>
+              <CardDescription>Perfect for party hosts and event clients</CardDescription>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">Free</span>
+                <span className="text-muted-foreground ml-2">Forever</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {clientFeatures.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full" variant="outline" asChild>
+                <Link to="/">Get Started Free</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
 
         {/* Planner Plan - Pro */}
         <Card className="relative border-2 border-primary shadow-lg">

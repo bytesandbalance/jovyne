@@ -39,7 +39,7 @@ export default function SubscriptionPage() {
       )}
       
       {/* Show pricing plans */}
-      <PricingPlans onSubscribe={handleSubscribe} />
+      <PricingPlans onSubscribe={handleSubscribe} showOnlyPro={true} />
     </div>
   );
 }
