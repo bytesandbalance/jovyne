@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
+import ClientRequestDialog from '@/components/requests/ClientRequestDialog';
+import { useToast } from '@/hooks/use-toast';
 import { 
   MapPin, 
   Star, 
@@ -43,14 +45,19 @@ interface Planner {
 
 export default function HomePage() {
   const { user } = useAuthContext();
+  const { toast } = useToast();
   const [searchLocation, setSearchLocation] = useState('');
   const [featuredPlanners, setFeaturedPlanners] = useState<Planner[]>([]);
   const [selectedPlanner, setSelectedPlanner] = useState<Planner | null>(null);
   const [showPlannerProfile, setShowPlannerProfile] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [clientData, setClientData] = useState<any>(null);
+  const [showRequestDialog, setShowRequestDialog] = useState(false);
 
   useEffect(() => {
     fetchFeaturedPlanners();
-  }, []);
+    fetchUserData();
+  }, [user]);
 
   const fetchFeaturedPlanners = async () => {
     try {
@@ -89,6 +96,57 @@ export default function HomePage() {
   const handleViewProfile = (planner: Planner) => {
     setSelectedPlanner(planner);
     setShowPlannerProfile(true);
+  };
+
+  const fetchUserData = async () => {
+    if (!user) return;
+    
+    try {
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      setUserProfile(profile);
+
+      // If user is a client, fetch their client data
+      if (profile?.user_role === 'client') {
+        let finalClientData = null;
+        
+        const { data: clientRecord, error: clientError } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (!clientRecord) {
+          // Create client record if it doesn't exist
+          const { data: newClientRecord, error: createError } = await supabase
+            .from('clients')
+            .insert({
+              user_id: user.id,
+              full_name: profile?.full_name || '',
+              email: profile?.email || ''
+            })
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error('Error creating client record:', createError);
+          } else {
+            finalClientData = newClientRecord;
+            setClientData(newClientRecord);
+          }
+        } else {
+          finalClientData = clientRecord;
+          setClientData(clientRecord);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
   };
 
   const getInitials = (name: string) => {
@@ -239,7 +297,40 @@ export default function HomePage() {
                     </div>
                   )}
                   
+                  {userProfile?.user_role === 'client' && planner.is_verified && (
+                    <Button 
+                      className="w-full hover-bounce mb-2"
+                      onClick={() => {
+                        if (!clientData) {
+                          toast({
+                            title: "Client profile not found",
+                            description: "Please refresh the page and try again.",
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+                        setSelectedPlanner(planner);
+                        setShowRequestDialog(true);
+                      }}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Send Request
+                    </Button>
+                  )}
+                  
+                  {userProfile?.user_role === 'client' && !planner.is_verified && (
+                    <Button 
+                      className="w-full mb-2"
+                      disabled
+                      variant="outline"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Verification Required
+                    </Button>
+                  )}
+                  
                   <Button 
+                    variant="outline" 
                     className="w-full hover-bounce"
                     onClick={() => handleViewProfile(planner)}
                   >
@@ -339,8 +430,19 @@ export default function HomePage() {
           open={showPlannerProfile}
           onOpenChange={setShowPlannerProfile}
           currentUserId={user?.id}
+          userRole={userProfile?.user_role}
         />
       )}
+
+      {/* Client Request Dialog */}
+      <ClientRequestDialog
+        isOpen={showRequestDialog}
+        onClose={() => setShowRequestDialog(false)}
+        recipientId={selectedPlanner?.id || ""}
+        recipientType="planner"
+        recipientName={selectedPlanner?.business_name || ""}
+        clientData={clientData}
+      />
     </div>
   );
 }
