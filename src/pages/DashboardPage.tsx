@@ -27,12 +27,15 @@ import BusinessCalendar from '@/components/dashboard/BusinessCalendar';
 import InventoryManagement from '@/components/dashboard/InventoryManagement';
 import ClientDashboard from '@/components/dashboard/ClientDashboard';
 import { SubscriptionStatus } from '@/components/subscription/SubscriptionStatus';
+import { useSubscription } from '@/hooks/useSubscription';
+import { SubscriptionExpiredModal } from '@/components/subscription/SubscriptionExpiredModal';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
+  const { hasValidSubscription, isTrialExpired, loading: subscriptionLoading } = useSubscription();
   
   // Safe default tab calculation that doesn't cause initialization errors
   const urlTab = searchParams.get('tab');
@@ -60,6 +63,7 @@ const DashboardPage = () => {
   // Derived states
   const isPlannerView = userProfile?.user_role === 'planner';
   const isClientView = userProfile?.user_role === 'client';
+  const shouldRestrictPlannerAccess = isPlannerView && !subscriptionLoading && !hasValidSubscription;
 
   useEffect(() => {
     if (user) {
@@ -230,7 +234,7 @@ const DashboardPage = () => {
     }
   };
 
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -259,23 +263,29 @@ const DashboardPage = () => {
           </p>
         </div>
 
+        {/* Subscription Expired Modal */}
+        <SubscriptionExpiredModal 
+          isOpen={shouldRestrictPlannerAccess}
+          isTrialExpired={isTrialExpired}
+        />
+
         {/* Show Client Dashboard directly without outer tabs to avoid nesting */}
         {isClientView && clientProfile ? (
           <ClientDashboard user={user} clientData={clientProfile} />
         ) : (
-          /* Show Planner Dashboard with tabs */
-          <Tabs defaultValue={defaultTab} className="space-y-6">
+          /* Show Planner Dashboard with tabs - restrict access if no valid subscription */
+          <Tabs defaultValue={shouldRestrictPlannerAccess ? "subscription" : defaultTab} className="space-y-6">
             <TabsList className="bg-transparent p-0 h-auto gap-2 flex flex-wrap justify-center w-full">
-              <TabsTrigger value="profile" className="px-4 py-2">Profile</TabsTrigger>
+              <TabsTrigger value="profile" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Profile</TabsTrigger>
               <TabsTrigger value="subscription" className="px-4 py-2">Subscription</TabsTrigger>
-              <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
-              <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
-              <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
-              <TabsTrigger value="tasks" className="px-4 py-2">Tasks</TabsTrigger>
-              <TabsTrigger value="vendors" className="px-4 py-2">Vendors</TabsTrigger>
-              <TabsTrigger value="templates" className="px-4 py-2">Templates</TabsTrigger>
-              <TabsTrigger value="calendar" className="px-4 py-2">Calendar</TabsTrigger>
-              <TabsTrigger value="inventory" className="px-4 py-2">Inventory</TabsTrigger>
+              <TabsTrigger value="requests" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Requests</TabsTrigger>
+              <TabsTrigger value="clients" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Clients</TabsTrigger>
+              <TabsTrigger value="invoicing" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Invoicing</TabsTrigger>
+              <TabsTrigger value="tasks" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Tasks</TabsTrigger>
+              <TabsTrigger value="vendors" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Vendors</TabsTrigger>
+              <TabsTrigger value="templates" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Templates</TabsTrigger>
+              <TabsTrigger value="calendar" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Calendar</TabsTrigger>
+              <TabsTrigger value="inventory" className="px-4 py-2" disabled={shouldRestrictPlannerAccess}>Inventory</TabsTrigger>
             </TabsList>
 
             {/* Profile Tab */}
