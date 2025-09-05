@@ -26,6 +26,7 @@ import EventTemplates from '@/components/dashboard/EventTemplates';
 import BusinessCalendar from '@/components/dashboard/BusinessCalendar';
 import InventoryManagement from '@/components/dashboard/InventoryManagement';
 import ClientDashboard from '@/components/dashboard/ClientDashboard';
+import { SubscriptionStatus } from '@/components/subscription/SubscriptionStatus';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
@@ -266,6 +267,7 @@ const DashboardPage = () => {
           <Tabs defaultValue={defaultTab} className="space-y-6">
             <TabsList className="bg-transparent p-0 h-auto gap-2 flex flex-wrap justify-center w-full">
               <TabsTrigger value="profile" className="px-4 py-2">Profile</TabsTrigger>
+              <TabsTrigger value="subscription" className="px-4 py-2">Subscription</TabsTrigger>
               <TabsTrigger value="requests" className="px-4 py-2">Requests</TabsTrigger>
               <TabsTrigger value="clients" className="px-4 py-2">Clients</TabsTrigger>
               <TabsTrigger value="invoicing" className="px-4 py-2">Invoicing</TabsTrigger>
@@ -381,6 +383,11 @@ const DashboardPage = () => {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            {/* Subscription Tab for Planners */}
+            <TabsContent value="subscription" className="space-y-6">
+              <SubscriptionStatus />
             </TabsContent>
 
             {/* Requests Tab for Planners */}

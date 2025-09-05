@@ -11,7 +11,8 @@ import {
   Users, 
   User,
   LogOut,
-  Menu
+  Menu,
+  Crown
 } from 'lucide-react';
 
 export function Navigation() {
@@ -45,6 +46,11 @@ export function Navigation() {
       { href: '/', label: 'Discover', icon: MapPin },
       { href: '/dashboard', label: 'Dashboard', icon: Calendar },
     ];
+
+    // Add subscription link for planners
+    if (userRole === 'planner') {
+      baseItems.push({ href: '/subscription', label: 'Subscription', icon: Crown });
+    }
 
     return baseItems;
   };
