@@ -13,6 +13,9 @@ import ProfilePage from "./pages/ProfilePage";
 import PlannersPage from "./pages/PlannersPage";
 import NotFound from "./pages/NotFound";
 import PlannersRequestsPage from "./pages/PlannersRequestsPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
+import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage";
+import SubscriptionCancelPage from "./pages/SubscriptionCancelPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,9 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/planners" element={<PlannersPage />} />
             <Route path="/planner-requests" element={<PlannersRequestsPage />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
+            <Route path="/subscription/cancel" element={<SubscriptionCancelPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
