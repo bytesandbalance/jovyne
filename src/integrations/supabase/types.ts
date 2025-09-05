@@ -807,6 +807,8 @@ export type Database = {
           portfolio_images: string[] | null
           services: string[] | null
           specialties: string[] | null
+          subscription_expires_at: string | null
+          subscription_status: string | null
           total_reviews: number | null
           updated_at: string
           user_id: string | null
@@ -830,6 +832,8 @@ export type Database = {
           portfolio_images?: string[] | null
           services?: string[] | null
           specialties?: string[] | null
+          subscription_expires_at?: string | null
+          subscription_status?: string | null
           total_reviews?: number | null
           updated_at?: string
           user_id?: string | null
@@ -853,6 +857,8 @@ export type Database = {
           portfolio_images?: string[] | null
           services?: string[] | null
           specialties?: string[] | null
+          subscription_expires_at?: string | null
+          subscription_status?: string | null
           total_reviews?: number | null
           updated_at?: string
           user_id?: string | null
