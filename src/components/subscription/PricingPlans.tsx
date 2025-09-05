@@ -85,11 +85,13 @@ export function PricingPlans({ onSubscribe, showOnlyPro = false }: PricingPlansP
 
         {/* Planner Plan - Pro */}
         <Card className="relative border-2 border-primary shadow-lg">
-          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-            <Badge className="bg-primary text-primary-foreground px-4 py-1">
-              Most Popular
-            </Badge>
-          </div>
+          {!showOnlyPro && (
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                Most Popular
+              </Badge>
+            </div>
+          )}
           <CardHeader>
             <div className="flex items-center gap-2 mb-2">
               <Crown className="w-6 h-6 text-yellow-500" />
