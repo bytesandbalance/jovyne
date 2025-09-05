@@ -1,12 +1,15 @@
 import { PricingPlans } from "@/components/subscription/PricingPlans";
 import { SubscriptionStatus } from "@/components/subscription/SubscriptionStatus";
 import { useAuth } from "@/hooks/useAuth";
+import { usePayPalSubscription } from "@/hooks/usePayPalSubscription";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function SubscriptionPage() {
   const { user } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { createSubscriptionPlan, createSubscription, loading } = usePayPalSubscription();
 
   useEffect(() => {
     if (user) {
@@ -24,9 +27,35 @@ export default function SubscriptionPage() {
     setUserRole(data?.user_role || null);
   };
 
-  const handleSubscribe = () => {
-    // This will be implemented with PayPal integration
-    console.log('Starting PayPal subscription flow...');
+  const handleSubscribe = async () => {
+    if (!user) {
+      toast.error('Please sign up first to subscribe');
+      return;
+    }
+
+    try {
+      toast.loading('Creating subscription...', { id: 'subscription' });
+      
+      // First create the subscription plan
+      const plan = await createSubscriptionPlan();
+      if (!plan) {
+        toast.error('Failed to create subscription plan', { id: 'subscription' });
+        return;
+      }
+
+      // Then create the subscription with the plan ID
+      const subscription = await createSubscription(plan.id);
+      
+      if (subscription?.approval_url) {
+        toast.success('Redirecting to PayPal...', { id: 'subscription' });
+        window.location.href = subscription.approval_url;
+      } else {
+        toast.error('Failed to get PayPal approval URL', { id: 'subscription' });
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast.error('Failed to create subscription. Please try again.', { id: 'subscription' });
+    }
   };
 
   return (

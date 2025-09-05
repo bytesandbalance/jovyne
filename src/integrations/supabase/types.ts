@@ -797,6 +797,7 @@ export type Database = {
           created_at: string
           description: string | null
           email: string | null
+          free_trial_started_at: string | null
           id: string
           instagram_handle: string | null
           is_verified: boolean | null
@@ -804,6 +805,7 @@ export type Database = {
           location_city: string | null
           location_state: string | null
           longitude: number | null
+          paypal_subscription_id: string | null
           portfolio_images: string[] | null
           services: string[] | null
           specialties: string[] | null
@@ -822,6 +824,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          free_trial_started_at?: string | null
           id?: string
           instagram_handle?: string | null
           is_verified?: boolean | null
@@ -829,6 +832,7 @@ export type Database = {
           location_city?: string | null
           location_state?: string | null
           longitude?: number | null
+          paypal_subscription_id?: string | null
           portfolio_images?: string[] | null
           services?: string[] | null
           specialties?: string[] | null
@@ -847,6 +851,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          free_trial_started_at?: string | null
           id?: string
           instagram_handle?: string | null
           is_verified?: boolean | null
@@ -854,6 +859,7 @@ export type Database = {
           location_city?: string | null
           location_state?: string | null
           longitude?: number | null
+          paypal_subscription_id?: string | null
           portfolio_images?: string[] | null
           services?: string[] | null
           specialties?: string[] | null

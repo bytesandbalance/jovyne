@@ -125,7 +125,7 @@ export function PricingPlans({ onSubscribe, showOnlyPro = false }: PricingPlansP
               onClick={onSubscribe}
               disabled={!user}
             >
-              {!user ? "Sign up to Subscribe" : "Start Free Trial"}
+              {!user ? "Sign up to Subscribe" : "Subscribe"}
             </Button>
           </CardFooter>
         </Card>
