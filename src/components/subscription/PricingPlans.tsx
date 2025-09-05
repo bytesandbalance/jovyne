@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 interface PricingPlansProps {
   onSubscribe?: () => void;
@@ -68,8 +69,8 @@ export function PricingPlans({ onSubscribe }: PricingPlansProps) {
             </ul>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" variant="outline">
-              Get Started Free
+            <Button className="w-full" variant="outline" asChild>
+              <Link to="/">Get Started Free</Link>
             </Button>
           </CardFooter>
         </Card>
