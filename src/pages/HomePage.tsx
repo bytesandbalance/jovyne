@@ -202,7 +202,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap justify-center gap-4">
               {!user && (
-                <Link to="/auth">
+                <Link to="/auth?mode=signup">
                   <Button size="lg" variant="secondary" className="hover-bounce">
                     Join the Platform
                   </Button>
@@ -406,13 +406,13 @@ export default function HomePage() {
               Join thousands of happy customers who found their perfect party planner
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/auth">
+              <Link to="/auth?mode=signup&role=client">
                 <Button size="lg" variant="secondary" className="hover-bounce">
                   <Users className="w-5 h-5 mr-2" />
                   Join as Client
                 </Button>
               </Link>
-              <Link to="/auth">
+              <Link to="/auth?mode=signup&role=planner">
                 <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover-bounce">
                   <Calendar className="w-5 h-5 mr-2" />
                   Become a Planner

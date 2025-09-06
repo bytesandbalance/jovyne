@@ -22,8 +22,14 @@ export default function AuthPage() {
   // Set sign-up mode based on URL parameter
   useEffect(() => {
     const mode = searchParams.get('mode');
+    const role = searchParams.get('role');
     if (mode === 'signup') {
       setIsSignUp(true);
+      if (role === 'client') {
+        setUserRole('client');
+      } else if (role === 'planner') {
+        setUserRole('planner');
+      }
     }
   }, [searchParams]);
 
