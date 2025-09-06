@@ -122,7 +122,7 @@ export function Navigation() {
                     Sign In
                   </Button>
                 </Link>
-                <Link to="/auth">
+                <Link to="/auth?mode=signup">
                   <Button size="sm" className="hover-bounce">
                     Join Party
                   </Button>

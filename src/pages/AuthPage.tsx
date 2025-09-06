@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Sparkles, PartyPopper, Users, Calendar } from 'lucide-react';
 
 export default function AuthPage() {
   const { user, signIn, signUp, resetPassword } = useAuthContext();
+  const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -17,6 +18,14 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState('');
   const [userRole, setUserRole] = useState<string>('client');
   const [loading, setLoading] = useState(false);
+
+  // Set sign-up mode based on URL parameter
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'signup') {
+      setIsSignUp(true);
+    }
+  }, [searchParams]);
 
   // Redirect if already authenticated
   if (user) {
