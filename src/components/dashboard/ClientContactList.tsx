@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { Phone, Mail, MapPin, User, Edit, Search, Plus } from 'lucide-react';
+import { Phone, Mail, MapPin, User, Edit, Search, Plus, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Client {
@@ -17,6 +17,7 @@ interface Client {
   address?: string;
   notes?: string;
   created_at: string;
+  user_id?: string | null;
 }
 
 interface ClientContactListProps {
@@ -29,7 +30,16 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [newClientForm, setNewClientForm] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    address: '',
+    notes: ''
+  });
+  const [editClientForm, setEditClientForm] = useState({
     full_name: '',
     email: '',
     phone: '',
@@ -101,7 +111,7 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
 
       toast({
         title: "Success",
-        description: "Client added successfully"
+        description: "External client added successfully"
       });
 
       setIsNewClientDialogOpen(false);
@@ -118,6 +128,91 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
       toast({
         title: "Error",
         description: "Failed to add client",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client);
+    setEditClientForm({
+      full_name: client.full_name,
+      email: client.email,
+      phone: client.phone || '',
+      address: client.address || '',
+      notes: client.notes || ''
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateClient = async () => {
+    if (!editingClient) return;
+
+    try {
+      if (!editClientForm.full_name || !editClientForm.email) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in name and email",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('clients')
+        .update({
+          full_name: editClientForm.full_name,
+          email: editClientForm.email,
+          phone: editClientForm.phone || null,
+          address: editClientForm.address || null,
+          notes: editClientForm.notes || null,
+        })
+        .eq('id', editingClient.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Client updated successfully"
+      });
+
+      setIsEditDialogOpen(false);
+      setEditingClient(null);
+      fetchClients();
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update client",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteClient = async (client: Client) => {
+    if (!confirm(`Are you sure you want to delete ${client.full_name}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', client.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "External client deleted successfully"
+      });
+
+      fetchClients();
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete client",
         variant: "destructive"
       });
     }
@@ -145,12 +240,12 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              New Client
+              New External Client
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
+              <DialogTitle>Add New External Client</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid gap-4">
@@ -208,6 +303,74 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
                 </Button>
                 <Button onClick={handleAddClient} className="flex-1">
                   Add Client
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Client Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit External Client</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="edit_full_name">Full Name *</Label>
+                  <Input
+                    id="edit_full_name"
+                    value={editClientForm.full_name}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, full_name: e.target.value }))}
+                    placeholder="Enter client name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_email">Email *</Label>
+                  <Input
+                    id="edit_email"
+                    type="email"
+                    value={editClientForm.email}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_phone">Phone</Label>
+                  <Input
+                    id="edit_phone"
+                    value={editClientForm.phone}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Enter phone number"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_address">Address</Label>
+                  <Input
+                    id="edit_address"
+                    value={editClientForm.address}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="Enter address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_notes">Notes</Label>
+                  <Textarea
+                    id="edit_notes"
+                    value={editClientForm.notes}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Additional notes about client"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdateClient} className="flex-1">
+                  Update Client
                 </Button>
               </div>
             </div>
@@ -305,10 +468,19 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-3 h-3 mr-1" />
-                      Edit
-                    </Button>
+                    {/* Only show edit/delete buttons for external clients (user_id is null) */}
+                    {!client.user_id && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEditClient(client)}>
+                          <Edit className="w-3 h-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteClient(client)}>
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
