@@ -975,6 +975,7 @@ export type Database = {
         | "awaiting_payment"
         | "paid_planner"
         | "completed"
+        | "paid_external"
       planner_request_status: "pending" | "approved" | "rejected"
       user_role: "client" | "planner"
     }
@@ -1118,6 +1119,7 @@ export const Constants = {
         "awaiting_payment",
         "paid_planner",
         "completed",
+        "paid_external",
       ],
       planner_request_status: ["pending", "approved", "rejected"],
       user_role: ["client", "planner"],

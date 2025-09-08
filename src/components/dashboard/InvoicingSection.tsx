@@ -16,13 +16,14 @@ interface PlannerInvoice {
   id: string;
   client_id: string;
   planner_id: string;
+  planner_request_id?: string; // Added to identify system vs external invoices
   job_title: string;
   client_name: string;
   client_contact_email: string;
   planner_name: string;
   event_date: string;
   amount: number;
-  status: 'draft' | 'sent_to_planner' | 'awaiting_payment' | 'paid_planner' | 'completed';
+  status: 'draft' | 'sent_to_planner' | 'awaiting_payment' | 'paid_planner' | 'paid_external' | 'completed';
   sent_at?: string;
   paid_at?: string;
   completed_at?: string;
@@ -231,7 +232,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
           event_date: newInvoiceForm.event_date || null,
           amount: parseFloat(newInvoiceForm.amount),
           notes: newInvoiceForm.notes || null,
-          status: 'paid_external', // External invoices go straight to paid status
+          status: 'paid_external' as any, // External invoices go straight to paid status
           paid_at: new Date().toISOString() // Mark as paid immediately
         });
 
@@ -287,6 +288,8 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
         return 'Sent to Client';
       case 'paid_planner':
         return 'Paid by Client';
+      case 'paid_external':
+        return 'Paid by External Client';
       case 'completed':
         return 'Completed';
       default:
@@ -336,12 +339,12 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              New Invoice
+              New External Invoice
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create New Invoice</DialogTitle>
+              <DialogTitle>Create New External Invoice</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid gap-4">
@@ -518,34 +521,39 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        {invoice.status === 'draft' && (
-                          <>
+                      {/* Only show actions for system-generated invoices, not external ones */}
+                      {invoice.planner_request_id ? (
+                        <div className="flex gap-2 justify-end">
+                          {invoice.status === 'draft' && (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleEditInvoice(invoice)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                size="sm"
+                                onClick={() => handleSendInvoice(invoice.id)}
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          {invoice.status === 'paid_planner' && (
                             <Button 
-                              variant="outline" 
                               size="sm"
-                              onClick={() => handleEditInvoice(invoice)}
+                              onClick={() => handleConfirmPayment(invoice.id)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Check className="h-4 w-4" />
+                              Confirm Receipt
                             </Button>
-                            <Button 
-                              size="sm"
-                              onClick={() => handleSendInvoice(invoice.id)}
-                            >
-                              <Send className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        {invoice.status === 'paid_planner' && (
-                          <Button 
-                            size="sm"
-                            onClick={() => handleConfirmPayment(invoice.id)}
-                          >
-                            <Check className="h-4 w-4" />
-                            Confirm Receipt
-                          </Button>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">External Invoice</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
