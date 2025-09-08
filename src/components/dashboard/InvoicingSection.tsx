@@ -231,7 +231,8 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
           event_date: newInvoiceForm.event_date || null,
           amount: parseFloat(newInvoiceForm.amount),
           notes: newInvoiceForm.notes || null,
-          status: 'draft'
+          status: 'paid_external', // External invoices go straight to paid status
+          paid_at: new Date().toISOString() // Mark as paid immediately
         });
 
       if (error) throw error;
