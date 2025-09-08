@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, FileText, Clock, AlertCircle, Send, Edit, Check, Plus } from 'lucide-react';
+import { DollarSign, FileText, Clock, AlertCircle, Send, Edit, Check, Plus, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Data structures to match the updated invoice table
@@ -205,6 +205,32 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
         variant: "destructive",
         title: "Error",
         description: "Failed to update invoice"
+      });
+    }
+  };
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    if (!confirm('Are you sure you want to delete this invoice?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('planner_invoices')
+        .delete()
+        .eq('id', invoiceId);
+
+      if (error) throw error;
+
+      await fetchInvoicesAndData();
+      toast({
+        title: "Success",
+        description: "Invoice deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting invoice:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete invoice"
       });
     }
   };
@@ -553,14 +579,23 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
                             )}
                           </>
                         ) : (
-                          // External invoices - always editable
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditInvoice(invoice)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          // External invoices - always editable and deletable
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditInvoice(invoice)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteInvoice(invoice.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </TableCell>
