@@ -521,39 +521,48 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {/* Only show actions for system-generated invoices, not external ones */}
-                      {invoice.planner_request_id ? (
-                        <div className="flex gap-2 justify-end">
-                          {invoice.status === 'draft' && (
-                            <>
+                      <div className="flex gap-2 justify-end">
+                        {invoice.planner_request_id ? (
+                          // System-generated invoices
+                          <>
+                            {invoice.status === 'draft' && (
+                              <>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleEditInvoice(invoice)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={() => handleSendInvoice(invoice.id)}
+                                >
+                                  <Send className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                            {invoice.status === 'paid_planner' && (
                               <Button 
-                                variant="outline" 
                                 size="sm"
-                                onClick={() => handleEditInvoice(invoice)}
+                                onClick={() => handleConfirmPayment(invoice.id)}
                               >
-                                <Edit className="h-4 w-4" />
+                                <Check className="h-4 w-4" />
+                                Confirm Receipt
                               </Button>
-                              <Button 
-                                size="sm"
-                                onClick={() => handleSendInvoice(invoice.id)}
-                              >
-                                <Send className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
-                          {invoice.status === 'paid_planner' && (
-                            <Button 
-                              size="sm"
-                              onClick={() => handleConfirmPayment(invoice.id)}
-                            >
-                              <Check className="h-4 w-4" />
-                              Confirm Receipt
-                            </Button>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">External Invoice</span>
-                      )}
+                            )}
+                          </>
+                        ) : (
+                          // External invoices - always editable
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditInvoice(invoice)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
