@@ -167,7 +167,7 @@ export type Database = {
           phone: string | null
           planner_id: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           address?: string | null
@@ -179,7 +179,7 @@ export type Database = {
           phone?: string | null
           planner_id?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           address?: string | null
@@ -191,7 +191,7 @@ export type Database = {
           phone?: string | null
           planner_id?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -460,7 +460,7 @@ export type Database = {
           amount: number | null
           client_contact_email: string | null
           client_contact_phone: string | null
-          client_id: string
+          client_id: string | null
           client_name: string | null
           completed_at: string | null
           created_at: string
@@ -485,7 +485,7 @@ export type Database = {
           amount?: number | null
           client_contact_email?: string | null
           client_contact_phone?: string | null
-          client_id: string
+          client_id?: string | null
           client_name?: string | null
           completed_at?: string | null
           created_at?: string
@@ -510,7 +510,7 @@ export type Database = {
           amount?: number | null
           client_contact_email?: string | null
           client_contact_phone?: string | null
-          client_id?: string
+          client_id?: string | null
           client_name?: string | null
           completed_at?: string | null
           created_at?: string
