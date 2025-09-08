@@ -195,12 +195,31 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
     }
 
     try {
-      const { error } = await supabase
+      console.log('Attempting to delete client:', {
+        clientId: client.id,
+        clientUserId: client.user_id,
+        plannerProfileId: plannerProfile?.id
+      });
+
+      const { data, error } = await supabase
         .from('clients')
         .delete()
-        .eq('id', client.id);
+        .eq('id', client.id)
+        .select();
+
+      console.log('Delete result:', { data, error });
 
       if (error) throw error;
+
+      if (data && data.length === 0) {
+        console.warn('No rows were deleted - possibly due to RLS policy');
+        toast({
+          title: "Error",
+          description: "Unable to delete client - permission denied",
+          variant: "destructive"
+        });
+        return;
+      }
 
       toast({
         title: "Success",
