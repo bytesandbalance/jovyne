@@ -3,12 +3,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, FileText, Clock, AlertCircle, Send, Edit, Check } from 'lucide-react';
+import { DollarSign, FileText, Clock, AlertCircle, Send, Edit, Check, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Data structures to match the updated invoice table
@@ -47,10 +47,20 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<PlannerInvoice | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isNewInvoiceDialogOpen, setIsNewInvoiceDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
     amount: '',
     notes: '',
     line_items: []
+  });
+  const [newInvoiceForm, setNewInvoiceForm] = useState({
+    client_name: '',
+    client_email: '',
+    client_phone: '',
+    job_title: '',
+    event_date: '',
+    amount: '',
+    notes: ''
   });
 
   useEffect(() => {
@@ -198,6 +208,60 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
     }
   };
 
+  const handleAddInvoice = async () => {
+    try {
+      if (!newInvoiceForm.client_name || !newInvoiceForm.client_email || !newInvoiceForm.job_title || !newInvoiceForm.amount) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('planner_invoices')
+        .insert({
+          planner_id: plannerProfile.id,
+          client_id: null, // Manual invoices don't have client_id from our system
+          client_name: newInvoiceForm.client_name,
+          client_contact_email: newInvoiceForm.client_email,
+          client_contact_phone: newInvoiceForm.client_phone || null,
+          job_title: newInvoiceForm.job_title,
+          event_date: newInvoiceForm.event_date || null,
+          amount: parseFloat(newInvoiceForm.amount),
+          notes: newInvoiceForm.notes || null,
+          status: 'draft'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Invoice created successfully"
+      });
+
+      setIsNewInvoiceDialogOpen(false);
+      setNewInvoiceForm({
+        client_name: '',
+        client_email: '',
+        client_phone: '',
+        job_title: '',
+        event_date: '',
+        amount: '',
+        notes: ''
+      });
+      fetchInvoicesAndData();
+    } catch (error) {
+      console.error('Error adding invoice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create invoice",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Get status color and display text for badges
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -267,6 +331,98 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Invoice Management</h2>
+        <Dialog open={isNewInvoiceDialogOpen} onOpenChange={setIsNewInvoiceDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Invoice
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Invoice</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="client_name">Client Name *</Label>
+                  <Input
+                    id="client_name"
+                    value={newInvoiceForm.client_name}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, client_name: e.target.value }))}
+                    placeholder="Enter client name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="client_email">Client Email *</Label>
+                  <Input
+                    id="client_email"
+                    type="email"
+                    value={newInvoiceForm.client_email}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, client_email: e.target.value }))}
+                    placeholder="Enter client email"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="client_phone">Client Phone</Label>
+                  <Input
+                    id="client_phone"
+                    value={newInvoiceForm.client_phone}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, client_phone: e.target.value }))}
+                    placeholder="Enter client phone"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="job_title">Job Title *</Label>
+                  <Input
+                    id="job_title"
+                    value={newInvoiceForm.job_title}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, job_title: e.target.value }))}
+                    placeholder="Enter job/event title"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="event_date">Event Date</Label>
+                  <Input
+                    id="event_date"
+                    type="date"
+                    value={newInvoiceForm.event_date}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, event_date: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="amount">Amount *</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={newInvoiceForm.amount}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, amount: e.target.value }))}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={newInvoiceForm.notes}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Additional invoice notes"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsNewInvoiceDialogOpen(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={handleAddInvoice} className="flex-1">
+                  Create Invoice
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Financial Summary Cards */}

@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { Phone, Mail, MapPin, User, Edit, Search } from 'lucide-react';
+import { Phone, Mail, MapPin, User, Edit, Search, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Client {
@@ -25,6 +28,14 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    address: '',
+    notes: ''
+  });
 
   useEffect(() => {
     if (plannerProfile) {
@@ -63,6 +74,55 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
     }
   };
 
+  const handleAddClient = async () => {
+    try {
+      if (!newClientForm.full_name || !newClientForm.email) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in name and email",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('clients')
+        .insert({
+          full_name: newClientForm.full_name,
+          email: newClientForm.email,
+          phone: newClientForm.phone || null,
+          address: newClientForm.address || null,
+          notes: newClientForm.notes || null,
+          planner_id: plannerProfile.id,
+          user_id: null // Manual clients don't have user accounts
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Client added successfully"
+      });
+
+      setIsNewClientDialogOpen(false);
+      setNewClientForm({
+        full_name: '',
+        email: '',
+        phone: '',
+        address: '',
+        notes: ''
+      });
+      fetchClients();
+    } catch (error) {
+      console.error('Error adding client:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add client",
+        variant: "destructive"
+      });
+    }
+  };
+
 
   if (loading) {
     return (
@@ -79,8 +139,80 @@ export default function ClientContactList({ plannerProfile }: ClientContactListP
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Client Contacts</h2>
+        <Dialog open={isNewClientDialogOpen} onOpenChange={setIsNewClientDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Client
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Client</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="full_name">Full Name *</Label>
+                  <Input
+                    id="full_name"
+                    value={newClientForm.full_name}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, full_name: e.target.value }))}
+                    placeholder="Enter client name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newClientForm.email}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={newClientForm.phone}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Enter phone number"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={newClientForm.address}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="Enter address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={newClientForm.notes}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Additional notes about client"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsNewClientDialogOpen(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={handleAddClient} className="flex-1">
+                  Add Client
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search Bar */}
