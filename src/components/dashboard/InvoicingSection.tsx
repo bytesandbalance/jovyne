@@ -365,7 +365,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ plannerProfile }) =
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              New External Invoice
+              New External Clients
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
