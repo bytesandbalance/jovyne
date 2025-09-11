@@ -343,12 +343,21 @@ export default function HomePage() {
           </div>
 
           <div className="text-center">
-            <Link to="/planners">
-              <Button size="lg" variant="outline" className="hover-bounce">
-                <Search className="w-5 h-5 mr-2" />
-                Browse All Planners
-              </Button>
-            </Link>
+            {user ? (
+              <Link to="/planners">
+                <Button size="lg" variant="outline" className="hover-bounce">
+                  <Search className="w-5 h-5 mr-2" />
+                  Browse All Planners
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth?mode=signin">
+                <Button size="lg" variant="outline" className="hover-bounce">
+                  <Search className="w-5 h-5 mr-2" />
+                  Browse All Planners
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
