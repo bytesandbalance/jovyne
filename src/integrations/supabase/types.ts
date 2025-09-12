@@ -322,6 +322,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "planner_applications_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "planner_applications_planner_request_id_fkey"
             columns: ["planner_request_id"]
             isOneToOne: false
@@ -379,6 +386,13 @@ export type Database = {
             columns: ["planner_id"]
             isOneToOne: false
             referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_calendar_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
             referencedColumns: ["id"]
           },
           {
@@ -451,6 +465,13 @@ export type Database = {
             columns: ["planner_id"]
             isOneToOne: false
             referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_inventory_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
             referencedColumns: ["id"]
           },
         ]
@@ -547,6 +568,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "planner_invoices_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "planner_invoices_planner_request_id_fkey"
             columns: ["planner_request_id"]
             isOneToOne: false
@@ -625,6 +653,13 @@ export type Database = {
             referencedRelation: "planners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "planner_requests_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       planner_tasks: {
@@ -675,6 +710,13 @@ export type Database = {
             referencedRelation: "planners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "planner_tasks_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       planner_templates: {
@@ -723,6 +765,13 @@ export type Database = {
             columns: ["planner_id"]
             isOneToOne: false
             referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_templates_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
             referencedColumns: ["id"]
           },
         ]
@@ -785,6 +834,13 @@ export type Database = {
             columns: ["planner_id"]
             isOneToOne: false
             referencedRelation: "planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planner_vendors_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
             referencedColumns: ["id"]
           },
         ]
@@ -945,11 +1001,77 @@ export type Database = {
             referencedRelation: "planners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reviews_planner_id_fkey"
+            columns: ["planner_id"]
+            isOneToOne: false
+            referencedRelation: "planners_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      planners_public: {
+        Row: {
+          average_rating: number | null
+          base_price: number | null
+          business_name: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          instagram_handle: string | null
+          is_verified: boolean | null
+          location_city: string | null
+          location_state: string | null
+          portfolio_images: string[] | null
+          services: string[] | null
+          specialties: string[] | null
+          total_reviews: number | null
+          updated_at: string | null
+          website_url: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          base_price?: number | null
+          business_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          instagram_handle?: string | null
+          is_verified?: boolean | null
+          location_city?: string | null
+          location_state?: string | null
+          portfolio_images?: string[] | null
+          services?: string[] | null
+          specialties?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          website_url?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          base_price?: number | null
+          business_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          instagram_handle?: string | null
+          is_verified?: boolean | null
+          location_city?: string | null
+          location_state?: string | null
+          portfolio_images?: string[] | null
+          services?: string[] | null
+          specialties?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          website_url?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_public_profiles: {
