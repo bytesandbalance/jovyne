@@ -1082,6 +1082,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      is_sensitive_planner_field: {
+        Args: { field_name: string }
+        Returns: boolean
+      }
     }
     Enums: {
       application_status: "pending" | "approved" | "rejected"
