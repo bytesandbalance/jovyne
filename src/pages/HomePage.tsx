@@ -61,12 +61,12 @@ export default function HomePage() {
 
   const fetchFeaturedPlanners = async () => {
     try {
-      // Fetch 3 most recent planners (exclude mock planner)
+      // Fetch top 3 planners by rating (exclude mock planner)
       const { data: plannersData, error } = await supabase
         .from('planners')
         .select('*')
         .neq('business_name', 'comeback')
-        .order('created_at', { ascending: false })
+        .order('average_rating', { ascending: false })
         .limit(3);
 
       if (error) {
