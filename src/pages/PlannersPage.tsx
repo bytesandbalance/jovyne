@@ -141,12 +141,11 @@ export default function PlannersPage() {
   const fetchPlanners = async () => {
     setLoading(true);
     try {
-      // Fetch planners data (exclude mock planner)
+      // Fetch planners data
       const { data: plannersData, error } = await supabase
         .from('planners')
         .select('*')
         .eq('is_verified', true)
-        .neq('business_name', 'comeback')
         .order('average_rating', { ascending: false });
 
       if (error) {
@@ -186,9 +185,6 @@ export default function PlannersPage() {
   };
 
   const filteredPlanners = planners.filter(planner => {
-    // Don't show current user in the planners list
-    if (planner.user_id === user?.id) return false;
-    
     return searchLocation === '' || 
       cityMatches(planner.location_city || '', searchLocation) ||
       cityMatches(planner.location_state || '', searchLocation) ||
