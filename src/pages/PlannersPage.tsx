@@ -141,10 +141,11 @@ export default function PlannersPage() {
   const fetchPlanners = async () => {
     setLoading(true);
     try {
-      // Fetch planners data
+      // Fetch planners data (exclude mock planner)
       const { data: plannersData, error } = await supabase
         .from('planners')
         .select('*')
+        .neq('business_name', 'comeback')
         .order('average_rating', { ascending: false });
 
       if (error) {
