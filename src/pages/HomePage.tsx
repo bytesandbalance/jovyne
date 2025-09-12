@@ -44,7 +44,7 @@ interface Planner {
 }
 
 export default function HomePage() {
-  const { user } = useAuthContext();
+  const { user, loading } = useAuthContext();
   const { toast } = useToast();
   const [searchLocation, setSearchLocation] = useState('');
   const [featuredPlanners, setFeaturedPlanners] = useState<Planner[]>([]);
@@ -192,7 +192,7 @@ export default function HomePage() {
                     className="border-0 bg-transparent focus-visible:ring-0 text-lg text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
-                {user ? (
+                {!loading && user ? (
                   <Link to={`/planners${searchLocation ? `?location=${encodeURIComponent(searchLocation)}` : ''}`} className="w-full sm:w-auto">
                     <Button size="lg" className="rounded-xl hover-bounce w-full sm:w-auto">
                       <Search className="w-5 h-5 mr-2" />
