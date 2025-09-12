@@ -141,10 +141,29 @@ export default function PlannersPage() {
   const fetchPlanners = async () => {
     setLoading(true);
     try {
-      // Fetch planners data (exclude mock planner)
+      // Fetch planners data (exclude mock planner) - only safe public fields
       const { data: plannersData, error } = await supabase
         .from('planners')
-        .select('*')
+        .select(`
+          id,
+          business_name,
+          description,
+          services,
+          specialties,
+          location_city,
+          location_state,
+          average_rating,
+          total_reviews,
+          years_experience,
+          base_price,
+          is_verified,
+          portfolio_images,
+          website_url,
+          instagram_handle,
+          created_at,
+          updated_at,
+          user_id
+        `)
         .neq('business_name', 'comeback')
         .order('average_rating', { ascending: false });
 

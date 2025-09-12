@@ -171,10 +171,29 @@ export default function PlannersRequestsPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch all planners (verified and unverified)
+      // Fetch all planners (verified and unverified) - only safe fields
       const { data: plannersData, error: plannersError } = await supabase
         .from('planners')
-        .select('*')
+        .select(`
+          id,
+          business_name,
+          description,
+          services,
+          specialties,
+          location_city,
+          location_state,
+          average_rating,
+          total_reviews,
+          years_experience,
+          base_price,
+          is_verified,
+          portfolio_images,
+          website_url,
+          instagram_handle,
+          created_at,
+          updated_at,
+          user_id
+        `)
         .order('average_rating', { ascending: false });
 
       if (plannersError) {
