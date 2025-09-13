@@ -184,10 +184,19 @@ export default function PlannersPage() {
   };
 
   const filteredPlanners = planners.filter(planner => {
-    return searchLocation === '' || 
-      cityMatches(planner.location_city || '', searchLocation) ||
-      cityMatches(planner.location_state || '', searchLocation) ||
-      planner.business_name?.toLowerCase().includes(searchLocation.toLowerCase());
+    if (searchLocation === '') return true;
+    
+    const searchTerm = searchLocation.toLowerCase().trim();
+    const city = (planner.location_city || '').toLowerCase();
+    const state = (planner.location_state || '').toLowerCase();
+    const businessName = (planner.business_name || '').toLowerCase();
+    
+    // Exact match first, then partial match
+    return city === searchTerm || 
+           state === searchTerm ||
+           city.includes(searchTerm) ||
+           state.includes(searchTerm) ||
+           businessName.includes(searchTerm);
   });
 
   return (
@@ -231,7 +240,7 @@ export default function PlannersPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {filteredPlanners.map((planner) => (
               <Card 
-                key={planner.business_name} 
+                key={`${planner.business_name}-${planner.email}`} 
                 className="overflow-hidden hover:shadow-party transition-party hover-bounce"
               >
                 <div className="aspect-video relative overflow-hidden bg-gradient-party">
