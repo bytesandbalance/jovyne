@@ -61,11 +61,12 @@ export default function HomePage() {
 
   const fetchFeaturedPlanners = async () => {
     try {
-      // Fetch top 3 planners by rating
+      // Fetch top 3 planners by rating (exclude mock planner)
       const { data: plannersData, error } = await supabase
         .from('planners')
         .select('*')
         .eq('is_verified', true)
+        .neq('business_name', 'comeback')
         .order('average_rating', { ascending: false })
         .limit(3);
 
@@ -203,7 +204,7 @@ export default function HomePage() {
                   <Link to="/auth?mode=signin" className="w-full sm:w-auto">
                     <Button size="lg" className="rounded-xl hover-bounce w-full sm:w-auto">
                       <Search className="w-5 h-5 mr-2" />
-                      Find Planners
+                      Sign In to Search
                     </Button>
                   </Link>
                 )}

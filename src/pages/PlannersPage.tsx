@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,8 @@ interface Planner {
 }
 
 export default function PlannersPage() {
-  const { user } = useAuthContext();
+  const { user, loading: authLoading } = useAuthContext();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [searchLocation, setSearchLocation] = useState('');
   const [planners, setPlanners] = useState<Planner[]>([]);
@@ -49,6 +50,12 @@ export default function PlannersPage() {
   const [showRequestDialog, setShowRequestDialog] = useState(false);
 
   useEffect(() => {
+    // Redirect to auth if not signed in
+    if (!user && !authLoading) {
+      navigate('/auth');
+      return;
+    }
+    
     // Get location from URL params if present
     const locationParam = searchParams.get('location');
     if (locationParam) {
@@ -56,7 +63,7 @@ export default function PlannersPage() {
     }
     fetchPlanners();
     fetchUserData();
-  }, [searchParams, user]);
+  }, [searchParams, user, authLoading]);
 
   const fetchUserData = async () => {
     if (!user) return;
@@ -141,11 +148,12 @@ export default function PlannersPage() {
   const fetchPlanners = async () => {
     setLoading(true);
     try {
-      // Fetch planners data
+      // Fetch planners data (exclude mock planner)
       const { data: plannersData, error } = await supabase
         .from('planners')
         .select('*')
         .eq('is_verified', true)
+        .neq('business_name', 'comeback')
         .order('average_rating', { ascending: false });
 
       if (error) {
