@@ -14,7 +14,6 @@ import ClientRequestDialog from '@/components/requests/ClientRequestDialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface Planner {
-  id: string;
   business_name: string;
   description: string;
   location_city: string;
@@ -29,14 +28,12 @@ interface Planner {
   total_reviews: number;
   website_url: string;
   instagram_handle: string;
-  user_id: string;
   email: string;
-  created_at: string;
-  updated_at: string;
-  latitude: number;
-  longitude: number;
-  full_name: string;
-  avatar_url: string;
+  // Client-side only fields
+  id?: string;
+  user_id?: string;
+  full_name?: string;
+  avatar_url?: string;
 }
 
 export default function PlannersPage() {
@@ -169,19 +166,7 @@ export default function PlannersPage() {
           .filter(planner => planner.business_name !== 'comeback')
           .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
 
-        // Fetch profiles for planners
-        const plannerUserIds = filteredPlanners.map(p => p.user_id);
-        const { data: profilesData } = await supabase
-          .rpc('get_public_profiles', { user_ids: plannerUserIds });
-
-        // Combine planners with their profiles
-        const plannersWithProfiles = filteredPlanners.map(planner => ({
-          ...planner,
-          full_name: profilesData?.find(p => p.user_id === planner.user_id)?.full_name || '',
-          avatar_url: profilesData?.find(p => p.user_id === planner.user_id)?.avatar_url || ''
-        }));
-
-        setPlanners(plannersWithProfiles as Planner[]);
+        setPlanners(filteredPlanners as Planner[]);
       } else {
         setPlanners([]);
       }
@@ -204,10 +189,6 @@ export default function PlannersPage() {
       cityMatches(planner.location_state || '', searchLocation) ||
       planner.business_name?.toLowerCase().includes(searchLocation.toLowerCase());
   });
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
 
   return (
     <div className="min-h-screen bg-background pt-20">
@@ -250,7 +231,7 @@ export default function PlannersPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {filteredPlanners.map((planner) => (
               <Card 
-                key={planner.id} 
+                key={planner.business_name} 
                 className="overflow-hidden hover:shadow-party transition-party hover-bounce"
               >
                 <div className="aspect-video relative overflow-hidden bg-gradient-party">
@@ -266,18 +247,18 @@ export default function PlannersPage() {
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Avatar className="w-16 h-16">
-                        <AvatarImage src={planner.avatar_url} />
+                        <AvatarImage src="" />
                         <AvatarFallback className="text-lg bg-white/20 text-white">
-                          {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
+                          {planner.business_name?.charAt(0) || 'P'}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                   )}
                   <div className="absolute top-4 left-4">
                     <Avatar className="w-12 h-12 border-2 border-white shadow-lg">
-                      <AvatarImage src={planner.avatar_url} />
+                      <AvatarImage src="" />
                       <AvatarFallback className="text-sm bg-white/90 text-primary">
-                        {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
+                        {planner.business_name?.charAt(0) || 'P'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
@@ -292,7 +273,7 @@ export default function PlannersPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-xl mb-1">{planner.business_name}</CardTitle>
-                      <p className="text-sm text-muted-foreground mb-2">{planner.full_name}</p>
+                      <p className="text-sm text-muted-foreground mb-2">Party Planner</p>
                       {(planner.location_city || planner.location_state) && (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <MapPin className="w-4 h-4" />
@@ -402,7 +383,7 @@ export default function PlannersPage() {
         <ClientRequestDialog
           isOpen={showRequestDialog}
           onClose={() => setShowRequestDialog(false)}
-          recipientId={selectedPlanner?.id || ""}
+          recipientId={selectedPlanner?.email || ""}
           recipientType="planner"
           recipientName={selectedPlanner?.business_name || ""}
           clientData={clientData}

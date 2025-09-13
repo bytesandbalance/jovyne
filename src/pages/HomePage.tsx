@@ -23,7 +23,6 @@ import {
 import { Input } from '@/components/ui/input';
 
 interface Planner {
-  id: string;
   business_name: string;
   description: string;
   location_city: string;
@@ -38,14 +37,10 @@ interface Planner {
   total_reviews: number;
   website_url: string;
   instagram_handle: string;
-  user_id: string;
   email: string;
-  created_at: string;
-  updated_at: string;
-  latitude: number;
-  longitude: number;
-  full_name: string;
-  avatar_url: string;
+  // Client-side only fields
+  full_name?: string;
+  avatar_url?: string;
 }
 
 export default function HomePage() {
@@ -82,19 +77,7 @@ export default function HomePage() {
           .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0))
           .slice(0, 3);
 
-        // Fetch profiles for planners
-        const plannerUserIds = topPlanners.map(p => p.user_id);
-        const { data: profilesData } = await supabase
-          .rpc('get_public_profiles', { user_ids: plannerUserIds });
-
-        // Combine planners with their profiles
-        const plannersWithProfiles = topPlanners.map(planner => ({
-          ...planner,
-          full_name: profilesData?.find(p => p.user_id === planner.user_id)?.full_name || '',
-          avatar_url: profilesData?.find(p => p.user_id === planner.user_id)?.avatar_url || ''
-        }));
-
-        setFeaturedPlanners(plannersWithProfiles as Planner[]);
+        setFeaturedPlanners(topPlanners as Planner[]);
       }
     } catch (error) {
       console.error('Error fetching featured planners:', error);
@@ -155,10 +138,6 @@ export default function HomePage() {
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
-  };
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
   return (
@@ -242,7 +221,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredPlanners.map((planner) => (
-              <Card key={planner.id} className="overflow-hidden hover:shadow-party transition-party hover-bounce">
+              <Card key={planner.business_name} className="overflow-hidden hover:shadow-party transition-party hover-bounce">
                 <div className="aspect-video relative overflow-hidden bg-gradient-party">
                   {planner.portfolio_images && planner.portfolio_images.length > 0 ? (
                     <img 
@@ -253,9 +232,9 @@ export default function HomePage() {
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-party">
                       <Avatar className="w-16 h-16">
-                        <AvatarImage src={planner.avatar_url} />
+                        <AvatarImage src="" />
                         <AvatarFallback className="text-lg bg-white/20 text-white">
-                          {planner.full_name ? getInitials(planner.full_name) : planner.business_name?.charAt(0) || 'P'}
+                          {planner.business_name?.charAt(0) || 'P'}
                         </AvatarFallback>
                       </Avatar>
                     </div>
@@ -279,7 +258,7 @@ export default function HomePage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-xl mb-1">{planner.business_name}</CardTitle>
-                      <p className="text-sm text-muted-foreground mb-2">{planner.full_name}</p>
+                      <p className="text-sm text-muted-foreground mb-2">Party Planner</p>
                       {(planner.location_city || planner.location_state) && (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <MapPin className="w-4 h-4" />
@@ -464,7 +443,7 @@ export default function HomePage() {
       <ClientRequestDialog
         isOpen={showRequestDialog}
         onClose={() => setShowRequestDialog(false)}
-        recipientId={selectedPlanner?.id || ""}
+        recipientId={selectedPlanner?.email || ""}
         recipientType="planner"
         recipientName={selectedPlanner?.business_name || ""}
         clientData={clientData}

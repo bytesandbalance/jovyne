@@ -1080,21 +1080,16 @@ export type Database = {
           average_rating: number
           base_price: number
           business_name: string
-          created_at: string
           description: string
           email: string
-          id: string
           instagram_handle: string
-          latitude: number
+          is_verified: boolean
           location_city: string
           location_state: string
-          longitude: number
           portfolio_images: string[]
           services: string[]
           specialties: string[]
           total_reviews: number
-          updated_at: string
-          user_id: string
           website_url: string
           years_experience: number
         }[]
