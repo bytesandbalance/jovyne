@@ -39,6 +39,11 @@ interface Planner {
   website_url: string;
   instagram_handle: string;
   user_id: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+  latitude: number;
+  longitude: number;
   full_name: string;
   avatar_url: string;
 }
