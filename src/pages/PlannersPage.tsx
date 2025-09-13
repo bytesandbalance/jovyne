@@ -187,16 +187,14 @@ export default function PlannersPage() {
     if (searchLocation === '') return true;
     
     const searchTerm = searchLocation.toLowerCase().trim();
-    const city = (planner.location_city || '').toLowerCase();
-    const state = (planner.location_state || '').toLowerCase();
     const businessName = (planner.business_name || '').toLowerCase();
     
-    // Exact match first, then partial match
-    return city === searchTerm || 
-           state === searchTerm ||
-           city.includes(searchTerm) ||
-           state.includes(searchTerm) ||
-           businessName.includes(searchTerm);
+    // Check city/state matches using cityMatches function for multilingual support
+    const cityMatch = cityMatches(planner.location_city || '', searchLocation);
+    const stateMatch = cityMatches(planner.location_state || '', searchLocation);
+    const businessMatch = businessName.includes(searchTerm);
+    
+    return cityMatch || stateMatch || businessMatch;
   });
 
   return (

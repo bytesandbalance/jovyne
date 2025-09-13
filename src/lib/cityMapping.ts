@@ -111,14 +111,16 @@ export const cityMatches = (cityInDb: string, searchTerm: string): boolean => {
   const normalizedDbCity = normalizeCity(cityInDb);
   const normalizedSearch = normalizeCity(searchTerm);
   
-  // Direct match
-  if (normalizedDbCity.includes(normalizedSearch)) {
+  // Exact match first
+  if (normalizedDbCity === normalizedSearch) {
     return true;
   }
   
-  // Check variations
+  // Check if the search term matches any variation for this city
   const searchVariations = getCityVariations(searchTerm);
-  return searchVariations.some(variation => 
-    normalizedDbCity.includes(normalizeCity(variation))
-  );
+  return searchVariations.some(variation => {
+    const normalizedVariation = normalizeCity(variation);
+    return normalizedDbCity === normalizedVariation || 
+           (normalizedVariation.length > 3 && normalizedDbCity.includes(normalizedVariation));
+  });
 };
