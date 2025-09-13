@@ -61,14 +61,9 @@ export default function HomePage() {
 
   const fetchFeaturedPlanners = async () => {
     try {
-      // Fetch top 3 planners by rating (exclude mock planner)
+      // Use public function to get planners data
       const { data: plannersData, error } = await supabase
-        .from('planners')
-        .select('*')
-        .eq('is_verified', true)
-        .neq('business_name', 'comeback')
-        .order('average_rating', { ascending: false })
-        .limit(3);
+        .rpc('get_public_planner_data');
 
       if (error) {
         console.error('Error fetching planners:', error);
@@ -76,13 +71,19 @@ export default function HomePage() {
       }
 
       if (plannersData && plannersData.length > 0) {
+        // Filter out comeback planner, sort by rating, and get top 3
+        const topPlanners = plannersData
+          .filter(planner => planner.business_name !== 'comeback')
+          .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0))
+          .slice(0, 3);
+
         // Fetch profiles for planners
-        const plannerUserIds = plannersData.map(p => p.user_id);
+        const plannerUserIds = topPlanners.map(p => p.user_id);
         const { data: profilesData } = await supabase
           .rpc('get_public_profiles', { user_ids: plannerUserIds });
 
         // Combine planners with their profiles
-        const plannersWithProfiles = plannersData.map(planner => ({
+        const plannersWithProfiles = topPlanners.map(planner => ({
           ...planner,
           full_name: profilesData?.find(p => p.user_id === planner.user_id)?.full_name || '',
           avatar_url: profilesData?.find(p => p.user_id === planner.user_id)?.avatar_url || ''

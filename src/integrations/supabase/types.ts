@@ -1074,6 +1074,31 @@ export type Database = {
       }
     }
     Functions: {
+      get_public_planner_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          average_rating: number
+          base_price: number
+          business_name: string
+          created_at: string
+          description: string
+          email: string
+          id: string
+          instagram_handle: string
+          latitude: number
+          location_city: string
+          location_state: string
+          longitude: number
+          portfolio_images: string[]
+          services: string[]
+          specialties: string[]
+          total_reviews: number
+          updated_at: string
+          user_id: string
+          website_url: string
+          years_experience: number
+        }[]
+      }
       get_public_profiles: {
         Args: { user_ids?: string[] }
         Returns: {
