@@ -95,9 +95,18 @@ export const getCityVariations = (searchTerm: string): string[] => {
   
   // Find the city mapping that includes this search term
   for (const [canonical, variations] of Object.entries(cityMappings)) {
-    if (variations.some(variant => normalizeCity(variant).includes(normalized))) {
+    if (variations.some(variant => normalizeCity(variant) === normalized)) {
       return variations;
     }
+  }
+  
+  // Also check if the search term matches the canonical city name
+  const canonicalMatch = Object.keys(cityMappings).find(canonical => 
+    normalizeCity(canonical) === normalized
+  );
+  
+  if (canonicalMatch) {
+    return cityMappings[canonicalMatch];
   }
   
   // If no mapping found, return the original search term
