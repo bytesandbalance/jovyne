@@ -72,10 +72,22 @@ export default function HomePage() {
 
       if (plannersData && plannersData.length > 0) {
         // Filter out comeback planner, sort by rating, and get top 3
-        const topPlanners = plannersData
-          .filter(planner => planner.business_name !== 'comeback')
-          .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0))
-          .slice(0, 3);
+        // Filter planners with portfolio images first, then sort by rating
+        const plannersWithImages = plannersData
+          .filter(planner => 
+            planner.business_name !== 'comeback' && 
+            planner.portfolio_images && 
+            planner.portfolio_images.length > 0
+          )
+          .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+
+        // If we have enough planners with images, use them; otherwise fallback to all planners
+        const topPlanners = plannersWithImages.length >= 3 
+          ? plannersWithImages.slice(0, 3)
+          : plannersData
+              .filter(planner => planner.business_name !== 'comeback')
+              .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0))
+              .slice(0, 3);
 
         setFeaturedPlanners(topPlanners as Planner[]);
       }
