@@ -4,8 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, Search, Filter, Users, CheckCircle, XCircle, Clock, Calendar, AlertCircle } from 'lucide-react';
+import { MapPin, Star, Search, Filter, Users, CheckCircle, XCircle, Clock, Calendar, AlertCircle, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
@@ -29,6 +33,7 @@ interface Planner {
   website_url: string;
   instagram_handle: string;
   email: string;
+  category: string[];
   // Client-side only fields
   id?: string;
   user_id?: string;
@@ -41,6 +46,7 @@ export default function PlannersPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchLocation, setSearchLocation] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [planners, setPlanners] = useState<Planner[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlanner, setSelectedPlanner] = useState<Planner | null>(null);
@@ -63,6 +69,13 @@ export default function PlannersPage() {
     if (locationParam) {
       setSearchLocation(locationParam);
     }
+    
+    // Get categories from URL params if present  
+    const categoriesParam = searchParams.get('categories');
+    if (categoriesParam) {
+      setSelectedCategories(categoriesParam.split(','));
+    }
+    
     fetchPlanners();
     fetchUserData();
   }, [searchParams, user, authLoading]);
@@ -184,18 +197,45 @@ export default function PlannersPage() {
   };
 
   const filteredPlanners = planners.filter(planner => {
-    if (searchLocation === '') return true;
+    // Location filter
+    let locationMatch = true;
+    if (searchLocation) {
+      const searchTerm = searchLocation.toLowerCase().trim();
+      const businessName = (planner.business_name || '').toLowerCase();
+      
+      // Check city/state matches using cityMatches function for multilingual support
+      const cityMatch = cityMatches(planner.location_city || '', searchLocation);
+      const stateMatch = cityMatches(planner.location_state || '', searchLocation);
+      const businessMatch = businessName.includes(searchTerm);
+      
+      locationMatch = cityMatch || stateMatch || businessMatch;
+    }
     
-    const searchTerm = searchLocation.toLowerCase().trim();
-    const businessName = (planner.business_name || '').toLowerCase();
+    // Category filter
+    let categoryMatch = true;
+    if (selectedCategories.length > 0) {
+      categoryMatch = selectedCategories.every(selectedCategory => 
+        planner.category && planner.category.includes(selectedCategory)
+      );
+    }
     
-    // Check city/state matches using cityMatches function for multilingual support
-    const cityMatch = cityMatches(planner.location_city || '', searchLocation);
-    const stateMatch = cityMatches(planner.location_state || '', searchLocation);
-    const businessMatch = businessName.includes(searchTerm);
-    
-    return cityMatch || stateMatch || businessMatch;
+    return locationMatch && categoryMatch;
   });
+
+  const categories = ['Venues', 'Entertainment', 'Catering', 'Stylists', 'Photography / Videography', 'Decoration', 'Others'];
+
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSearchLocation('');
+  };
 
   return (
     <div className="min-h-screen bg-background pt-20">
@@ -222,11 +262,83 @@ export default function PlannersPage() {
                 />
               </div>
             </div>
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Categories
+                  {selectedCategories.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {selectedCategories.length}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="end">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold text-sm">Filter by Categories</h4>
+                    {selectedCategories.length > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setSelectedCategories([])}
+                      >
+                        Clear all
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {categories.map((category) => (
+                      <div key={category} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={category}
+                          checked={selectedCategories.includes(category)}
+                          onCheckedChange={() => handleCategoryToggle(category)}
+                        />
+                        <Label htmlFor={category} className="text-sm font-normal cursor-pointer">
+                          {category}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
+          
+          {/* Active Filters */}
+          {(selectedCategories.length > 0 || searchLocation) && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-sm text-muted-foreground">Active filters:</span>
+              {searchLocation && (
+                <Badge variant="secondary" className="gap-1">
+                  Location: {searchLocation}
+                  <X 
+                    className="w-3 h-3 cursor-pointer" 
+                    onClick={() => setSearchLocation('')}
+                  />
+                </Badge>
+              )}
+              {selectedCategories.map((category) => (
+                <Badge key={category} variant="secondary" className="gap-1">
+                  {category}
+                  <X 
+                    className="w-3 h-3 cursor-pointer" 
+                    onClick={() => handleCategoryToggle(category)}
+                  />
+                </Badge>
+              ))}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearAllFilters}
+                className="text-xs"
+              >
+                Clear all filters
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -299,6 +411,22 @@ export default function PlannersPage() {
                 </CardHeader>
                 
                 <CardContent>
+                  {/* Display Categories */}
+                  {planner.category && planner.category.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {planner.category.slice(0, 2).map((cat) => (
+                        <Badge key={cat} variant="outline" className="text-xs">
+                          {cat}
+                        </Badge>
+                      ))}
+                      {planner.category.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{planner.category.length - 2} more
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
                   {planner.specialties && planner.specialties.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {planner.specialties.slice(0, 3).map((specialty) => (

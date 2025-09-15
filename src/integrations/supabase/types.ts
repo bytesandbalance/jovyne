@@ -850,6 +850,7 @@ export type Database = {
           average_rating: number | null
           base_price: number | null
           business_name: string
+          category: string[] | null
           created_at: string
           description: string | null
           email: string | null
@@ -877,6 +878,7 @@ export type Database = {
           average_rating?: number | null
           base_price?: number | null
           business_name: string
+          category?: string[] | null
           created_at?: string
           description?: string | null
           email?: string | null
@@ -904,6 +906,7 @@ export type Database = {
           average_rating?: number | null
           base_price?: number | null
           business_name?: string
+          category?: string[] | null
           created_at?: string
           description?: string | null
           email?: string | null

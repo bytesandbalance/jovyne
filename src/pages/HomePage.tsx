@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthContext } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { PlannerProfileModal } from '@/components/planners/PlannerProfileModal';
@@ -38,6 +42,7 @@ interface Planner {
   website_url: string;
   instagram_handle: string;
   email: string;
+  category: string[];
   // Client-side only fields
   full_name?: string;
   avatar_url?: string;
@@ -47,6 +52,7 @@ export default function HomePage() {
   const { user, loading } = useAuthContext();
   const { toast } = useToast();
   const [searchLocation, setSearchLocation] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [featuredPlanners, setFeaturedPlanners] = useState<Planner[]>([]);
   const [selectedPlanner, setSelectedPlanner] = useState<Planner | null>(null);
   const [showPlannerProfile, setShowPlannerProfile] = useState(false);
@@ -191,7 +197,7 @@ export default function HomePage() {
                   />
                 </div>
                 {!loading && user ? (
-                  <Link to={`/planners${searchLocation ? `?location=${encodeURIComponent(searchLocation)}` : ''}`} className="w-full sm:w-auto">
+                  <Link to={`/planners${searchLocation || selectedCategories.length > 0 ? '?' : ''}${searchLocation ? `location=${encodeURIComponent(searchLocation)}` : ''}${selectedCategories.length > 0 ? (searchLocation ? '&' : '') + `categories=${selectedCategories.join(',')}` : ''}`} className="w-full sm:w-auto">
                     <Button size="lg" className="rounded-xl hover-bounce w-full sm:w-auto">
                       <Search className="w-5 h-5 mr-2" />
                       Find Planners
@@ -290,6 +296,22 @@ export default function HomePage() {
                 </CardHeader>
                 
                 <CardContent>
+                  {/* Display Categories */}
+                  {planner.category && planner.category.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {planner.category.slice(0, 2).map((cat) => (
+                        <Badge key={cat} variant="outline" className="text-xs">
+                          {cat}
+                        </Badge>
+                      ))}
+                      {planner.category.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{planner.category.length - 2} more
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
                   {planner.specialties && planner.specialties.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {planner.specialties.slice(0, 3).map((specialty) => (
