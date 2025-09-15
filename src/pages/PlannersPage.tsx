@@ -222,7 +222,7 @@ export default function PlannersPage() {
     return locationMatch && categoryMatch;
   });
 
-  const categories = ['Venues', 'Entertainment', 'Catering', 'Stylists', 'Photography / Videography', 'Decoration', 'Others'];
+  const categories = ['Corporate Events', 'Decoration', 'Entertainment', 'Event Styling', 'Others', 'Private Parties', 'Stylists', 'Venues', 'Wedding Planning', 'Weddings'];
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories(prev => 
