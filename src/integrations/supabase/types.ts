@@ -1083,6 +1083,7 @@ export type Database = {
           average_rating: number
           base_price: number
           business_name: string
+          category: string[]
           description: string
           email: string
           instagram_handle: string
