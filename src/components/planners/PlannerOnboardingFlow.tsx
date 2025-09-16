@@ -22,6 +22,9 @@ interface PlannerProfile {
   average_rating: number;
   total_reviews: number;
   email: string;
+  subscription_status?: string;
+  free_trial_started_at?: string;
+  subscription_expires_at?: string;
 }
 
 type OnboardingStep = 'checking' | 'connect-existing' | 'create-new';
@@ -69,7 +72,10 @@ export function PlannerOnboardingFlow() {
           average_rating,
           total_reviews,
           email,
-          user_id
+          user_id,
+          subscription_status,
+          free_trial_started_at,
+          subscription_expires_at
         `)
         .eq('email', user.email)
         .maybeSingle();
@@ -112,10 +118,24 @@ export function PlannerOnboardingFlow() {
     
     setLoading(true);
     try {
-      // Link the planner profile to current user
+      // Determine trial duration based on current year
+      const currentYear = new Date().getFullYear();
+      const trialMonths = currentYear === 2025 ? 3 : 1;
+      const trialExpiration = new Date();
+      trialExpiration.setMonth(trialExpiration.getMonth() + trialMonths);
+
+      // Link the planner profile to current user and set up trial if not already set
       const { error: plannerError } = await supabase
         .from('planners')
-        .update({ user_id: user.id })
+        .update({ 
+          user_id: user.id,
+          // Only set trial fields if they're not already set (existing profile might already have a subscription)
+          ...(existingProfile.subscription_status === 'none' || !existingProfile.subscription_status ? {
+            subscription_status: 'trial',
+            free_trial_started_at: new Date().toISOString(),
+            subscription_expires_at: trialExpiration.toISOString()
+          } : {})
+        })
         .eq('id', existingProfile.id);
 
       if (plannerError) throw plannerError;
@@ -129,9 +149,12 @@ export function PlannerOnboardingFlow() {
 
       if (profileError) throw profileError;
 
+      const hasExistingTrial = existingProfile.subscription_status && existingProfile.subscription_status !== 'none';
+      const trialMessage = hasExistingTrial ? '' : ` with a ${currentYear === 2025 ? '3-month' : '1-month'} free trial`;
+      
       toast({
         title: "Profile connected successfully! 🎉",
-        description: `You are now connected to ${existingProfile.business_name}. Welcome to Jovial!`
+        description: `You are now connected to ${existingProfile.business_name}${trialMessage}. Welcome to Jovial!`
       });
 
       // Reload to refresh app state
@@ -153,7 +176,13 @@ export function PlannerOnboardingFlow() {
     
     setLoading(true);
     try {
-      // Create new planner profile
+      // Determine trial duration based on current year
+      const currentYear = new Date().getFullYear();
+      const trialMonths = currentYear === 2025 ? 3 : 1;
+      const trialExpiration = new Date();
+      trialExpiration.setMonth(trialExpiration.getMonth() + trialMonths);
+
+      // Create new planner profile with trial subscription
       const { data: newPlanner, error: plannerError } = await supabase
         .from('planners')
         .insert({
@@ -169,7 +198,10 @@ export function PlannerOnboardingFlow() {
           base_price: newPlannerForm.base_price ? parseFloat(newPlannerForm.base_price) : null,
           is_verified: true,
           average_rating: 0,
-          total_reviews: 0
+          total_reviews: 0,
+          subscription_status: 'trial',
+          free_trial_started_at: new Date().toISOString(),
+          subscription_expires_at: trialExpiration.toISOString()
         })
         .select()
         .single();
@@ -187,7 +219,7 @@ export function PlannerOnboardingFlow() {
 
       toast({
         title: "Profile created successfully! 🎉",
-        description: "Your planner profile has been created. Welcome to Jovial!"
+        description: `Your planner profile has been created with a ${currentYear === 2025 ? '3-month' : '1-month'} free trial. Welcome to Jovial!`
       });
 
       // Reload to refresh app state
