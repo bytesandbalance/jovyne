@@ -61,6 +61,27 @@ export default function HomePage() {
   const [showRequestDialog, setShowRequestDialog] = useState(false);
 
   useEffect(() => {
+    // Handle auth callback from email confirmation
+    const handleAuthCallback = async () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token')) {
+        try {
+          const { error } = await supabase.auth.getSession();
+          if (!error) {
+            // Clear the hash from URL
+            window.history.replaceState(null, '', window.location.pathname);
+            toast({
+              title: "Welcome! 🎉",
+              description: "Your account has been confirmed successfully!"
+            });
+          }
+        } catch (error) {
+          console.error('Error handling auth callback:', error);
+        }
+      }
+    };
+
+    handleAuthCallback();
     fetchFeaturedPlanners();
     fetchUserData();
   }, [user]);
