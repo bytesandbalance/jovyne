@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Camera, MapPin, Star, Calendar, Phone, Mail, Edit3, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -32,8 +33,23 @@ export default function ProfilePage() {
     base_price: '',
     years_experience: '',
     website_url: '',
-    instagram_handle: ''
+    instagram_handle: '',
+    category: [] as string[]
   });
+
+  // Available categories for planners
+  const availableCategories = [
+    'Corporate Events',
+    'Decoration',
+    'Entertainment', 
+    'Event Styling',
+    'Others',
+    'Private Parties',
+    'Stylists',
+    'Venues',
+    'Wedding Planning',
+    'Weddings'
+  ];
 
   useEffect(() => {
     if (user) {
@@ -72,7 +88,8 @@ export default function ProfilePage() {
         base_price: plannerData?.base_price?.toString() || '',
         years_experience: plannerData?.years_experience?.toString() || '',
         website_url: plannerData?.website_url || '',
-        instagram_handle: plannerData?.instagram_handle || ''
+        instagram_handle: plannerData?.instagram_handle || '',
+        category: plannerData?.category || []
       });
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -240,7 +257,8 @@ export default function ProfilePage() {
             base_price: formData.base_price ? parseFloat(formData.base_price) : null,
             years_experience: formData.years_experience ? parseInt(formData.years_experience) : null,
             website_url: formData.website_url,
-            instagram_handle: formData.instagram_handle
+            instagram_handle: formData.instagram_handle,
+            category: formData.category
           })
           .eq('user_id', user?.id);
 
@@ -478,6 +496,38 @@ export default function ProfilePage() {
                         rows={4}
                       />
                     </div>
+                    <div>
+                      <Label>Categories</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                        {availableCategories.map((category) => (
+                          <div key={category} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={category}
+                              checked={formData.category.includes(category)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setFormData({
+                                    ...formData,
+                                    category: [...formData.category, category]
+                                  });
+                                } else {
+                                  setFormData({
+                                    ...formData,
+                                    category: formData.category.filter(c => c !== category)
+                                  });
+                                }
+                              }}
+                            />
+                            <Label 
+                              htmlFor={category} 
+                              className="text-sm font-normal cursor-pointer"
+                            >
+                              {category}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     
                     {/* Portfolio Images Upload */}
                     <div>
@@ -563,6 +613,20 @@ export default function ProfilePage() {
                       <div>
                         <span className="font-medium">Description:</span>
                         <p className="text-muted-foreground mt-1">{plannerProfile.description}</p>
+                      </div>
+                    )}
+                    
+                    {/* Categories Display */}
+                    {plannerProfile?.category && plannerProfile.category.length > 0 && (
+                      <div>
+                        <span className="font-medium">Categories:</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {plannerProfile.category.map((cat: string) => (
+                            <Badge key={cat} variant="secondary">
+                              {cat}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
                     
