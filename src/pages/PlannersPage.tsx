@@ -25,7 +25,7 @@ interface Planner {
   average_rating: number;
   base_price: number;
   years_experience: number;
-  specialties: string[];
+  category: string[];
   services: string[];
   portfolio_images: string[];
   is_verified: boolean;
@@ -33,7 +33,6 @@ interface Planner {
   website_url: string;
   instagram_handle: string;
   email: string;
-  category: string[];
   // Client-side only fields
   id?: string;
   user_id?: string;
@@ -413,30 +412,15 @@ export default function PlannersPage() {
                 <CardContent>
                   {/* Display Categories */}
                   {planner.category && planner.category.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {planner.category.slice(0, 2).map((cat) => (
-                        <Badge key={cat} variant="outline" className="text-xs">
-                          {cat}
-                        </Badge>
-                      ))}
-                      {planner.category.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{planner.category.length - 2} more
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                  
-                  {planner.specialties && planner.specialties.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {planner.specialties.slice(0, 3).map((specialty) => (
-                        <Badge key={specialty} variant="secondary">
-                          {specialty}
+                      {planner.category.slice(0, 3).map((category) => (
+                        <Badge key={category} variant="secondary" className="text-xs">
+                          {category}
                         </Badge>
                       ))}
-                      {planner.specialties.length > 3 && (
-                        <Badge variant="outline">
-                          +{planner.specialties.length - 3} more
+                      {planner.category.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{planner.category.length - 3} more
                         </Badge>
                       )}
                     </div>

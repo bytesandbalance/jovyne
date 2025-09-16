@@ -17,7 +17,7 @@ interface PlannerProfile {
   location_city: string;
   location_state: string;
   services: string[];
-  specialties: string[];
+  category: string[];
   years_experience: number;
   average_rating: number;
   total_reviews: number;
@@ -42,7 +42,7 @@ export function PlannerOnboardingFlow() {
     location_city: '',
     location_state: '',
     services: [] as string[],
-    specialties: [] as string[],
+    category: [] as string[],
     years_experience: '',
     base_price: ''
   });
@@ -67,7 +67,7 @@ export function PlannerOnboardingFlow() {
           location_city,
           location_state,
           services,
-          specialties,
+          category,
           years_experience,
           average_rating,
           total_reviews,
@@ -193,7 +193,7 @@ export function PlannerOnboardingFlow() {
           location_city: newPlannerForm.location_city,
           location_state: newPlannerForm.location_state,
           services: newPlannerForm.services,
-          specialties: newPlannerForm.specialties,
+          category: newPlannerForm.category,
           years_experience: newPlannerForm.years_experience ? parseInt(newPlannerForm.years_experience) : 0,
           base_price: newPlannerForm.base_price ? parseFloat(newPlannerForm.base_price) : null,
           is_verified: true,
@@ -248,9 +248,9 @@ export function PlannerOnboardingFlow() {
   const handleSpecialtyToggle = (specialty: string) => {
     setNewPlannerForm(prev => ({
       ...prev,
-      specialties: prev.specialties.includes(specialty)
-        ? prev.specialties.filter(s => s !== specialty)
-        : [...prev.specialties, specialty]
+      category: prev.category.includes(specialty)
+        ? prev.category.filter(s => s !== specialty)
+        : [...prev.category, specialty]
     }));
   };
 
@@ -309,11 +309,11 @@ export function PlannerOnboardingFlow() {
                 </div>
               )}
 
-              {existingProfile.specialties?.length > 0 && (
+              {existingProfile.category?.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-2">Specialties</h4>
+                  <h4 className="font-medium mb-2">Categories</h4>
                   <div className="flex flex-wrap gap-2">
-                    {existingProfile.specialties.map((specialty, index) => (
+                    {existingProfile.category.map((specialty, index) => (
                       <Badge key={index} variant="outline">{specialty}</Badge>
                     ))}
                   </div>
@@ -354,9 +354,17 @@ export function PlannerOnboardingFlow() {
       'Anniversary Celebrations', 'Holiday Parties', 'Graduation Parties', 'Retirement Parties'
     ];
 
-    const availableSpecialties = [
-      'Luxury Events', 'Budget-Friendly Events', 'Outdoor Events', 'Indoor Events',
-      'Multicultural Events', 'Religious Ceremonies', 'Destination Events', 'Intimate Gatherings'
+    const availableCategories = [
+      'Corporate Events',
+      'Decoration', 
+      'Entertainment',
+      'Event Styling',
+      'Others',
+      'Private Parties',
+      'Stylists',
+      'Venues',
+      'Wedding Planning',
+      'Weddings'
     ];
 
     return (
@@ -458,16 +466,16 @@ export function PlannerOnboardingFlow() {
               </div>
 
               <div className="space-y-3">
-                <Label>Specialties</Label>
+                <Label>Categories</Label>
                 <div className="flex flex-wrap gap-2">
-                  {availableSpecialties.map((specialty) => (
+                  {availableCategories.map((category) => (
                     <Badge
-                      key={specialty}
-                      variant={newPlannerForm.specialties.includes(specialty) ? "default" : "outline"}
+                      key={category}
+                      variant={newPlannerForm.category.includes(category) ? "default" : "outline"}
                       className="cursor-pointer"
-                      onClick={() => handleSpecialtyToggle(specialty)}
+                      onClick={() => handleSpecialtyToggle(category)}
                     >
-                      {specialty}
+                      {category}
                     </Badge>
                   ))}
                 </div>

@@ -105,7 +105,7 @@ interface Planner {
   business_name: string;
   description: string;
   services: string[];
-  specialties: string[];
+  category: string[];
   years_experience: number;
   base_price: number;
   location_city: string;

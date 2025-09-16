@@ -159,13 +159,13 @@ export function PlannerProfileModal({
             </div>
           )}
 
-          {/* Specialties Section */}
-          {planner.specialties && planner.specialties.length > 0 && (
+          {/* Categories Section */}
+          {planner.category && planner.category.length > 0 && (
             <div>
-              <h4 className="font-semibold mb-2">Specialties</h4>
+              <h4 className="font-semibold mb-2">Categories</h4>
               <div className="flex flex-wrap gap-2">
-                {planner.specialties.map((specialty: string, index: number) => (
-                  <Badge key={index} variant="outline">{specialty}</Badge>
+                {planner.category.map((category: string, index: number) => (
+                  <Badge key={index} variant="outline">{category}</Badge>
                 ))}
               </div>
             </div>

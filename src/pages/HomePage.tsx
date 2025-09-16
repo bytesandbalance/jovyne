@@ -34,7 +34,7 @@ interface Planner {
   average_rating: number;
   base_price: number;
   years_experience: number;
-  specialties: string[];
+  category: string[];
   services: string[];
   portfolio_images: string[];
   is_verified: boolean;
@@ -42,7 +42,6 @@ interface Planner {
   website_url: string;
   instagram_handle: string;
   email: string;
-  category: string[];
   // Client-side only fields
   full_name?: string;
   avatar_url?: string;
@@ -259,8 +258,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredPlanners.map((planner) => (
-              <Card key={planner.business_name} className="overflow-hidden hover:shadow-party transition-party hover-bounce">
+            {featuredPlanners.map((planner, index) => (
+              <Card key={`${planner.business_name}-${index}`} className="overflow-hidden hover:shadow-party transition-party hover-bounce">
                 <div className="aspect-video relative overflow-hidden bg-gradient-party">
                   {planner.portfolio_images && planner.portfolio_images.length > 0 ? (
                     <img 
@@ -333,16 +332,16 @@ export default function HomePage() {
                     </div>
                   )}
                   
-                  {planner.specialties && planner.specialties.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {planner.specialties.slice(0, 3).map((specialty) => (
-                        <Badge key={specialty} variant="secondary">
-                          {specialty}
+                  {planner.category && planner.category.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {planner.category.slice(0, 3).map((category) => (
+                        <Badge key={category} variant="secondary" className="text-xs">
+                          {category}
                         </Badge>
                       ))}
-                      {planner.specialties.length > 3 && (
-                        <Badge variant="outline">
-                          +{planner.specialties.length - 3} more
+                      {planner.category.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{planner.category.length - 3} more
                         </Badge>
                       )}
                     </div>

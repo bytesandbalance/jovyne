@@ -13,11 +13,16 @@ interface PlannerProfile {
   description: string;
   location_city: string;
   location_state: string;
+  category: string[];
   services: string[];
-  specialties: string[];
   years_experience: number;
+  base_price: number;
   average_rating: number;
   total_reviews: number;
+  portfolio_images: string[];
+  is_verified: boolean;
+  instagram_handle?: string;
+  website_url?: string;
 }
 
 export function PlannerProfileSelector() {
@@ -49,10 +54,15 @@ export function PlannerProfileSelector() {
           location_city,
           location_state,
           services,
-          specialties,
+          category,
           years_experience,
+          base_price,
           average_rating,
           total_reviews,
+          portfolio_images,
+          is_verified,
+          instagram_handle,
+          website_url,
           email
         `)
         .is('user_id', null)
@@ -194,18 +204,18 @@ export function PlannerProfileSelector() {
                     </div>
                   )}
 
-                  {profile.specialties && profile.specialties.length > 0 && (
+                  {profile.category && profile.category.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Specialties:</h4>
+                      <h4 className="text-sm font-medium mb-2">Categories:</h4>
                       <div className="flex flex-wrap gap-1">
-                        {profile.specialties.slice(0, 3).map((specialty, index) => (
+                        {profile.category.slice(0, 3).map((category, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
-                            {specialty}
+                            {category}
                           </Badge>
                         ))}
-                        {profile.specialties.length > 3 && (
+                        {profile.category.length > 3 && (
                           <Badge variant="outline" className="text-xs">
-                            +{profile.specialties.length - 3} more
+                            +{profile.category.length - 3} more
                           </Badge>
                         )}
                       </div>

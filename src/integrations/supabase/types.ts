@@ -865,7 +865,6 @@ export type Database = {
           paypal_subscription_id: string | null
           portfolio_images: string[] | null
           services: string[] | null
-          specialties: string[] | null
           subscription_expires_at: string | null
           subscription_status: string | null
           total_reviews: number | null
@@ -893,7 +892,6 @@ export type Database = {
           paypal_subscription_id?: string | null
           portfolio_images?: string[] | null
           services?: string[] | null
-          specialties?: string[] | null
           subscription_expires_at?: string | null
           subscription_status?: string | null
           total_reviews?: number | null
@@ -921,7 +919,6 @@ export type Database = {
           paypal_subscription_id?: string | null
           portfolio_images?: string[] | null
           services?: string[] | null
-          specialties?: string[] | null
           subscription_expires_at?: string | null
           subscription_status?: string | null
           total_reviews?: number | null
@@ -1020,6 +1017,7 @@ export type Database = {
           average_rating: number | null
           base_price: number | null
           business_name: string | null
+          category: string[] | null
           created_at: string | null
           description: string | null
           id: string | null
@@ -1029,7 +1027,6 @@ export type Database = {
           location_state: string | null
           portfolio_images: string[] | null
           services: string[] | null
-          specialties: string[] | null
           total_reviews: number | null
           updated_at: string | null
           website_url: string | null
@@ -1039,6 +1036,7 @@ export type Database = {
           average_rating?: number | null
           base_price?: number | null
           business_name?: string | null
+          category?: string[] | null
           created_at?: string | null
           description?: string | null
           id?: string | null
@@ -1048,7 +1046,6 @@ export type Database = {
           location_state?: string | null
           portfolio_images?: string[] | null
           services?: string[] | null
-          specialties?: string[] | null
           total_reviews?: number | null
           updated_at?: string | null
           website_url?: string | null
@@ -1058,6 +1055,7 @@ export type Database = {
           average_rating?: number | null
           base_price?: number | null
           business_name?: string | null
+          category?: string[] | null
           created_at?: string | null
           description?: string | null
           id?: string | null
@@ -1067,7 +1065,6 @@ export type Database = {
           location_state?: string | null
           portfolio_images?: string[] | null
           services?: string[] | null
-          specialties?: string[] | null
           total_reviews?: number | null
           updated_at?: string | null
           website_url?: string | null
