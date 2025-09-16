@@ -211,10 +211,10 @@ export default function PlannersPage() {
       locationMatch = cityMatch || stateMatch || businessMatch;
     }
     
-    // Category filter
+    // Category filter - planner should have at least one of the selected categories
     let categoryMatch = true;
     if (selectedCategories.length > 0) {
-      categoryMatch = selectedCategories.every(selectedCategory => 
+      categoryMatch = selectedCategories.some(selectedCategory => 
         planner.category && planner.category.includes(selectedCategory)
       );
     }
@@ -350,7 +350,7 @@ export default function PlannersPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {filteredPlanners.map((planner) => (
               <Card 
-                key={`${planner.business_name}-${planner.email}`} 
+                key={`${planner.email}-${planner.location_city}-${planner.business_name}`} 
                 className="overflow-hidden hover:shadow-party transition-party hover-bounce"
               >
                 <div className="aspect-video relative overflow-hidden bg-gradient-party">
